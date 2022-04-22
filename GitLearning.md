@@ -100,7 +100,11 @@ $ cat "file"
 
 这时我们其实还可以回退到更之前的版本，但是且慢，我们再用`git log`查看版本信息，我们发现刚刚最新的版本已经不见了
 
-那怎么办，1，在命令窗口没有关闭的时候，我们可以通过上翻翻到之前版本的版本号，通过reset的命令来恢复。
+那怎么办，1，在命令窗口没有关闭的时候，我们可以通过上翻翻到之前版本的版本号，通过下面的命令来恢复。
+
+```
+$ git reset --hard "commit id"
+```
 
 2，运行下面的指令
 
@@ -207,7 +211,7 @@ $ git clone git@github.com:Aurora0201/GitSkill.git
 
 然后`Aurora0201`是我们的用户名，`GitSkill`是我们要克隆的仓库
 
-**分支管理**
+## 7.分支管理
 
 首先我们创建dev分支然后切换到dev分支，运行下面的命令
 
@@ -243,15 +247,12 @@ Creating a new branch is quick.
 ```
 $ git add readme.txt 
 $ git commit -m "branch test"
-[dev b17d20e] branch test
- 1 file changed, 1 insertion(+)
 ```
 
 现在，`dev`分支的工作完成，我们就可以切换回`master`分支：
 
 ```
 $ git checkout master
-Switched to branch 'master'
 ```
 
 切换回`master`分支后，再查看一个`readme.txt`文件，刚才添加的内容不见了！因为那个提交是在`dev`分支上，而`master`分支此刻的提交点并没有变：
@@ -260,15 +261,9 @@ Switched to branch 'master'
 
 ```
 $ git merge dev
-Updating d46f35e..b17d20e
-Fast-forward
- readme.txt | 1 +
- 1 file changed, 1 insertion(+)
 ```
 
-`git merge`命令用于合并指定分支到当前分支。合并后，再查看`readme.txt`的内容，就可以看到，和`dev`分支的最新提交是完全一样的。
-
-注意到上面的`Fast-forward`信息，Git告诉我们，这次合并是“快进模式”，也就是直接把`master`指向`dev`的当前提交，所以合并速度非常快。
+`git merge`命令用于合并指定分支到当前分支。合并后，再查看`readme.txt`的内容，就可以看到，和`dev`分支的最新提交是完全一样的。注意到上面的`Fast-forward`信息，Git告诉我们，这次合并是“快进模式”，也就是直接把`master`指向`dev`的当前提交，所以合并速度非常快。
 
 当然，也不是每次合并都能`Fast-forward`，我们后面会讲其他方式的合并。
 
@@ -276,14 +271,12 @@ Fast-forward
 
 ```
 $ git branch -d dev
-Deleted branch dev (was b17d20e).
 ```
 
 删除后，查看`branch`，就只剩下`master`分支了：
 
 ```
 $ git branch
-* master
 ```
 
 因为创建、合并和删除分支非常快，所以Git鼓励你使用分支完成某个任务，合并后再删掉分支，这和直接在`master`分支上工作效果是一样的，但过程更安全。
