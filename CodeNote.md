@@ -192,7 +192,42 @@ int main() {
 
 ---
 
+### 7.扫描法（运酒问题）
 
+例子：UVa11054，题意如下
+
+```
+直线上有n个村庄，每个村庄会卖酒或者买酒，他们的供需平衡，每k个单位的就送到附近的村庄所需的劳动力为k，求所需的最少劳动力
+```
+
+AC代码：
+
+```c++
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+int main(){
+    int n;
+    while(cin>>n&&n){
+        ll ans=0,a,next=0;
+        for(int i=0;i<n;i++){
+            cin>>a;
+            ans+=abs(next);
+            next+=a;
+        }
+        cout<<ans<<endl;
+    }
+    system("pause");
+}
+```
+
+本题关键是需要合并简化问题，并且这里注意的是劳动力是**不可复用**的，且以**临近村庄**为单位，这里我们假设第一个村庄的需求为a，第二个村庄的需求为b，那么我们将第一第二个村庄看作一个整体，则从第三个村庄送过来所需的劳动力为a+b，这里就成为了2~n个村庄的问题，且第二个村庄所需劳动力为a+b，如此计算下去，我们就能得到n-1~n所需的劳动力，问题的解得出，这里的**等价转化思想十分重要**
+
+本题注意要审题的地方有，劳动力的计算是以临近村庄为单位的，且劳动力不可复用
+
+这里使用的是**扫描法**，它在枚举时，维护一些重要的量，从而简化计算
+
+---
 
 ## 2.算法练习（牛客竞赛）
 
@@ -520,13 +555,54 @@ int main()
 
 ---
 
+## 3.算法练习（紫书）
+
+### 1.唯一的雪花 （滑动区间问题）
+
+UVa11572
+
+AC代码_1：
+
+```c++
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+const int N=1000000+5;
+int A[N];
+int main(){
+    int t,n;
+    cin>>t;
+    while(t--){
+        cin>>n;
+        set<int> st;
+        for(int i=0;i<n;i++)cin>>A[i];
+        int L=0,R=0,ans=0;
+        while(R<n){
+            while(R<n&&!st.count(A[R]))st.insert(A[R++]);//先判是不是越界
+            ans=max(ans,R-L);
+            st.erase(A[L++]);
+        }
+        cout<<ans<<endl;
+    }
+   
+    system("pause");
+}
+```
+
+AC代码_2：
+
+```c++
+```
 
 
 
 
 
 
-## 3.STL容器/C++补充
+
+
+
+## 4.STL容器/C++补充
 
 ### 1.set容器（自定义去重）
 
@@ -544,7 +620,7 @@ count();            // 返回某个值元素的个数
 empty();            // 如果集合为空，返回true
 equal_range();      //返回集合中与给定值相等的上下限的两个迭代器
 erase()–删除集合中的元素
-find()–返回一个指向被查找到元素的迭代器
+find()–返回一个指向被查找到元素的迭代器,查找失败则返回end()的迭代器
 get_allocator()–返回集合的分配器
 insert()–在集合中插入元素
 lower_bound()–返回指向大于（或等于）某值的第一个元素的迭代器
