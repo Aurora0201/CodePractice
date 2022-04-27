@@ -548,7 +548,7 @@ ll fun(ll a){
 }
 int main(){
 	int n;cin>>n;
-	cout<<fun(n);
+	cout<<fun(n)%N;
 	system("pause");
 	return 0;
 }
@@ -652,13 +652,98 @@ int main(){
 
 ---
 
-### 2.抄书
+### 2.抄书（二分法的活用）
 
 UVa714
 
+“最大值尽量小”是一种很常见的优化目标。下面考虑一个新的问题：能否把输入序列划 分成 m 个连续的子序列，使得所有 S(i)均不超过 x？将这个问题的答案用谓词 P(x)表示，则让 P(x)为真的最小 x 就是原题的答案。P(x)并不难计算，每次尽量往右划分即可（想一想，为什么）。 接下来又可以猜数字了——随便猜一个 x0，如果 P(x0)为假，那么答案比 x0大；如果 P(x0) 为真，则答案小于或等于 x0。至此，解法已经得出：二分最小值 x，把优化问题转化为判定 问题 P(x)。设所有数之和为 M，则二分次数为 O(logM)，计算 P(x)的时间复杂度为 O(n)（从 左到右扫描一次即可），因此总时间复杂度为 O(nlogM) 
 
+AC代码：
 
+```c++
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+const int N=500+5;
+ll A[N];
+int main(){
+    int t;cin>>t;
+    while(t--){
+        int m,k,vis[N]={0};
+        ll sum=0,L=0;
+        cin>>m>>k;
+        for(int i=0;i<m;i++)cin>>A[i],sum+=A[i];
+        while(L<sum){
+            ll mid=(L+sum)/2,tmp=0;
+            int cnt=0;//分段数
+            for(int i=m-1;i>=0;i--){
+                if(A[i]>mid){cnt=m+1;break;}//这一行可以替换为if(mid<*max_element(A,A+m)){cnt=m+1;break;}
+                //但是会稍慢，这里找出最大元素也是需要时间的，所以这里用代码中的写法是相对聪明的
+                if(A[i]+tmp<=mid)tmp+=A[i];
+                else{
+                    tmp=0;cnt++;i++;
+                }
+            }
+            if(tmp<mid)cnt++;
+            if(cnt<=k)sum=mid;
+            else L=mid+1;
+        }
+        int cnt=0;
+        ll tmp=0;
+        for(int i=m-1;i>=0;i--){
+            if(tmp+A[i]<=L)tmp+=A[i];
+            else{cnt++;tmp=0;vis[i]=1;i++;}
+        }
+        for(int i=0;i<m;i++){
+            if(vis[i])cout<<A[i]<<" / ";
+            else if(cnt<k-1){cout<<A[i]<<" / ";cnt++;}
+            else if(i!=m-1)cout<<A[i]<<' ';
+            else cout<<A[i];
+        }
+        cout<<endl;
+    }
+    system("pause");
+}
+```
 
+一道思维题，在我们不知道最优解的时候，使用二分法来查找最优解，因为如果暴力搜索需要复杂度为n的平方，而n=500，所以肯定会超时，但是我们用查找代替遍历，这样就大大降低了复杂度。
+
+---
+
+### 3.Add All （Huffman编码）
+
+UVa 10954
+
+这里最小cost的构建很像哈夫曼编码的构建过程，所以这里用priority_queue来模拟
+
+AC代码：
+
+```c++
+#include<bits/stdc++.h>
+using namespace std;
+const int N = 505;
+typedef long long ll;
+int main() {
+	int n;
+    while(cin>>n&&n){
+        priority_queue<int,vector<int>,greater<int> >q;
+        int a,b;
+        for(int i=0;i<n;i++)cin>>a,q.push(a);
+        ll ans=0;     
+        for(int i=0;i<n-1;i++){
+            a=q.top();q.pop();
+            b=q.top();q.pop();
+            ans+=b+a;
+            q.push(a+b);
+        }
+        cout<<ans<<endl;
+    }
+    system("pause");
+	return 0;
+}
+```
+
+优先队列是优先级高的元素先出队，所以用降序优先队列，让小的先出队，这样就得出解
 
 ---
 
@@ -756,6 +841,8 @@ sort(A,A+m,cmp);//降序排列
 ```c++
 ios::sync_with_stdio(false);cin.tie(0);cout.tie(0);
 ```
+
+还有，cin是不能读取空格和换行符的，读取他们需要使用`getline()`
 
 ---
 
@@ -885,6 +972,46 @@ cout<<upper_bound(A.begin(),A.end(),3)-A.begin();
 
 ### 6.cout的补充
 
+**以不同进制输出数字**
+
+```c++
+	int i = 90;
+	cout << i << endl;
+	cout << dec << i << endl;
+	cout << oct << i << endl;
+	cout << hex << i << endl;
+	cout << setiosflags(ios::uppercase);
+	cout << hex << i << endl;
+	cout << setbase(8) << i << endl;
+```
+
+![输出结果](https://img-blog.csdn.net/20180920214934343?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM1NDgxMTY3/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70)
+
+其中，oct 是八进制输出， dec 是十进制（效果和默认一样）， hex 是十六进制输出（字母默认是小写字母）。这两个也包含在 std 中，即其全称分别是 std::oct 、 std::dec 、 std::hex ，这三个控制符包含在库 < iostream > 中。
+setbase(n) 表示以 n 进制显示，包含在库 < iomanip > 中，n 只能取 8, 10, 16 三个值。
+setiosflags(ios::uppercase) 表示将字母大写输出
+
+**输出数字位数的控制**
+
+```c++
+	double i = 3333.1415926;
+	cout << i << endl;
+	cout << setprecision(3) << i << endl;
+	cout << setprecision(9) << i << endl;
+	cout << setiosflags(ios::fixed);
+	cout << i << endl;
+	cout << fixed << setprecision(3) << i << endl;
+	cout << setprecision(9) << fixed <<  i << endl;
+```
+
+![输出结果](https://img-blog.csdn.net/20180920204637119?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM1NDgxMTY3/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70)
+
+可以看出，C++默认浮点数输出有效位数是 6 位（若前面整数位数大于 6 位，使用科学计数法输出），而通过以下几种方式可以更改输出精度：
+1.使用 setprecision(n) 即可设置浮点数输出的有效位数（若前面整数位数大于 n 位，使用科学计数法输出）
+2.使用 setiosflags(ios::fixed) 或 fixed，表示对小数点后面数字的输出精度进行控制
+所以，和 setprecision(n) 结合使用即可设置浮点数小数点后面数字的输出精度，位数不足的补零
+以上均采用 “四舍五入” 的方法控制精度，三个控制符均包含在 std 命名空间中
+
 
 
 ---
@@ -944,14 +1071,37 @@ cout<<max_element(a,a+7)-a;//输出3
 //输出
 ```
 
+---
+
+### 9.queue和priority_queue容器
+
+队列queue是一种先进先出(FIFO)的数据结构，基本操作如下
+
+```c++
+//队列
+q.empty()               如果队列为空返回true，否则返回false
+q.size()                返回队列中元素的个数
+q.pop()                 删除队列首元素但不返回其值
+q.front()               返回队首元素的值，但不删除该元素
+q.push()                在队尾压入新元素
+q.back()                返回队列尾元素的值，但不删除该元素
+//优先队列
+q.top()                 返回堆顶元素（即队列头部元素）
+```
+
+priority_queue是一种优先级高的元素先出队的数据结构，这里的数据优先级可以通过自带的定义或者通过复杂的计算定义，他是由堆实现的，优先队列具有队列的所有特性，包括基本操作，只是在队列的基础上加入了一个内部的排序，下面是priority_queue的定义
+
+```c++
+//升序队列，小顶堆
+priority_queue <int,vector<int>,greater<int> > q;
+//降序队列，大顶堆
+priority_queue <int,vector<int>,less<int> >q;
+//greater和less是std实现的两个仿函数（就是使一个类的使用看上去像一个函数。其实现就是类中实现一个operator()，这个类就有了类似函数的行为，就是一个仿函数类了）
+//当需要用自定义的数据类型时才需要传入这三个参数，使用基本数据类型时，只需要传入数据类型，默认是大顶堆
+```
+
 
 
 ---
-
-
-
-
-
-
 
 [^1]: 朝0取整，指在数轴上整数向左取整，负数向右
