@@ -37,6 +37,12 @@ int maxsum(int* A,int x,int y){
 
 此处有一个细节`int m=x+(y-x)/2`这是一个相当重要的技巧，因为计算机的`/`的取整是朝0方向[^1]的所以用这样的方式来确保分界点总是靠近区间起点，在本题中并不是必要的，但是在后面的二分查找中是一个重要的技巧
 
+**复杂度时间表**
+
+![image-20220429002742775](C:\Users\11763\AppData\Roaming\Typora\typora-user-images\image-20220429002742775.png)
+
+可以很好的作为算法是否超时的判断
+
 ---
 
 ### 2.排序与检索
@@ -747,7 +753,154 @@ int main() {
 
 ---
 
-## 4.STL容器/C++补充
+### 4.Erratic Expansion（递归）
+
+UVa 12627
+
+如图 8-20 所示，k 小时的情况由 4 个 k-1 小时的情况拼成，其中右下角全是蓝气球， 不用考虑。剩下的 3 个部分有一个共同点：都是前 k-1 小时后“最下面若干行”或者“最上面若干行”的红气球总数。 具体来说，设 f(k, i)表示 k 小时之后最上面 i 行的红气球总数，g(k,i)表示 k 小时之后最 下面 i 行的红气球总数（规定 i≤0 时 f(k,i)=g(k,i)=0），则所求答案为 f(k,b) - f(k, a-1)。 如何计算 f(k,i)和 g(k,i)呢？以 g(k,i)为例，下面分两种情况进行讨论，如图 8-21 所示
+
+![image-20220428155326604](C:\Users\11763\AppData\Roaming\Typora\typora-user-images\image-20220428155326604.png)
+
+如果 i≥2k-1 ，则 g(k,i)=2g(k-1,i-2k-1 )+c(k)，否则 g(k,i)=g(k-1,i)。其中，c(k)表示 k 小时 后红气球的总数，满足递推式 c(k)=3c(k-1)，而 c(0)=1，因此 c(k)=3k
+
+AC代码：
+
+```c++
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+ll g(ll k,ll i){
+    if(i<=0)return 0;
+    if(k==0)return 1;
+    if(i>pow(2,k-1)){
+        return 2*g(k-1,i-pow(2,k-1))+pow(3,k-1);
+    }else{
+        return g(k-1,i);
+    }
+}
+
+int main() {
+	int t,ct=1;cin>>t;
+    while(t--){
+        ll K,A,B;
+        cin>>K>>A>>B;
+        cout<<"Case "<<ct++<<": "<<g(K,pow(2,K)+1-A)-g(K,pow(2,K)-B)<<endl;
+    }
+    system("pause");
+	return 0;
+}
+```
+
+数据量很大，有2的30次方，不可能用模拟，因为是规则的棋盘，所以我们可以想到用递归，但是怎么样递归是一个考验我们思维的问题，观察每一个图形，我们可以发现，第k个小时的图形是由三个第k-1小时的图型和一个全蓝的方块组成，所以这里我们只用考虑三个有红块的区域，这里用的思想是分割组合，与分治法有一点相似
+
+---
+
+### 5.Just Finish it up（贪心）
+
+UVa 11093
+
+考虑 1 号加油站，直接模拟判断它是否为解。如果是，直接输出；如果不是，说明在 模拟的过程中遇到了某个加油站 p，在从它开到加油站 p+1 时油没了。这样，以 2, 3,…, p 为起点也一定不是解（想一想，为什么）。这样，使用简单的枚举法便解决了问题，时间复杂度为 O(n)
+
+AC代码：
+
+```c++
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+const int N=100000+5;
+int A[N],B[N];
+int main() {
+	int t,n,ct=1;
+    cin>>t;
+    ios::sync_with_stdio(false);cin.tie(0);cout.tie(0);
+    while(t--){
+        cin>>n;
+        ll sumA=0,sumB=0;
+        memset(A,0,sizeof(A));
+        memset(B,0,sizeof(B));
+        for(int i=0;i<n;i++)cin>>A[i],sumA+=A[i];
+        for(int i=0;i<n;i++)cin>>B[i],sumB+=B[i];
+        if(sumB>sumA){
+            cout<<"Case "<<ct++<<": "<<"Not possible"<<endl;
+            continue;
+        }
+        sumA=0,sumB=0;
+        int ans=-1;
+        for(int i=n-1;i>=0;i--){
+            sumA+=A[i];
+            sumB+=B[i];
+            if(sumA>=sumB)ans=i,sumA=0,sumB=0;
+        }
+        cout<<"Case "<<ct++<<": "<<"Possible from station "<<ans+1<<endl;
+    }
+    system("pause");
+	return 0;
+}
+```
+
+
+
+---
+
+## 4.算法练习（洛谷）
+
+### 1.涂国旗（贪心）
+
+https://www.luogu.com.cn/problem/P3392
+
+某国法律规定，只要一个由 N \times M*N*×*M* 个小方块组成的旗帜符合如下规则，就是合法的国旗。（毛熊：阿嚏——）
+
+- 从最上方若干行（至少一行）的格子全部是白色的；
+- 接下来若干行（至少一行）的格子全部是蓝色的；
+- 剩下的行（至少一行）全部是红色的；
+
+现有一个棋盘状的布，分成了 N*N* 行 M*M* 列的格子，每个格子是白色蓝色红色之一，小 a 希望把这个布改成该国国旗，方法是在一些格子上涂颜料，盖住之前的颜色。
+
+小a很懒，希望涂最少的格子，使这块布成为一个合法的国旗。
+
+输入格式：第一行是两个整数 N,M*N*,*M*。接下来 N*N* 行是一个矩阵，矩阵的每一个小方块是`W`（白），`B`（蓝），`R`（红）中的一个。
+
+输出格式：一个整数，表示至少需要涂多少块
+
+AC代码：
+
+```c++
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+const int N=55;
+int main(){
+    int W[N]={0},B[N]={0},R[N]={0};//涂满0-i行所需的颜料
+    int n,m;
+    cin>>n>>m;
+    char c;
+    for(int i=1;i<=n;i++){
+        for(int j=0;j<m;j++){
+            cin>>c;
+            if(c=='W')W[i]++;
+            else if(c=='B')B[i]++;
+            else R[i]++;
+        }
+        W[i+1]+=W[i];
+        B[i+1]+=B[i];
+        R[i+1]+=R[i];
+    }
+    int ans=0xfffffff;
+    for(int i=1;i<n-1;i++)
+        for(int j=i+1;j<n;j++){
+            ans=min(B[i]+R[i]+W[j]+R[j]-W[i]-R[i]+W[n]-W[j]+B[n]-B[j],ans);
+        }
+    cout<<ans;
+    system("pause");
+    return 0;
+}
+```
+
+题目的数据量为50，因为暴力枚举的复杂度为n的平方，不会超时，所以直接枚举所有可能取最小值
+
+---
+
+## 5.STL容器/C++补充
 
 ### 1.set容器（自定义去重）
 
