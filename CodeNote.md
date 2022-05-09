@@ -147,13 +147,31 @@ $$
 
 ##### 1.最优装载问题
 
+**最优装载问题** 给出 n 个物体，第 i 个物体重量为 wi。选择尽量多的物体，使得总重量 不超过 C
+
+由于只关心物体的数量，所以装重的没有装轻的划算。只需把所有物体按重量从小到 大排序，依次选择每个物体，直到装不下为止。这是一种典型的贪心算法，它只顾眼前， 但却能得到最优解
+
 ---
 
 ##### 2.部分背包问题
 
+**部分背包问题 **有 n 个物体，第 i 个物体的重量为 wi，价值为 vi。在总重量不超过 C 的情况下让总价值尽量高。每一个物体都可以只取走一部分，价值和重量按比例计算
+
+本题在上一题的基础上增加了价值，所以不能简单地像上题那样先拿轻的（轻的可能 价值也小），也不能先拿价值大的（可能它特别重），而应该综合考虑两个因素。一种直 观的贪心策略是：优先拿“价值除以重量的值”最大的，直到重量和正好为 C
+
 ---
 
 ##### 3.乘船问题
+
+**乘船问题 **有 n 个人，第 i 个人重量为 wi。每艘船的最大载重量均为 C，且最多只能乘 两个人。用最少的船装载所有人
+
+考虑最轻的人 i，他应该和谁一起坐呢？如果每个人都无法和他一起坐船，则唯一的方 案就是每人坐一艘船（想一想，为什么）。否则，他应该选择能和他一起坐船的人中最重 的一个 j。这样的方法是贪心的，因此它只是让“眼前”的浪费最少。幸运的是，这个贪心策略也是对的，可以用反证法说明
+
+假设这样做不是最好的，那么最好方案中 i 是什么样的呢？ 
+
+情况 1：i 不和任何一个人坐同一艘船，那么可以把 j 拉过来和他一起坐，总船数不会 增加（而且可能会减少）
+
+情况 2：i 和另外一人 k 同船。由贪心策略，j 是“可以和 i 一起坐船的人”中最重的， 因此 k 比 j 轻。把 j 和 k 交换后 k 所在的船仍然不会超重（因为 k 比 j 轻），而 i 和 j 所在的 船也不会超重（由贪心法过程），因此所得到的新解不会更差。 由此可见，贪心法不会丢失最优解。最后说一下程序实现。在刚才的分析中，比 j 更重 的人只能每人坐一艘船。这样，只需用两个下标 i 和 j 分别表示当前考虑的最轻的人和最重 的人，每次先将 j 往左移动，直到 i 和 j 可以共坐一艘船，然后将 i 加 1，j 减 1，并重复上 述操作。不难看出，程序的时间复杂度仅为 O(n)，是最优算法（别忘了，读入数据也需要 O(n)时间，因此无法比这个更好了）
 
 ---
 
@@ -219,7 +237,7 @@ $$
 给出四个有n个元素的集合,A,B,C,D(n<=4000)，要求分别从中选出一个元素a,b,c,d，令他们的和为0，输出有多少种选法
 ```
 
-【分析】如果使用四重循环枚举a,b,c,d，那算法的复制度是n的四次方，肯定超时，最好的算法是，一是先将A,B,C,D，两两分组，用双重循环枚举每个a+b，c+d，然后将他们放到两个数组SumA，SumB中，此时有两种解法，使用二分查找，在数组SumB中寻找与SumA中的值相加为0的情况，二是使用map容器，利用map容器统计不同的a+b的对数，然后再在c+d中找到与他们相加等于0的解。这两种方法的复杂度都是
+【分析】如果使用四重循环枚举a,b,c,d，那算法的复杂度是n的四次方，肯定超时，最好的算法是，一是先将A,B,C,D，两两分组，用双重循环枚举每个a+b，c+d，然后将他们放到两个数组SumA，SumB中，此时有两种解法，使用二分查找，在数组SumB中寻找与SumA中的值相加为0的情况，二是使用map容器，利用map容器统计不同的a+b的对数，然后再在c+d中找到与他们相加等于0的解。这两种方法的复杂度都是
 $$
 O(n^2logn)
 $$
@@ -682,7 +700,7 @@ int main()
 
 ## 3.算法练习（紫书）
 
-### 1.唯一的雪花 （滑动区间问题）
+### 1.唯一的雪花 （滑动区间+连续子序列问题）
 
 UVa11572
 
@@ -1108,13 +1126,387 @@ int main(){
 
 ---
 
+### 9.*Defense Lines（利用数据结构加速）
+
+UVa1471
+
+为了方便叙述，下面用 L 序列表示“连续递增子序列”。删除一个子序列之后，得到 的最长 L 序列应该是由两个序列拼起来的，如图 8-15 所示
+
+![image-20220504110231862](C:\Users\11763\AppData\Roaming\Typora\typora-user-images\image-20220504110231862.png)
+
+现在我们用`f(j)`和`g(i)`来表示当前以j为尾的递增子序列长度，以i为首的递增子序列长度，这时最笨的方法肯定是O(n3)的暴力枚举，但是如果我们提前将`g(j)`和`f(i)`计算好，算法就能优化到O(n2)，这也是目前能想到最快的方法，但是现在仍然会超时，那该怎么办呢，一般这种情况下，我们应该要用查找来代替一层枚举，这样就能降低算法的复杂度，这里我们只枚举i然后查找当前`A[j]<A[i]`，且最大的`f[j]`，这里我们用STL中的set集合存入每一个二元组`(a[j],g[j])`，那么现在的问题是，如何得到最好的情况，即维护当前的最优解，即在我们插入一个新元素时，我们要与前面一个元素比较，是否前一个元素的`f[j_1]>=f[j_2]`，如果大于等于，则这个元素不要插入set，**因为前一个元素已经是最优解，插入这个元素会影响最优解的情况**，当这个元素需要插入时，我们还需要遍历后面的元素，如果存在这个这个元素的`f[j]`更大的情况，则后面的元素都应该删除。遍历一次后即可得到最优解，复杂度为O(nlogn)
+
+AC代码：
+
+```c++
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+const int N=200000+5;
+int a[N],f[N],g[N];
+
+struct point{
+	int val,f;
+	point(int val,int f):val(val),f(f){};
+	bool operator<(const point &p)const{
+		return val<p.val;
+	}
+};
+
+int main(){
+	int t;
+    ios::sync_with_stdio(false);cin.tie(0);cout.tie(0);
+	set<point> st;
+	cin>>t;
+    while(t--){
+		st.clear();
+		int n;cin>>n;
+		for(int i=1;i<=n;i++)cin>>a[i];
+		if(n==1){cout<<1<<endl;continue;}//因为下面的运行至少要从2开始，所以要特殊处理1的情况，先后顺序问题，记得先输入再跳过
+		f[1]=1;
+		for(int i=2;i<=n;i++)a[i]>a[i-1] ? f[i]=f[i-1]+1 : f[i]=1;
+		g[n]=1;
+		for(int i=n-1;i>=1;i--)a[i]<a[i+1] ? g[i]=g[i+1]+1 : g[i]=1;
+		int ans=1;
+		st.insert(point(a[1],f[1]));
+		for(int i=2;i<=n;i++){//枚举i
+			point b(a[i],f[i]);
+			set<point>::iterator it=st.lower_bound(b);
+			int keep=1;
+			if(it!=st.begin()){
+				it--;
+				ans=max(ans,it->f+g[i]);
+				if(it->f>=b.f)keep=0;//因为当前的it是最优解，考虑这次要插入的b是否会影响当前最优解，这个算法成立是因为，每一次更新set时，都不会允许不符合规则的元素存在，因为每次都在维护这个规则，所以算法是成立的
+			}
+			if(keep){
+				st.erase(b);
+				st.insert(b);
+				it=st.find(b);
+				it++;
+				while(it!=st.end()&&it->val>b.val&&it->f<=b.f)st.erase(it++);
+			}
+		}
+		cout<<ans<<endl;
+    }
+    system("pause");
+	return 0;
+}
+```
+
+这个算法重要的地方告诉我们，当我们定义了一个规则，并且在每次枚举时都维护这个规则，那么最终容器中的所有元素都会符合我们的规则，这是理解本题最关键的地方
+
+---
+
+### 10.*Average（数形结合+子序列操作+数形结合）
+
+ UVa1451
+
+先求**前缀和**Si=A1+A2+…+Ai（规定 S0=0），然后令点 Pi=(i, Si)，则子序列 i~j 的平均值 为(Sj-Si-1)/(j-i+1)，也就是直线 Pi-1Pj 的斜率。这样可得到主算法：从小到大枚举 t，快速找 到 t'≤t-L，使得 Pt'Pt 斜率最大。注意题目中的 Ai都是 0 或 1，因此每个 Pi和上一个 Pi-1相 比，都是 x 加 1，y 不变或者加 1
+
+![image-20220504172746420](C:\Users\11763\AppData\Roaming\Typora\typora-user-images\image-20220504172746420.png)
+
+![image-20220504172810339](C:\Users\11763\AppData\Roaming\Typora\typora-user-images\image-20220504172810339.png)
+
+1.上面说的栈指的并不是数据结构中的链栈，而是这里用数组模拟的栈，因为我们在本题中要访问的不仅是栈顶元素，还有栈顶的下面一个元素，所以这里用一个大数组模拟栈即可
+
+2.求斜率的过程是不断的比较当前t点与当前切点的和当前t点与下一个切点的斜率比较，当下一个切点斜率大或者**相等**时，切点更新为下一个切点，相等时可能的情况有，当前字符串更短，所以不能忽略当他们的平均值相等的情况
+
+AC代码：
+
+```c++
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+const int N=100000+5;
+int a[N],p[N];//栈
+char s[N];
+int compare(int x1,int x2,int x3,int x4){
+	return (a[x2]-a[x1-1]) * (x4-x3+1) - (a[x4]-a[x3-1]) * (x2-x1+1);//用乘法避免除法
+}
+
+int main(){
+	// ios::sync_with_stdio(false);cin.tie(0);cout.tie(0);
+	int t;scanf("%d",&t);
+	while(t--){
+		int n,L;
+		scanf("%d%d%s",&n,&L,s+1);//这种存法可以让下标从1开始
+		a[0]=0;
+		for(int i=1;i<=n;i++)a[i]=s[i]-'0'+a[i-1];
+		int ansL=1,ansR=L;
+		int i=0,j=0;
+		for(int t=L;t<=n;t++){//从L开始枚举3
+			while(j-i>1&&compare(p[j-2],t-L,p[j-1],t-L)>=0)j--;
+			p[j++]=t-L+1;//栈中存入的是下标
+			while(j-i>1&&compare(p[i+1], t, p[i], t)>=0)i++;
+			int c=compare(p[i],t,ansL,ansR);//与之前的答案比较
+			if(c>0||c==0&&t-p[i]<ansR-ansL){
+				ansL=p[i];ansR=t;
+			}
+		}
+		printf("%d %d\n",ansL,ansR);
+	}
+    system("pause");
+	return 0;
+}
+```
+
+代码中还有一个技巧，一般遇到斜率我们会用除法，这里会涉及小数的计算，这回使我们的程序更复杂同时更加耗时，所以这里我们用乘法相加来避免除法的出现，这题主要难点在于下标，如果不进行下标转换的话，这里的计算非常容易出错，切记切记
+
+---
+
+### 11.Non-boring sequences（中途相遇法+子序列）
+
+UVa1608
+
+不难想到整体思路：在整个序列中找一个只出现一次的元素，如果不存在，则这个序 列不是不无聊的；如果找到一个只出现一次的元素 A[p]，则只需检查 A[1…p-1]和 A[p+1… n]是否满足条件，设长度为 n 的序列需要 T(n)时间，则有 T(n) = max{T(k-1)  + T(n-k) + 找到唯一元素 k 的时间}。这里取 max 是因为要看最坏情况如果事先算出每个元素左边和右边最近的相同元素，则可以在 O(1)时间内判断在任意一个连续子序列中，某个元素是否唯一。 如果从左边找，最坏情况下唯一元素是最后一个元素，因此 T(n) = T(n-1) + O(n)≥T(n) = O(n 2 )，在n<=200000的数据量下肯定超时，那么，从两边往中间找会怎样？此时 T(n) = max{T(k) + T(n-k) + min(k,n-k)}，刚才 的最坏情况（即第一个元素或最后一个元素是唯一元素）变成了 T(n)=T(n-1)+O(1)（因为一 下子就找到唯一元素了），即 T(n)=O(n)。而此时的最坏情况是唯一元素在中间的情况，它 满足经典递推式 T(n) = 2T(n/2) + O(n)，即 T(n)=O(nlogn)
+
+AC代码：
+
+```c
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+const int N=200000+5;
+int a[N],l[N],r[N];
+int n;
+int solve(int L,int R){
+	if(L==R)return 1;
+	for(int i=L;i<=R;i++){
+		if(l[i]<L&&r[i]>R)
+			if(i==L)return solve(L+1,R);
+			else if(i==R) return solve(L,R-1);
+			else return solve(L,i-1)&&solve(i+1,R);
+		if(l[R-i+L]<L&&r[R-i+L]>R)//从两侧同时查找
+			if(R-i+L==L)return solve(L+1,R);
+			else if(R-i+L==R) return solve(L,R-1);
+			else return solve(L,R-i+L-1)&&solve(R-i+L+1,R);
+	}
+	return 0;
+}
+int main(){
+	ios::sync_with_stdio(false);cin.tie(0);cout.tie(0);
+	int t;cin>>t;
+	while(t--){
+		cin>>n;
+		for(int i=0;i<n;i++)cin>>a[i];
+		unordered_map<int,int> mp;//unordered_map更快
+		for(int i=0;i<n;i++){
+			mp.count(a[i]) ? l[i]=mp[a[i]] : l[i]=-1;mp[a[i]]=i;
+		}
+		mp.clear();
+		for(int i=n-1;i>=0;i--){
+			mp.count(a[i]) ? r[i]=mp[a[i]] : r[i]=N;mp[a[i]]=i;
+		}
+		int ok=solve(0,n-1);
+		if(!ok)cout<<"boring"<<endl;
+		else cout<<"non-boring"<<endl;
+		// cout<<solve(0,n-1)<<endl;
+	}
+	system("pause");
+	return 0;
+}
+```
+
+中途相遇的巧妙运用，为了避免最坏情况，从两侧同时查找，大大降低了时间复杂度，最坏的情况也只是元素在中间而已。还有里面的函数递归过程，非常适合这种两端同时判断的写法
+
+---
+
+### 12.Cav（扫描法）
+
+Uva1442
+
+为了方便起见，下面用“水”来代替题目中的燃料。根据物理定律，每一段有水的连 续区间，水位高度必须相等，且水位必须小于等于区间内的最低天花板高度，因此位置[i,i+1] 处的水位满足 h≤si，**且从(i,h)出发往左右延伸出的两条射线均不会碰到天花板**（即两条射 线将一直延伸到洞穴之外或先碰到地板之间的“墙壁”）的最大 h。如果这样的 h 不存在， 则规定 h=pi（也就是“没水”）。 这样，可以先求出“往左延伸不会碰到天花板”的最大值 h1(i)，再求“往右延伸不会 碰到天花板”的最大值 h2(i)，则 hi=min{h1(i), h2(i)}。根据对称性，只考虑 h1(i)的计算
+
+ 从左到右扫描。初始时设水位 level=s0，然后依次判断各个位置[i,i+1]处的高度。 如果 p[i] > level，说明水被“隔断”了，需要把 level 提升到 pi。 如果 s[i] < level，说明水位太高，碰到了天花板，需要把 level 下降到 si。 位置[i,i+1]处的水位就是扫描到位置 i 时的 level。 不难发现，两次扫描的时间复杂度均为 O(n)，总时间复杂度为 O(n)
+
+AC代码：
+
+```c++
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+const int N=1000000+5;//1000000+5
+int p[N],s[N],l[N],r[N];
+int main(){
+	ios::sync_with_stdio(false);cin.tie(0);cout.tie(0);
+	int t;cin>>t;
+	while(t--){
+		int n;cin>>n;
+		for(int i=0;i<n;i++)cin>>p[i];//地面
+		for(int i=0;i<n;i++)cin>>s[i];//天花板
+		l[0]=s[0];
+		for(int i=1;i<n;i++){//从左向右扫描
+			if(l[i-1]>=p[i]&&l[i-1]<=s[i])l[i]=l[i-1];
+			else if(l[i-1]>s[i])l[i]=s[i];
+			else if(l[i-1]<p[i])l[i]=p[i];
+		}
+		r[n-1]=s[n-1];
+		for(int i=n-2;i>=0;i--){
+			if(r[i+1]>=p[i]&&r[i+1]<=s[i])r[i]=r[i+1];
+			else if(r[i+1]>s[i])r[i]=s[i];
+			else if(r[i+1]<p[i])r[i]=p[i];
+		}
+		ll ans=0;
+		for(int i=0;i<n;i++){
+			int lev=min(l[i],r[i]);
+			ans+=lev-p[i];
+		}
+		cout<<ans<<endl;
+		system("pause");
+	}
+	return 0;
+}
+```
+
+这道题的关键就是如何判断水位，上面从(i,h)发射的射线不会碰到天花板就是关键，这里让我们想到从左到右扫描一次，再从右向左扫描一次，这里就是模拟射线的形成，因为本题的数据量有10的6次方，但是这里扫描两次的复杂度均为O(n)，所以本题完美解决
+
+---
+
+### 13.Party Games（暴力穷举）
+
+Uva1610
+
+本来以为需要用理解来做，但是不管怎么样都过不了，但是我们发现数据量极小，不如使用暴力枚举
+
+AC代码：
+
+```c++
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+const int N=1000+5;
+string s[N];
+int main(){
+	ios::sync_with_stdio(false);cin.tie(0);cout.tie(0);
+	int n;
+	while(cin>>n&&n){
+		for(int i=0;i<n;i++)cin>>s[i];
+		sort(s,s+n);
+		int m=n/2-1;
+		int len=s[m].size();
+		string a,ans;
+		while(len>0){
+			a=s[m].substr(0,len);
+			a[a.size()-1]='Z';
+			while(a[a.size()-1]>=s[m][a.size()-1]){//枚举
+				if(a>=s[m]&&a<s[m+1])ans=a;
+				a[a.size()-1]--;
+			}
+			len--;
+		}
+		cout<<ans<<endl;
+	}
+	system("pause");
+	return 0;
+}
+```
+
+---
+
+### 14.Bits Equalizer（先后顺序的处理）
+
+Uva12545
+
+不难的一题，**但是tm的认真读题**没认真读题浪费大量的时间我超，这题不难，处理好各种操作的先后顺序即可
+
+AC代码：
+
+```c++
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+int main(){
+	ios::sync_with_stdio(false);cin.tie(0);cout.tie(0);
+	int t;cin>>t;
+	int ct=1;
+	while(t--){
+		string a,b;
+		cin>>a>>b;
+		int z=0,o=0,u=0;
+		for(int i=0;i<a.size();i++){
+			if(a[i]=='0')z--;
+			if(a[i]=='1')o--;
+			if(a[i]=='?')u++;
+			if(b[i]=='0')z++;
+			if(b[i]=='1')o++;
+		}
+		if(o<0||z+o!=u){cout<<"Case "<<ct++<<": "<<-1<<endl;continue;}
+		int len=a.size(),ans=0;
+		if(z<0){
+			for(int i=0;i<len;i++){
+				if(z<0&&a[i]=='0'&&b[i]=='1'){z++;ans++;o--;a[i]='1';}
+			}
+		}
+		for(int i=0;i<len;i++){//先处理？对应0和1的情况
+			if(o>0&&a[i]=='?'&&b[i]=='1'){o--;ans++;a[i]='1';u--;}
+			if(z>0&&a[i]=='?'&&b[i]=='0'){z--;ans++;a[i]='0';u--;}
+		}
+		if(u>0){
+			for(int i=0;i<len;i++){
+				if(o>0&&a[i]=='?'){o--;ans++;a[i]='1';}
+				if(z>0&&a[i]=='?'){z--;ans++;a[i]='0';}
+			}
+		}
+		int cnt=0;
+		for(int i=0;i<len;i++){
+			if(a[i]!=b[i])cnt++;
+		}
+		ans+=cnt/2;
+		cout<<"Case "<<ct++<<": "<<ans<<endl;
+		
+	}
+	system("pause");
+	return 0;
+}
+```
+
+---
+
+### 15.Erasing and Winning（维护最优解）
+
+UVa11491
+
+本题说实话不难，其基本思路就是尽量将序列中的最小的数先删除，怎么维护当前的最优解问题，是不是很像之前的（防线UVa1471），这里是当有更大的值出现时我们要将之前的小的值删除，因为更大的值才是更优解，这里用一个循环就能实现，注意要处理当删除位数与剩余位数相等时的情况，因为这时不能再添加了
+
+AC代码：
+
+```c++
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+const int N=100000+5;
+char s[N];
+int main(){
+	ios::sync_with_stdio(false);cin.tie(0);cout.tie(0);
+	int n,d;
+	while(cin>>n>>d&&(n||d)){
+		char c;
+		int del=0,j=0;
+		for(int i=0;i<n;i++){
+			cin>>c;
+			while(j>0&&s[j-1]<c&&del<d){j--;del++;}
+			if(d-del==n-i){del++;continue;}
+			s[j++]=c;
+		}
+		s[j]='\0';//记得要补上字符串结尾，因我们进行了反复读写
+		cout<<s<<endl;
+	}
+	system("pause");
+	return 0;
+}
+```
+
+
+
+---
+
 ## 4.算法练习（洛谷）
 
 ### 1.涂国旗（贪心）
 
 https://www.luogu.com.cn/problem/P3392
 
-某国法律规定，只要一个由 N \times M*N*×*M* 个小方块组成的旗帜符合如下规则，就是合法的国旗。（毛熊：阿嚏——）
+某国法律规定，只要一个由 N  M *N*×*M* 个小方块组成的旗帜符合如下规则，就是合法的国旗。（毛熊：阿嚏——）
 
 - 从最上方若干行（至少一行）的格子全部是白色的；
 - 接下来若干行（至少一行）的格子全部是蓝色的；
@@ -1617,7 +2009,65 @@ struct cmp{
 cmp a(1);//这样我们就能以这种方式定义一个结构体
 ```
 
+---
 
+### 13.C++读写文件
+
+1.写文件
+
+利用流对象`ofstream`
+
+```c++
+ofstream out("FilePath",ios::out);
+//或者
+ofstream out;
+out.open("FliePath",ios::out);
+
+out<<"要写入的内容"<<endl;
+out.close();//记得关闭文件
+```
+
+2.读文件
+
+利用流对象`ifstream`
+
+```c++
+ifstream in("FilePath",ios::int);
+//或者
+ifstream in;
+in.open("FilePath",ios::in);
+    //第一种方式
+	char buf[1024] = { 0 };
+	while (ifs >> buf){
+		cout << buf << endl;
+	}
+	//第二种
+	char buf[1024] = { 0 };
+	while (ifs.getline(buf,sizeof(buf))){
+		cout << buf << endl;
+	}
+	//第三种
+	string buf;
+	while (getline(ifs, buf)){
+		cout << buf << endl;
+	}
+in.close();//记得关闭文件
+```
+
+文件打开方式补充
+
+|  打开方式   |            解释            |
+| :---------: | :------------------------: |
+|   ios::in   |     为读文件而打开文件     |
+|  ios::out   |     为写文件而打开文件     |
+|  ios::ate   |      初始位置：文件尾      |
+|  ios::app   |       追加方式写文件       |
+| ios::trunc  | 如果文件存在先删除，再创建 |
+| ios::binary |         二进制方式         |
+
+**注意：** 文件打开方式可以配合使用，利用|操作符
+
+**例如：**用二进制方式写文件 `ios::binary | ios:: out`
 
 ---
 
