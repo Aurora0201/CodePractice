@@ -1496,11 +1496,244 @@ int main(){
 }
 ```
 
+---
+
+### 16.Crane（数学推理分析）
+
+用选择排序的思维来做，每次都将i位置的归位，第一次提交的时候出现RE是因为代码中仍然存在错误，下次出现这种情况还是要自己重写样例进行测试
+
+```c
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+const int N=10000+10;//10000+5
+int a[N],pos[N];
+struct Point{//答案输出
+	int x,y;
+	Point(int x,int y):x(x),y(y){};
+};
+vector<Point> v;
+int n,ans=0;
+void swa(int p1,int p2){
+	if(p2>p1+(n-p1+1)/2){
+		int p=!((n-p1+1)%2)?p1:p1+1;
+		v.push_back(Point(p,n));
+		int m=(n-p+1)/2+p;
+		for(int i=0;i<(n-p+1)/2;i++)swap(a[p+i],a[m+i]),swap(pos[a[p+i]],pos[a[m+i]]);
+		ans++;
+	}
+	int p3=pos[p1];
+	v.push_back(Point(p1,2*p3-p1-1));
+	for(int i=0;i<p3-p1;i++)swap(a[p1+i],a[p3+i]),swap(pos[a[p1+i]],pos[a[p3+i]]);
+	ans++;
+}
+int main(){
+	ios::sync_with_stdio(false);cin.tie(0);cout.tie(0);
+	int t;
+    cin>>t;
+	while(t--){
+		v.clear();
+		cin>>n;
+		for(int i=1;i<=n;i++)cin>>a[i],pos[a[i]]=i;
+		int i=1;
+		ans=0;
+		while(i<=n){if(a[i]!=i)swa(i,pos[i]);i++;}
+		cout<<ans<<endl;
+		vector<Point>::iterator it;
+		for(it=v.begin();it!=v.end();it++)cout<<it->x<<" "<<it->y<<endl;	
+	}
+	system("pause");
+	return 0;
+}
+```
+
+---
+
+### 17.Generating Permutations（逆向思维）
+
+逆向思维，原本题目要求的是用1,2,3,···,n的排列生成所给的排列，本来这样是很难想的，但是如果我们这么想，如何用所给的排列用所给的操作还原成1,2,3,···,n这就是一个很简单的问题了，其中要注意的是，所有的操作都要反过来，比如原本是把第一个元素移到最后一个，现在就是把最后一个元素移到第一个，最后把答案输出就行了
+
+AC代码：
+
+```c++
+#include<bits/stdc++.h>
+
+using namespace std;
+typedef long long ll;
+const int N=300+5;
+int a[N],n;
+/*第一位移到最后为1，前后互换为2*/
+
+bool judge(int ft){
+	for(int i=1;i<=n;i++){
+		if(a[ft]!=i)return true;
+		ft+1>n?ft=1:ft++;
+	}
+	return false;
+}
+vector<int> v;
+int main(){
+	ios::sync_with_stdio(false);cin.tie(0);cout.tie(0);
+	// ifstream in("C://Users//11763//Desktop//test//TestFile//in1.txt",ios::in);
+	while(cin>>n&&n){
+		v.clear();
+		for(int i=1;i<=n;i++)cin>>a[i];
+		int ft=1,next=ft+1;
+		while(1){
+			next=ft+1>n?1:ft+1;
+			if(a[ft]!=n&&a[ft]>a[next]){swap(a[ft],a[next]);v.push_back(1);}
+			else if(a[ft]==n||a[ft]<a[next]){v.push_back(2);ft=ft-1<1?n:ft-1;}
+			if(!judge(ft))break;		
+		}
+		for(vector<int>::reverse_iterator it=v.rbegin();it!=v.rend();it++)cout<<*it;
+		cout<<endl;
+	}
+	// in.close();
+	system("pause");
+	return 0;
+}
+```
+
+下面附上别人的题解，真的是非常的厉害，不难发现这种排序题一般都是类似于冒泡排序或者选择排序的思路，用这种思路也许能写出更短更高效的代码
+
+```c++
+#includecbits/stdc++.h>
+using namespace std;
+int main(){
+int n, a[300];string s;
+while(scanf("%d", &n),n){
+    for(int i=0;i<n;++i)
+    scanf( "%d", a+i);
+    s= "";
+    for(int i=0;i<n-1; ++i)
+        for(int j =n-1;j>= 0;--j){//冒泡排序
+            s+='2';
+            if(j !=n-1 && a[j+1]<a[j]){
+            	swap(a[i],a[j+1]);s+= '1';
+         	}
+    	}
+	reverse(s.begin(,s.end());//反转答案cout < S<<endl;
+}
+return 0;
+
+```
+
+---
+
+## 4.算法练习（蓝书）
+
+### 1.Commando War（代数分析）
+
+情况一：交换之前，任务 Y 比 X 先结束，如图 1-1（a）所示。不难发现，交换之后 X 的结束时间延后，Y 的结束时间提前，最终答案不会变好
+
+情况二：交换之前，X 比 Y 先结束，因此交换后答案变好的充要条件是：交换后 X 的 结束时间比交换前 Y 的结束时间早（交换后 Y 的结束时间肯定变早了），如图 1-1（b）所 示。这个条件可以写成 B[Y]+B[X]+J[X]<B[X]+B[Y]+J[Y]，我们可以化简得J[X]<J[Y]，这就是我们贪心的依据
+
+![image-20220509131043627](C:\Users\11763\AppData\Roaming\Typora\typora-user-images\image-20220509131043627.png)
+
+AC代码：
+
+```c++
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+const int N=10000+5;
+struct sd{
+	int b,j;
+	bool operator<(const sd &p)const{
+		return j>p.j;
+	}
+};
+sd A[N];
+int main(){
+	ios::sync_with_stdio(false);cin.tie(0);cout.tie(0);
+	int n,ct=1;
+	while(cin>>n&&n){
+		for(int i=0;i<n;i++)cin>>A[i].b>>A[i].j;
+		sort(A,A+n);
+		int ans=A[0].b+A[0].j,btime=A[0].b;
+		for(int i=1;i<n;i++){
+			ans=max(ans,btime+A[i].b+A[i].j);
+			btime+=A[i].b;
+		}
+		cout<<"Case "<<ct++<<": "<<ans<<endl;
+	}
+	system("pause");
+	return 0;
+}
+```
+
+---
+
+### 2.Spreading the Wealth（代数分析+数形结合）
+
+UVa11300
+
+这道题目看起来很复杂，让我们慢慢分析。首先，最终每个人的金币数量可以计算出 来，它等于金币总数除以人数 n。接下来我们用 M 来表示每人最终拥有的金币数。 
+
+假设有 4 个人，按顺序编号为 1, 2, 3, 4。假设 1 号给 2 号 3 枚金币，然后 2 号又给 1 号 5 枚金币，这实际上等价于 2 号给 1 号 2 枚金币，而 1 号什么也没给 2 号。这样，可以设 x2 表示 2 号给了 1 号多少个金币。如果 x2<0，说明实际上是 1 号给了 2 号-x2枚金币。x1， x3 和 x4 的含义类似。注意，由于是环形，x1 指的是 1 号给 4 号多少金币。 
+
+现在假设编号为 i 的人初始有 Ai 枚金币。对于 1 号来说，他给了 4 号 x1枚金币，还剩 Ai-x1 枚；但因为 2 号给了他 x2 枚金币，所以最后还剩 A1-x1+x2枚金币。根据题设，该金币 数等于 M。换句话说，我们得到了一个方程：A1-x1+x2=M。 
+
+同理，对于第 2 个人，有 A2-x2+x3=M。最终，我们可以得到 n 个方程，一共有 n 个变 量，是不是可以直接解方程组了呢？很可惜，还不行。因为从前 n-1 个方程可以推导出最 后一个方程（想一想，为什么）。所以，实际上只有 n-1 个方程是有用的。 
+
+尽管无法直接解出答案，我们还是可以尝试着用 x1 表示出其他的 xi，则本题就变成了 单变量的极值问题。  对于第 1 个人，A1-x1+x2=M  x2=M-A1+x1=x1-C1（规定 C1=A1-M，下面类似） 对于第 2 个人，A2-x2+x3=M  x3=M-A2+x2=2M-A1-A2+x1=x1-C2 对于第 3 个人，A3-x3+x4=M  x4=M-A3+x3=3M-A1-A2-A3+x1=x1-C3 …  对于第 n 个人，An-xn+x1=M。这是一个多余的等式，并不能给我们更多的信息（想一 想，为什么）**因为用之前的所有A与M可以表示An，同时x1与xn是互为相反数的**
+
+|第x个人| 关于x的方程 | 用x1来表示其他变量 |
+| :---------: | :-------------: | ----------- |
+| 1 | A1-x1+x2=M | x2=M-A1+x1=x1-C1 |
+| 2 | A2-x2+x3=M | x3=2M-A1-A2+x1=x1-C2 |
+| ··· | ··· | ··· |
+| n | An-xn+x1=M |  |
+
+Ps：C1=A1-M，C程递推关系
+
+我们希望所有 xi 的绝对值之和尽量小，即$$min\left.\begin{cases} |x_1|+|x_2|+···+|x_n|\end{cases}\right\}=min\left.\begin{cases} |x_1|+|x_1-C_1|+···+|x_1-C_n|\end{cases}\right\}$$ 这里我们可以发现，这个式子的$|x_1-C_1|$的几何意义是数轴上点 $x_1$到$C_1$的距离，所以我们现在要找一个点，这个点到数轴上所有的点的距离最小，这里我们给出答案，到所有的点距离最短的点就是这些数的中位数，即最中间的点，下面给出证明
+
+我们先把所有点画在一根数轴上
+
+![image-20220509140611406](C:\Users\11763\AppData\Roaming\Typora\typora-user-images\image-20220509140611406.png)
+
+任意找一个点，比如图 1-2 中的灰点。它左边有 4 个输入点，右边有 2 个输入点。把它 往左移动一点，不要移得太多，以免碰到输入点。假设移动了 d 单位距离，则灰点左边 4 个点到它的距离各减少了 d，右边的两个点到它的距离各增加了 d，但总的来说，距离之和 减少了 2d
+
+如果灰点的左边有 2 个点，右边有 4 个点，道理类似，不过应该向右移动。换句话说， 只要灰点左右的输入点不一样多，就不是最优解。什么情况下左右的输入点一样多呢？如 果输入点一共有奇数个，则灰点必须和中间的那个点重合（中位数）；如果有偶数个，则 灰点可以位于最中间的两个点之间的任意位置（还是中位数）
+
+在数轴上的所有点中，中位数离所有顶点的距离之和最小。凡是能转化为这个模型的题目都可以用中位数求解，并不只适用于本题，这也是一种我们需要掌握的思想
+
+AC代码：
+
+```c++
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+const int N=1000000+5;
+ll A[N],C[N];
+int main(){
+	ios::sync_with_stdio(false);cin.tie(0);cout.tie(0);
+	int n;
+	while(cin>>n){
+		ll sum=0,m;
+		for(int i=0;i<n;i++)cin>>A[i],sum+=A[i];
+		m=sum/n;
+		C[0]=A[0]-m;
+		for(int i=1;i<n;i++)C[i]=C[i-1]+A[i]-m;
+		sort(C,C+n);
+		ll x=C[n/2];
+		sum=0;
+		for(int i=0;i<n;i++){
+			sum+=abs(x-C[i]);
+		}
+		cout<<sum<<endl;
+	}
+	system("pause");
+	return 0;
+}
+```
+
 
 
 ---
 
-## 4.算法练习（洛谷）
+## 5.算法练习（洛谷）
 
 ### 1.涂国旗（贪心）
 
@@ -1558,7 +1791,7 @@ int main(){
 
 ---
 
-## 5.STL容器/C++补充
+## 6.STL容器/C++补充
 
 ### 1.set容器（自定义去重）
 
@@ -2068,6 +2301,18 @@ in.close();//记得关闭文件
 **注意：** 文件打开方式可以配合使用，利用|操作符
 
 **例如：**用二进制方式写文件 `ios::binary | ios:: out`
+
+---
+
+### 14.reverse反转函数
+
+使用`reverse()`可以将数组元素翻转
+
+```c
+int a[]={1,2,3};
+reverse(a,a+3);
+//a={3,2,1}
+```
 
 ---
 
