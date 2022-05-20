@@ -1612,11 +1612,231 @@ while(scanf("%d", &n),n){
             	swap(a[i],a[j+1]);s+= '1';
          	}
     	}
-	reverse(s.begin(,s.end());//反转答案cout < S<<endl;
+	reverse(s.begin(,s.end());//反转答案
+    cout << s << endl;
 }
 return 0;
 
 ```
+
+---
+
+### 18.Guess（浮点数精度问题）
+
+1.读题：本题的题目需要好好理解一下，刚开始给的是ID依次1~ n的得分，然后再给的是rank1~ rank n的ID，题目说的不是很清楚。
+2.基本思路就是贪心。为了使后面选手的选择空间更大，rank靠前的选手因尽能力分高，这道题就仅此而已了。另外ID并列的情况也很容易分析，详情可以看代码。
+3.本题要考虑浮点数精度的问题。比较明智的做法是，由于给的和输出的都是两位小数，所以输入时乘100，输出时除100
+
+AC代码：
+
+```c
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+const int N=17000+5;//17000+5
+int s[N][3],sc[N];
+int id[N];
+
+bool chose(int v,int _id,int id1){
+	//v=1能小于等于前者的成绩相同,v=2只能小于前者成绩
+	double ans=-1,sum=0;
+	for(int i=0;i<3;i++){
+		sum+=s[id1][i];
+		if(v==1&&sum<=sc[_id-1])ans=max(ans,sum);
+		if(v==2&&sum<sc[_id-1])ans=max(ans,sum);
+	}sum=0;
+	for(int i=1;i<3;i++){
+		sum+=s[id1][i];
+		if(v==1&&sum<=sc[_id-1])ans=max(ans,sum);
+		if(v==2&&sum<sc[_id-1])ans=max(ans,sum);
+	}sum=0;
+	int j=2;
+	for(int i=0;i<2;i++){
+		sum+=s[id1][j];
+		if(v==1&&sum<=sc[_id-1])ans=max(ans,sum);
+		if(v==2&&sum<sc[_id-1])ans=max(ans,sum);
+		j=0;
+	}
+	if(ans!=-1)sc[_id]=ans;
+	else return false;
+	return true;
+}
+
+int main(){
+	ios::sync_with_stdio(false);cin.tie(0);cout.tie(0);
+	// ifstream in("C://Users//11763//Desktop//test//TestFile//in1.txt",ios::in);
+	// ofstream out("C://Users//11763//Desktop//test//TestFile//out.txt",ios::out);
+	int n,ct=1;
+	while(cin>>n&&n){
+		// fill(sc,sc+n,0);
+		int ok=1;
+		double f1,f2,f3;
+		// cout<<"Case "<<ct++<<": ";
+		for(int i=1;i<=n;i++)cin>>f1>>f2>>f3,s[i][0]=round(f1*100),s[i][1]=round(f2*100),s[i][2]=round(f3*100);
+		for(int i=1;i<=n;i++)cin>>id[i];
+		sc[1]=s[id[1]][0]+s[id[1]][1]+s[id[1]][2];
+		for(int i=2;i<=n;i++){
+			if(id[i]>id[i-1]){//后面的id大于前者时
+				if(!chose(1,i,id[i])){cout<<"Case "<<ct++<<": "<<"No solution"<<endl;ok=0;break;}
+			}else{
+				if(!chose(2,i,id[i])){cout<<"Case "<<ct++<<": "<<"No solution"<<endl;ok=0;break;}
+			}
+		}
+		if(!ok)continue;
+		cout<<"Case "<<ct++<<": "<<fixed<<setprecision(2)<<(sc[n]/100.0)<<endl;
+	}
+	// cout<<endl;
+	// in.close();
+	// out.close();
+	system("pause");
+	return 0;
+}
+```
+
+1.读入的浮点数往往有误差，比如9.53读成9.5299999999这种，这时候为了避免可以使用round函数，其功能是四舍五入。不过讲道理这种误差这么大的情况少见，所以只要记得遇到了可以用round()就可以了
+
+---
+
+### 19.K-Graph Oddity（简单dfs）
+
+这题不难主要是处理邻接矩阵的问题，因为边太多了，开二维数组会报数组过大，所以这里我们用vector数组来存，注意vector的处理，同时这里因为一定有解，所以dfs不用回溯只要获得一种可能就行了
+
+AC代码：
+
+```c
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+const int N=10000+5;
+int clr[N],k,n,m;//染色数组
+vector<int> v[N];//邻接矩阵
+
+int judge(int x,int y){//x当前点，y当前要染的颜色
+	for(int i=0;i<v[x].size();i++){
+		if(clr[v[x][i]]==y)return 0;
+	}
+	return 1;
+}
+
+void dfs(int x){//x为当前点
+	for(int j=1;j<=k;j++){//先给自己染色
+		if(judge(x,j)){clr[x]=j;break;}
+	}
+	for(int i=0;i<v[x].size();i++){
+		if(!clr[v[x][i]])dfs(v[x][i]);
+	}	
+}
+
+int main(){
+	ios::sync_with_stdio(false);cin.tie(0);cout.tie(0);
+	while(cin>>n>>m&&(n+m)){
+		int a,b;
+		k=0;
+		fill(clr,clr+N,0);
+		for(int i=1;i<=n;i++)v[i].clear();//清除数组
+		for(int i=1;i<=m;i++)cin>>a>>b,v[a].push_back(b),v[b].push_back(a);//普通数组开不了这么大
+		for(int i=1;i<=n;i++)if(k<v[i].size())k=v[i].size();
+		if(k%2==0)k++;
+		cout<<k<<endl;
+		dfs(1);
+		for(int i=1;i<=n;i++)cout<<clr[i]<<endl;
+		cout<<endl;
+	}
+	system("pause");
+	return 0;
+}
+```
+
+### 20.Keep the Customer Satisfied（简单区间维护）
+
+AC代码：
+
+```c++
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+const int N=800000+5;//800000+5
+struct Od{
+	int q,d;
+	bool operator<(const Od &p)const{
+		return d<p.d;
+	}
+}a[N];
+priority_queue<int> q;
+int main(){
+	ios::sync_with_stdio(false);cin.tie(0);cout.tie(0);
+	int t,n;cin>>t;
+	while(t--){
+		while(!q.empty())q.pop();
+		cin>>n;
+		for(int i=1;i<=n;i++)cin>>a[i].q>>a[i].d;
+		sort(a+1,a+n+1);
+		ll cnt=0,ans=0;
+		for(int i=1;i<=n;i++){
+			if(cnt+a[i].q<=a[i].d)cnt+=a[i].q,ans++,q.push(a[i].q);
+			else{
+				if(!q.empty()&&a[i].q<q.top())cnt-=q.top(),cnt+=a[i].q,q.pop(),q.push(a[i].q);
+			}
+		}
+		cout<<ans<<endl;
+		if(t)cout<<endl;
+	}
+	system("pause");
+	return 0;
+}
+```
+
+---
+
+### 21.Meeting with Aliens（暴力+贪心）
+
+这题说实话并不难，主要是环形模拟的部分还是花太多时间了，因为想不出更好的办法，以后对环形进行模拟还是预先求出每个元素应该在的位置（打出位置表，以值为索引），否则算法的可读性会大大下降
+
+```c++
+#include<bits/stdc++.h>
+#define rep(i,n) for(int i=0;i<n;i++)
+using namespace std;
+typedef long long ll;
+const int N=500+5;
+int a[N],b[N],c[N];
+int n;
+int judge(int x){
+    for(int i=0;i<n;i++)if(c[b[i]]!=i)return 0;
+    return 1;
+}
+
+int solve(int x,int t){//x为起始位置，c为方向
+    int cnt=0;
+    if(t==1)for(int j=0;j<n;j++)c[j]=(x+j)%n;//以值为索引，获得目标位置(正向)
+    else for(int j=0;j<n;j++)c[j]=(x+n-j)%n;//以值为索引，获得目标位置(反向)
+    while(1){
+        rep(i,n)if(c[b[i]]!=i)swap(b[i],b[c[b[i]]]),cnt++;
+        if(judge(x))break;
+    }
+    return cnt;
+}
+int main(){
+	ios::sync_with_stdio(false);cin.tie(0);cout.tie(0);
+	while(cin>>n&&n){
+		rep(i,n)cin>>a[i],a[i]--;
+		int ans=0xfffffff;
+		rep(i,n){//枚举起始位置
+        rep(j,n)b[j]=a[j];//复制一份a
+        int cnt;
+        cnt=solve(i,1);
+        ans=min(ans,cnt);
+        rep(j,n)b[j]=a[j];
+        cnt=solve(i,-1);
+        ans=min(ans,cnt);
+    	}
+    	cout<<ans<<endl;
+	}
+	system("pause");
+	return 0;
+}
+```
+
+
 
 ---
 
@@ -1788,6 +2008,119 @@ int main(){
 ```
 
 题目的数据量为50，因为暴力枚举的复杂度为n的平方，不会超时，所以直接枚举所有可能取最小值
+
+---
+
+### 2.取数游戏（dfs）
+
+https://www.luogu.com.cn/problem/P1123
+
+题目描述
+
+一个N  M*N*×*M*的由非负整数构成的数字矩阵，你需要在其中取出若干个数字，使得取出的任意两个数字不相邻（若一个数字在另外一个数字相邻88个格子中的一个即认为这两个数字相邻），求取出数字和最大是多少。
+
+输入格式：第1行有一个正整数T*T*，表示了有T*T*组数据。对于每一组数据，第一行有两个正整数N*N*和M*M*，表示了数字矩阵为N*N*行M*M*列。接下来N*N*行，每行M*M*个非负整数，描述了这个数字矩阵。
+
+输出格式：T*T*行，每行一个非负整数，输出所求得的答案。
+
+AC代码：
+
+```c++
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+
+int M[10][10],vis[10][10]={0};
+int _x[]={-1,0,1},_y[]={-1,0,1};
+int n,m,ans=0,tmp=0;
+void dfs(int x,int y){
+    if(y==m)return dfs(x+1,0);
+    if(x==n){
+        ans=max(tmp,ans);
+        return;
+    }
+    if(!vis[x][y]){
+        int k=0,vx[10],vy[10];
+        for(int i=0;i<=2;i++)//先标记不能访问的位置
+            for(int j=0;j<=2;j++)
+                if(x+_x[i]>=0&&y+_y[j]>=0&&!vis[x+_x[i]][y+_y[j]]){
+                    vis[x+_x[i]][y+_y[j]]=1;
+                    vx[k]=x+_x[i],vy[k++]=y+_y[j];
+                }
+        tmp+=M[x][y];
+        dfs(x,y+1);
+        tmp-=M[x][y];
+        for(int i=0;i<k;i++)vis[vx[i]][vy[i]]=0;//回溯
+    }
+    dfs(x,y+1); //下一个起点
+}
+
+int main(){
+    ios::sync_with_stdio(false);cin.tie(0);cout.tie(0);
+    int t;in>>t;
+    while(t--){
+        ans=0;
+        in>>n>>m;
+        fill(vis[0],vis[0]+10*10,0);
+        for(int i=0;i<n;i++)
+            for(int j=0;j<m;j++)in>>M[i][j];
+        dfs(0,0);
+        cout<<ans<<endl;
+    }
+    system("pause");
+    return 0;
+}
+```
+
+TLE代码：
+
+```c++
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+
+int M[10][10],vis[10][10]={0};
+int _x[]={-1,0,1},_y[]={-1,0,1};
+int n,m,ans=0,tmp=0;
+void dfs(int x,int y){
+    int k=0,vx[10],vy[10];
+    for(int i=0;i<=2;i++)//先标记不能访问的位置
+        for(int j=0;j<=2;j++)
+            if(x+_x[i]>=0&&y+_y[j]>=0&&!vis[x+_x[i]][y+_y[j]]){
+                vis[x+_x[i]][y+_y[j]]=1;
+                vx[k]=x+_x[i],vy[k++]=y+_y[j];
+            }
+    tmp+=M[x][y];
+    for(int i=x;i<n;i++)//暴力穷举(超时)
+        for(int j=0;j<m;j++)if(!vis[i][j])dfs(i,j);//还是有重复部分
+    ans=max(ans,tmp);
+    tmp-=M[x][y];
+    for(int i=0;i<k;i++)vis[vx[i]][vy[i]]=0;//回溯
+}
+
+int main(){
+    ios::sync_with_stdio(false);cin.tie(0);cout.tie(0);
+    ifstream in("C://Users//11763//Desktop//test//TestFile//in.txt",ios::in);
+    int t;in>>t;
+    while(t--){
+        ans=0;
+        in>>n>>m;
+        fill(vis[0],vis[0]+10*10,0);
+        for(int i=0;i<n;i++)
+            for(int j=0;j<m;j++)in>>M[i][j];
+        for(int i=0;i<n;i++)
+            for(int j=0;j<m;j++){
+                dfs(i,j);
+            }
+        cout<<ans<<endl;
+    }
+    in.close();
+    system("pause");
+    return 0;
+}
+```
+
+TLE代码出现的问题主要是进行了重复的搜索，已知我们是从左上角搜索到右下角，TLE代码的dfs部分对于下一个位置的搜索在**优化前**是从头开始搜索（从（0，0）开始寻找没被标记的点），相当于不断的重复搜索已经搜过的路径（类似于全排列搜索），这样必然会超时，因为宗旨是不能往前搜索，所以我们**再次优化**将第一个循环从x即当前行开始，第二个循环从0开始，这样就能过第4个测试点，但是这样还是有重复的部分，因为当前行的前y个我们已经搜过了，这样也是冗余的计算。这样的话我们不如**重新编写**代码，改为步进式，即每次都搜索下一个点，这样就避免了重复搜索的问题，最终AC
 
 ---
 
@@ -2188,7 +2521,7 @@ ans==a ? L=mid+1 : R=mid;//二分中的一个语句
 
 ---
 
-### 11.fill的使用
+### 11.fill()的使用
 
 当我们想对一个容器填充数据时可以使用`fill()`
 
@@ -2199,6 +2532,9 @@ fill (array+3,array+6,8);   // myvector: 5 5 5 8 8 8 0 0
 vector<int> myvector (8)//对vector数组填充
 fill (myvector.begin(),myvector.begin()+4,5);   // myvector: 5 5 5 5 0 0 0 0
 fill (myvector.begin()+3,myvector.end()-2,8);   // myvector: 5 5 5 8 8 8 0 0
+//fill填充二维数组
+int G[6][6];
+fill(G[0],G[0]+6*6,6);
 ```
 
 一般，我们可以用`fill()`来初始化数组
@@ -2304,7 +2640,7 @@ in.close();//记得关闭文件
 
 ---
 
-### 14.reverse反转函数
+### 14.reverse()反转函数
 
 使用`reverse()`可以将数组元素翻转
 
@@ -2312,6 +2648,252 @@ in.close();//记得关闭文件
 int a[]={1,2,3};
 reverse(a,a+3);
 //a={3,2,1}
+```
+
+---
+
+### 15.floor()，round()，ceil()数学函数用于浮点数操作
+
+ceil(x)返回不小于x的最小整数值（然后转换为double型）。
+
+floor(x)返回不大于x的最大整数值。
+
+round(x)返回x的四舍五入整数值。
+
+---
+
+## 2.每月集训
+
+### 1.位运算
+
+按位与`&`如果两个数据均为1返回1，否则返回0
+
+按位或`|`只要有一个值为1返回1
+
+按位异或`^`两者相同返回0，否则返回1
+
+左移`<<`左移一位相当于乘以2
+
+右移`>>`右移一位相当于除以2
+
+上面仅有左移和右移使用的情况较多，需要注意的是左移1位相当于该数乘以2，左移2位相当于该数乘以2*2。但**此结论只适用于该数左移时被溢出舍弃的高位中不包含1的情况**。由下表可以看出，64在左移1位后相当于乘2，左移2位后，值就等于0了
+
+![image-20220519101724605](C:\Users\11763\AppData\Roaming\Typora\typora-user-images\image-20220519101724605.png)
+
+练习
+
+#### LC.191 位1的数量 
+
+```c++
+int hammingWeight(uint32_t n) {
+        int ans=0;
+        while(n){
+            ans+=(n&1);
+            n>>=1;
+        }
+        return ans;
+    }
+```
+
+---
+
+#### LC.137 只出现一次的数字Ⅱ
+
+很有技巧的一到题目，通过统计每一位1的个数来计算，最后把结果拼接起来
+
+```c++
+int singleNumber(vector<int>& nums) {
+        int cnt=0;
+        for(int i=0;i<32;i++){
+            int ans=0;
+            for(int j=0;j<nums.size();j++){
+                ans+=(nums[j]>>i)&1;
+            }
+            ans%=3;
+            if(ans){cnt+=(unsigned int)1<<i;}
+        }
+        return cnt;
+    }
+```
+
+---
+
+#### LC.1442 形成两个异或相等数组的三元组数目
+
+前缀和+枚举即可
+
+```c++
+int countTriplets(vector<int>& arr) {
+        vector<int> v;//前缀数组
+        v.push_back(0);
+        for(int i=0;i<arr.size();i++){
+            v.push_back(arr[i]^v[i]);
+        }
+        //枚举i,j,k
+        int ans=0;
+        for(int i=0;i<arr.size();i++){
+            for(int j=i+1;j<arr.size();j++){
+                for(int k=j;k<arr.size();k++){
+                    int a=v[j]^v[i];
+                    int b=v[k+1]^v[j];
+                    if(a==b)ans++;
+                }
+            }
+        }
+        return ans;
+    }
+```
+
+---
+
+### 2.前缀和
+
+#### LC.1094 拼车
+
+这道题的关键是，求得每个时刻上，车上的人数，如果使用$log(n^2)$的枚举，很可能超时，所以这里我们提前算好每个时刻的操作，关键点就是上车和下车的时间节点
+
+```c++
+bool carPooling(vector<vector<int>>& trips, int capacity) {
+        int num[1005];
+        fill(num,num+1005,0);
+        for(int i=0;i<trips.size();i++){
+            int cnt=trips[i][0];
+            int l=trips[i][1];
+            int r=trips[i][2];
+            num[l]+=cnt;
+            num[r]-=cnt;
+        }
+        int sum=0;
+        for(int i=0;i<1000;i++){
+            sum+=num[i];
+            if(sum>capacity)return false;
+        }
+        return true;
+    }
+```
+
+---
+
+### 3.递归
+
+#### LC.565 嵌套数组
+
+本题不难，主要是理解，不用清除之前遍历过的地方，因为每次进行嵌套，一定是一个环形，即每个下标开始递推出的答案是一个闭环，不管从其中哪个作为起点都只会得到同样的结果，所以这里我们不用重复清除vis数组
+
+```c++
+class Solution {//非递归
+public:
+    int arrayNesting(vector<int>& nums) {
+        int vis[200005];
+        fill(vis,vis+200005,0);
+        int ans=0;
+        for(int i=0;i<nums.size();i++){
+            int j=i,cnt=0;
+            while(!vis[j]){
+                cnt++;
+                vis[j]=1;
+                j=nums[j];
+            }
+            ans=max(ans,cnt);
+        }
+        return ans;
+    }
+};
+```
+
+```c++
+class Solution {//递归
+    int Max, Cnt;
+    int hash[200010];
+    
+    void dfs(vector<int>& nums, int u, int color) {
+        if(hash[u] != -1) {
+            return ;
+        }
+        hash[u] = color;
+        ++Cnt;
+        dfs(nums, nums[u], color);
+    }
+public:
+    int arrayNesting(vector<int>& nums) {
+        int i;
+        int n = nums.size();
+        int color = 0;
+        Max = 0;
+        memset(hash, -1, sizeof(hash));
+        for(i = 0; i < n; ++i) {
+            if(-1 == hash[i]) {
+                Cnt = 0;
+                dfs(nums, i, ++color);
+                Max = max(Max, Cnt);
+            }
+        }
+        return Max;
+    }
+};
+
+```
+
+---
+
+#### LC.401 二进制手表
+
+不算难，主要是细节的处理
+
+```c
+class Solution {
+    string s;
+    int hour[4]={8,4,2,1},vis[4]={0},vis1[20]={0};
+    int cnt=0;
+    int minn[6]={32,16,8,4,2,1},vis2[6]={0},vis3[65]={0};
+    int cnt1=0;
+    vector<string> h;
+    vector<string> m;
+    vector<string> ans;
+    void dfs1(int n){
+        if(cnt1>59||vis3[cnt1])return;
+        if(!n){vis3[cnt1]=1;stringstream ss;ss<<cnt1;ss>>s;if(cnt1<10)s+=s,s[0]=0+'0';m.push_back(s);return;}
+        for(int i=0;i<6;i++){
+            if(!vis2[i]){
+                vis2[i]=1;cnt1+=minn[i];
+                dfs1(n-1);
+                vis2[i]=0;cnt1-=minn[i];
+            }
+        }
+    }
+    void dfs(int n){
+        if(cnt>11||vis1[cnt])return;
+        if(!n){vis1[cnt]=1;stringstream ss;ss<<cnt;ss>>s;h.push_back(s);return;}
+        for(int i=0;i<4;i++){
+            if(!vis[i]){
+                vis[i]=1;cnt+=hour[i];
+                dfs(n-1);
+                vis[i]=0;cnt-=hour[i];
+            }
+        }
+    }
+
+public:
+    vector<string> readBinaryWatch(int turnedOn) {
+        
+        if(turnedOn>8)return ans;
+        //枚举小时亮灯数
+        for(int i=0;i<4;i++){
+            h.clear();m.clear();
+            fill(vis1,vis1+20,0);
+            fill(vis3,vis3+60,0);
+            if(i==0)h.push_back("0");
+            else if(i<=turnedOn)dfs(i);
+            if(turnedOn-i==0)m.push_back("00");
+            else if(turnedOn-i>0)dfs1(turnedOn-i);
+            for(int j=0;j<h.size();j++)
+                for(int k=0;k<m.size();k++){
+                    ans.push_back(h[j]+":"+m[k]);
+                }
+	    }
+        return ans;
+    }
+};
 ```
 
 ---
