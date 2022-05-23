@@ -1949,6 +1949,124 @@ int main(){
 }
 ```
 
+---
+
+### 3.Piotr's Ants（状态分析）
+
+UVa 10881
+
+不管怎么动，蚂蚁的相对位置是不会动的，所以只要对变动后的状态排一次序就行了，抓住这个点后，我们要处理的只有下标的映射问题，先对输入状态排序，然后用一个order数组来储存映射就行了
+
+AC代码：
+
+```c++
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+const int N=10000+5;
+//蚂蚁
+int L,T,n;
+struct Ant{
+	int id,p,d;
+	bool operator<(const Ant &a)const{
+		return p<a.p;
+	}
+}a[N],b[N];
+int order[N];	
+int main(){
+	ios::sync_with_stdio(false);cin.tie(0);cout.tie(0);
+	int t;cin>>t;
+	int ct=1;
+	while(t--){
+		
+		cin>>L>>T>>n;
+		char c;
+		for(int i=1;i<=n;i++){
+			int p;
+			char c;
+			cin>>p>>c;
+			int d=c=='R'?1:-1;
+			a[i]=(Ant){i,p,d};
+			b[i]=(Ant){0,p+T*d,d};
+		}
+		cout<<"Case #"<<ct++<<":"<<endl;
+		sort(a+1,a+n+1);
+		for(int i=1;i<=n;i++)order[a[i].id]=i;
+		sort(b+1,b+n+1);
+		for(int i=1;i<=n;i++){
+			int j=order[i];
+			if(b[j].p<0||b[j].p>L)cout<<"Fell off"<<endl;
+			else if(j>1&&b[j].p==b[j-1].p||j<n&&b[j].p==b[j+1].p)cout<<b[j].p<<" Turning"<<endl;
+			else cout<<b[j].p<<" "<<(b[j].d==1?'R':'L')<<endl;
+		}
+		cout<<endl;
+	}
+	system("pause");
+	return 0;
+}
+```
+
+---
+
+### 4.Even Parity（用已有的条件推导）
+
+因为$$n\leq15$$，如果枚举所有位置是不可能的，复杂度log(2^n^)不可能这么做，但是，因为我们可以通过上面两行来确定下面一行的数，那么枚举量就只2^15^了，下面遍历一遍矩阵就可以完成，第二个难点就是第一行的枚举，但是我们不可能用15个循环来枚举吧，因为是01矩阵，我们可以想到一共有2^n^种情况，所以第一行实际就是0-2^n-1^的二进制形式，解决这两个难点后只要在枚举的过程中注意排除1变成0的情况就没问题了
+
+```c++
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+const int N=20+5;
+const int INF=0xfffffff;
+int a[N][N],b[N][N];
+int n;
+
+int solve(int s){
+	memset(b,0,sizeof(b));//初始化b
+	for(int i=0;i<n;i++){
+		if(s&(1<<i))b[0][i]=1;
+		else if(a[0][i])return INF;
+	}
+	//计算每一行
+	for(int c=0;c<n-1;c++)
+		for(int r=0;r<n;r++){
+			int sum=0;
+			if(c>0)sum+=b[c-1][r];
+			if(r>0)sum+=b[c][r-1];
+			if(r<n-1)sum+=b[c][r+1];
+			b[c+1][r]=sum%2;
+			if(a[c+1][r]==1&&b[c+1][r]==0)return INF;
+		}
+	int cnt=0;
+	for(int i=0;i<n;i++)
+		for(int j=0;j<n;j++)if(a[i][j]!=b[i][j])cnt++;
+	return cnt;
+}
+
+int main(){
+	ios::sync_with_stdio(false);cin.tie(0);cout.tie(0);
+	//ifstream in("C://Users//11763//Desktop//test//TestFile//in.txt",ios::in);
+	//ofstream out("C://Users//11763//Desktop//test//TestFile//out.txt",ios::out);
+	int t;
+	cin>>t;
+	int ct=1;
+	while(t--){
+		cin>>n;
+		for(int i=0;i<n;i++)
+			for(int j=0;j<n;j++)cin>>a[i][j];//输入
+		//枚举第一行
+		int ans=INF;
+		for(int i=0;i<(1<<n);i++)ans=min(ans,solve(i));
+		if(ans==INF)ans=-1;
+		cout<<"Case "<<ct++<<": "<<ans<<endl;
+	}
+	//in.close();
+	//out.close();
+	system("pause");
+	return 0;
+}
+```
+
 
 
 ---
@@ -2895,6 +3013,81 @@ public:
     }
 };
 ```
+
+---
+
+### 4.二叉树
+
+#### LC.04.10.检查子树
+
+不算难，注意递归边界的处理
+
+```c
+class Solution {
+public:
+    bool checkSubTree(TreeNode* t1, TreeNode* t2) {
+        //递归边界-当t2无左右节点
+        //如果当前节点相同，则比较剩下的节点
+        //如果当前节点不同，则比较将t1的左右节点与t2比较
+        //先完成return 0的情况
+        if(t1->val!=t2->val){//枚举下一个起点，如果没有下一个起点则返回0
+            if(t1->left!=NULL&&t1->right!=NULL)return checkSubTree(t1->left,t2)||checkSubTree(t1->right,t2);
+            if(t1->left!=NULL)return checkSubTree(t1->left,t2);
+            if(t1->right!=NULL)return checkSubTree(t1->right,t2);
+            if(t2->left!=NULL&&t1->left==NULL||t2->right!=NULL&&t1->right==NULL)return 0;
+        }
+        if(t2->right!=NULL&&t2->left!=NULL)return checkSubTree(t1->left,t2->left) && checkSubTree(t1->right,t2->right);
+        if(t2->left!=NULL)return checkSubTree(t1->left,t2->left);
+        if(t2->right!=NULL)return checkSubTree(t1->right,t2->right);
+        return 1;//都空则返回1
+    }
+};
+```
+
+---
+
+#### LC.1110 删点成林
+
+递归后断开指针即可
+
+AC代码：
+
+```c++
+class Solution {
+public:
+    queue<TreeNode*> q;
+    set<int> s;
+    vector<TreeNode*> ans;
+    int cnt=1;
+    void dfs(TreeNode *root){//每次dfs会得到一颗完整的树
+        if(root==nullptr)return;
+        if(s.count(root->val)){
+            if(root->left!=nullptr)q.push(root->left);
+            if(root->right!=nullptr)q.push(root->right);
+            return;
+        }
+        // cout<<root->val<<endl;
+        if(cnt)ans.push_back(root),cnt=0;
+        dfs(root->left);
+        if(root->left!=nullptr&&s.count(root->left->val))root->left=nullptr;
+        dfs(root->right);
+        if(root->right!=nullptr&&s.count(root->right->val))root->right=nullptr;
+    }
+
+    vector<TreeNode*> delNodes(TreeNode* root, vector<int>& to_delete) {
+        for(int i=0;i<to_delete.size();i++)s.insert(to_delete[i]);
+        q.push(root);
+        while(!q.empty()){
+            cnt=1;
+            dfs(q.front());
+            q.pop();
+        }
+        return ans;
+    }
+};
+```
+
+
 
 ---
 
