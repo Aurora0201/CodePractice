@@ -39,7 +39,7 @@ int maxsum(int* A,int x,int y){
 
 ####  **复杂度时间表**
 
-![image-20220429002742775](C:\Users\11763\AppData\Roaming\Typora\typora-user-images\image-20220429002742775.png)
+![image](./image/1.png)
 
 可以很好的作为算法是否超时的判断
 
@@ -69,7 +69,9 @@ void merge_sort(int* A,int x,int y,int* T){
 
 代码中的两个条件是关键。首先，只要有一个序列非空就继续合并`while(p<m || q<y)`，其次，`if(q>=y||(p<m && A[p]<=A[q]))`中的写法也很有讲究，如果将后一个条件写在前的话，很有可能造成指针错误，所以这里我们先将`q>=y`写在前，即当一个序列为空时，将剩余的数依次写入临时空间，这里利用了`||`操作符判断前一个条件满足时，则不会计算第二个条件，从而避免了指针越界的问题。
 
-分治时，我们利用了左闭右开区间，这样的技巧十分有用，对于求解范围题目我们可以用于其中，应用心体会<img src="E:\Picture\guibing .jpg" alt="guibing " style="zoom: 50%;" />
+分治时，我们利用了左闭右开区间，这样的技巧十分有用，对于求解范围题目我们可以用于其中，应用心体会
+
+![image](./image/1-2.jpg)
 
 此题的理解算花费了很多的时间，主要是对代码中的变量没有完全的理解，这里我们应该结合归并算法的本质，即该算法到底是怎么样将元素进行排序的，这样我们才能快速的理解算法究竟是怎么样对变量进行操作的
 
@@ -187,7 +189,7 @@ $$
 
 情况2：当a1<=a2<=a3···，如果区间1与区间2完全不相交，那么第一次选谁都可以（但是正因如此我们必须选区间1，因为按照我们的贪心策略只会向后选择，不会想去选择区间，如果选了区间2，我们就不能再选区间1）。当他们都有部分相交时，如果不选区间2，那么区间1的黑色部分是无效的（它不会影响任何其他的区间），此时区间1的有效区间就变成了灰色部分，他被区间2包含，按照上面的结论，区间2是不能选择的，依次类推，选择区间1是明智的
 
-![image-20220502114015178](C:\Users\11763\AppData\Roaming\Typora\typora-user-images\image-20220502114015178.png)
+![image](./bmp/.png)
 
 这样，选择了区间1后，需要将与区间1相交的区间排除，记录上一个选择的区间，这样在排序后只要扫描一次即可完成贪心获得正确结果
 
@@ -203,7 +205,7 @@ $$
 
 根据刚才的讨论，所有需要考虑的区间的a也是递增的，那么我们就可以画成下图所示
 
-![image-20220502115257198](C:\Users\11763\AppData\Roaming\Typora\typora-user-images\image-20220502115257198.png)
+![image](./image/3.png)
 
 如果第一个区间不选最后一个点，而是取中间的，如灰色的点，那么把他后移到最后一个点，被满足的区间增加了，而且原先的区间一定被满足，不难看出，这样的贪心策略是正确的
 
@@ -217,13 +219,15 @@ $$
 
 把各区间按照 a 从小到大排序。如果区间 1 的起点不是 s，无解（因为其他区间的起点 更大，不可能覆盖到 s 点），否则选择起点在 s 的最长区间。选择此区间[ai, bi] 后，新的起 点应该设置为 bi，并且忽略所有区间在 bi 之前的部分，就像预处理一样。虽然贪心策略比 上题复杂，但是仍然只需要一次扫描，如图 8-9 所示。s 为当前有效起点（此前部分已被覆 盖），则应该选择区间 2
 
-![image-20220502140704467](C:\Users\11763\AppData\Roaming\Typora\typora-user-images\image-20220502140704467.png)
+![image](./image/4.png)
 
 
 
 ---
 
-### 5.KMP算法（字符串匹配）
+### 5.矩阵的分块和枚举
+
+
 
 
 
@@ -237,10 +241,8 @@ $$
 给出四个有n个元素的集合,A,B,C,D(n<=4000)，要求分别从中选出一个元素a,b,c,d，令他们的和为0，输出有多少种选法
 ```
 
-【分析】如果使用四重循环枚举a,b,c,d，那算法的复杂度是n的四次方，肯定超时，最好的算法是，一是先将A,B,C,D，两两分组，用双重循环枚举每个a+b，c+d，然后将他们放到两个数组SumA，SumB中，此时有两种解法，使用二分查找，在数组SumB中寻找与SumA中的值相加为0的情况，二是使用map容器，利用map容器统计不同的a+b的对数，然后再在c+d中找到与他们相加等于0的解。这两种方法的复杂度都是
-$$
-O(n^2logn)
-$$
+【分析】如果使用四重循环枚举a,b,c,d，那算法的复杂度是n的四次方，肯定超时，最好的算法是，一是先将A,B,C,D，两两分组，用双重循环枚举每个a+b，c+d，然后将他们放到两个数组SumA，SumB中，此时有两种解法，使用二分查找，在数组SumB中寻找与SumA中的值相加为0的情况，二是使用map容器，利用map容器统计不同的a+b的对数，然后再在c+d中找到与他们相加等于0的解。这两种方法的复杂度都是$$O(n^2logn)$$
+
 同时，二分查找的部分可以使用STL库中自带的`lower_bound()`和`upper_bound()`来实现，同时也可以自己实现，因此有两种方法
 
 以下附上代码
@@ -340,11 +342,11 @@ int main(){
 
 ---
 
-### 8.滑动区间问题
+### 8.使用数据结构来优化算法&滑动区间问题
 
----
+如滑动区间+优先队列
 
-### 9.使用数据结构来优化算法
+滑动区间的原理是合理利用之前计算过的部分
 
 使用数据结构，数据结构往往可以在不改变主算法的前提下提高运行效率，具体做法 可能千差万别，但思路却是有规律可循的。下面先介绍一个经典问题
 
@@ -352,7 +354,7 @@ int main(){
 
 【分析】 如果使用定义，每个 f(i)都需要 O(k)时间计算，总时间复杂度为((n-k)k)，太大了。那么 换一个思路：计算 f(1)时，需要求 k 个元素的最小值——这是一个“窗口”。计算 f(2)时， 这个窗口向右滑动了一个位置，计算 f(3)和 f(4)时，窗口各滑动了一个位置，如图所示
 
-![image-20220426163111102](C:\Users\11763\AppData\Roaming\Typora\typora-user-images\image-20220426163111102.png)
+![image-20220426163111102](./image/11.png)
 
 因此，这个问题称为滑动窗口的最小值问题。窗口在滑动的过程中，窗口中的元素“出 去”了一个，又“进来”了一个。借用数据结构中的术语，窗口往右滑动时需要删除一个 元素，然后插入一个元素，还需要取最小值。这不就是优先队列吗？第 5 章中曾经介绍过 用 STL 集合实现一个支持删除任意元素的优先队列。因为窗口中总是有 k 个元素，插入、 删除、取最小值的时间复杂度均为 O(logk)。这样，每次把窗口滑动时都需要 O(logk)的时间， 一共滑动 n-k 次，因此总时间复杂度为 O((n-k)logk)。
 
@@ -360,7 +362,7 @@ int main(){
 
 当窗口滑动时，首先要删除滑动前窗口的最左边元素（如果是有用元素），然后把新 元素加入单调队列。注意，比新元素大的元素都变得无用了，应当从右往左删除。如图 8-14 所示是滑动窗口的 4 个位置所对应的单调队列
 
-![image-20220426163303144](C:\Users\11763\AppData\Roaming\Typora\typora-user-images\image-20220426163303144.png)
+![image-20220426163303144](./image/12.png)
 
 单调队列和普通队列有些不同，因为右端既可以插入又可以删除，因此在代码中通常 用一个数组和 front、rear 两个指针来实现，而不是用 STL 中的 queue。如果一定要用 STL， 则需要用双端队列（即两端都可以插入和删除），即 deque
 
@@ -633,9 +635,9 @@ $$
 （1）每次只能移动一个圆盘；
 （2）A、B、C三根细柱上的圆盘都要保持上小下大的顺序；
 
-  任务：设An为2n个圆盘完成上述任务所需的最少移动次数，对于输入的n，输出An。 
+任务：设An为2n个圆盘完成上述任务所需的最少移动次数，对于输入的n，输出An。 
 
-  ![img](https://uploadfiles.nowcoder.com/images/20180615/305281_1528993453083_7673A9888110E5E39181300DE876C2A4)
+ ![img](https://uploadfiles.nowcoder.com/images/20180615/305281_1528993453083_7673A9888110E5E39181300DE876C2A4)
 
 
 输入描述:
@@ -868,7 +870,7 @@ UVa 12627
 
 如图 8-20 所示，k 小时的情况由 4 个 k-1 小时的情况拼成，其中右下角全是蓝气球， 不用考虑。剩下的 3 个部分有一个共同点：都是前 k-1 小时后“最下面若干行”或者“最上面若干行”的红气球总数。 具体来说，设 f(k, i)表示 k 小时之后最上面 i 行的红气球总数，g(k,i)表示 k 小时之后最 下面 i 行的红气球总数（规定 i≤0 时 f(k,i)=g(k,i)=0），则所求答案为 f(k,b) - f(k, a-1)。 如何计算 f(k,i)和 g(k,i)呢？以 g(k,i)为例，下面分两种情况进行讨论，如图 8-21 所示
 
-![image-20220428155326604](C:\Users\11763\AppData\Roaming\Typora\typora-user-images\image-20220428155326604.png)
+![image-20220428155326604](./image/13.png)
 
 如果 i≥2k-1 ，则 g(k,i)=2g(k-1,i-2k-1 )+c(k)，否则 g(k,i)=g(k-1,i)。其中，c(k)表示 k 小时 后红气球的总数，满足递推式 c(k)=3c(k-1)，而 c(0)=1，因此 c(k)=3k
 
@@ -1132,7 +1134,7 @@ UVa1471
 
 为了方便叙述，下面用 L 序列表示“连续递增子序列”。删除一个子序列之后，得到 的最长 L 序列应该是由两个序列拼起来的，如图 8-15 所示
 
-![image-20220504110231862](C:\Users\11763\AppData\Roaming\Typora\typora-user-images\image-20220504110231862.png)
+![image-20220504110231862](./image/5.png)
 
 现在我们用`f(j)`和`g(i)`来表示当前以j为尾的递增子序列长度，以i为首的递增子序列长度，这时最笨的方法肯定是O(n3)的暴力枚举，但是如果我们提前将`g(j)`和`f(i)`计算好，算法就能优化到O(n2)，这也是目前能想到最快的方法，但是现在仍然会超时，那该怎么办呢，一般这种情况下，我们应该要用查找来代替一层枚举，这样就能降低算法的复杂度，这里我们只枚举i然后查找当前`A[j]<A[i]`，且最大的`f[j]`，这里我们用STL中的set集合存入每一个二元组`(a[j],g[j])`，那么现在的问题是，如何得到最好的情况，即维护当前的最优解，即在我们插入一个新元素时，我们要与前面一个元素比较，是否前一个元素的`f[j_1]>=f[j_2]`，如果大于等于，则这个元素不要插入set，**因为前一个元素已经是最优解，插入这个元素会影响最优解的情况**，当这个元素需要插入时，我们还需要遍历后面的元素，如果存在这个这个元素的`f[j]`更大的情况，则后面的元素都应该删除。遍历一次后即可得到最优解，复杂度为O(nlogn)
 
@@ -1203,9 +1205,9 @@ int main(){
 
 先求**前缀和**Si=A1+A2+…+Ai（规定 S0=0），然后令点 Pi=(i, Si)，则子序列 i~j 的平均值 为(Sj-Si-1)/(j-i+1)，也就是直线 Pi-1Pj 的斜率。这样可得到主算法：从小到大枚举 t，快速找 到 t'≤t-L，使得 Pt'Pt 斜率最大。注意题目中的 Ai都是 0 或 1，因此每个 Pi和上一个 Pi-1相 比，都是 x 加 1，y 不变或者加 1
 
-![image-20220504172746420](C:\Users\11763\AppData\Roaming\Typora\typora-user-images\image-20220504172746420.png)
+![image-20220504172746420](./image/6.png)
 
-![image-20220504172810339](C:\Users\11763\AppData\Roaming\Typora\typora-user-images\image-20220504172810339.png)
+![image-20220504172810339](./image/7.png)
 
 1.上面说的栈指的并不是数据结构中的链栈，而是这里用数组模拟的栈，因为我们在本题中要访问的不仅是栈顶元素，还有栈顶的下面一个元素，所以这里用一个大数组模拟栈即可
 
@@ -1848,7 +1850,7 @@ int main(){
 
 情况二：交换之前，X 比 Y 先结束，因此交换后答案变好的充要条件是：交换后 X 的 结束时间比交换前 Y 的结束时间早（交换后 Y 的结束时间肯定变早了），如图 1-1（b）所 示。这个条件可以写成 B[Y]+B[X]+J[X]<B[X]+B[Y]+J[Y]，我们可以化简得J[X]<J[Y]，这就是我们贪心的依据
 
-![image-20220509131043627](C:\Users\11763\AppData\Roaming\Typora\typora-user-images\image-20220509131043627.png)
+![image-20220509131043627](./image/8.png)
 
 AC代码：
 
@@ -1911,7 +1913,7 @@ Ps：C1=A1-M，C程递推关系
 
 我们先把所有点画在一根数轴上
 
-![image-20220509140611406](C:\Users\11763\AppData\Roaming\Typora\typora-user-images\image-20220509140611406.png)
+![image-20220509140611406](./image/9.png)
 
 任意找一个点，比如图 1-2 中的灰点。它左边有 4 个输入点，右边有 2 个输入点。把它 往左移动一点，不要移得太多，以免碰到输入点。假设移动了 d 单位距离，则灰点左边 4 个点到它的距离各减少了 d，右边的两个点到它的距离各增加了 d，但总的来说，距离之和 减少了 2d
 
@@ -1978,7 +1980,6 @@ int main(){
 	int t;cin>>t;
 	int ct=1;
 	while(t--){
-		
 		cin>>L>>T>>n;
 		char c;
 		for(int i=1;i<=n;i++){
@@ -2045,8 +2046,6 @@ int solve(int s){
 
 int main(){
 	ios::sync_with_stdio(false);cin.tie(0);cout.tie(0);
-	//ifstream in("C://Users//11763//Desktop//test//TestFile//in.txt",ios::in);
-	//ofstream out("C://Users//11763//Desktop//test//TestFile//out.txt",ios::out);
 	int t;
 	cin>>t;
 	int ct=1;
@@ -2060,8 +2059,6 @@ int main(){
 		if(ans==INF)ans=-1;
 		cout<<"Case "<<ct++<<": "<<ans<<endl;
 	}
-	//in.close();
-	//out.close();
 	system("pause");
 	return 0;
 }
@@ -2073,7 +2070,7 @@ int main(){
 
 ## 5.算法练习（洛谷）
 
-### 1.涂国旗（贪心）
+### 1.涂国旗（暴力枚举+贪心）
 
 https://www.luogu.com.cn/problem/P3392
 
@@ -2796,7 +2793,7 @@ round(x)返回x的四舍五入整数值。
 
 上面仅有左移和右移使用的情况较多，需要注意的是左移1位相当于该数乘以2，左移2位相当于该数乘以2*2。但**此结论只适用于该数左移时被溢出舍弃的高位中不包含1的情况**。由下表可以看出，64在左移1位后相当于乘2，左移2位后，值就等于0了
 
-![image-20220519101724605](C:\Users\11763\AppData\Roaming\Typora\typora-user-images\image-20220519101724605.png)
+![image-20220519101724605](./image/10.png)
 
 练习
 
@@ -3087,9 +3084,286 @@ public:
 };
 ```
 
+---
 
+### 5.二叉搜索树
+
+#### LC.230 二叉搜索树中第k小的元素
+
+因为二叉搜索树的左子树值一定小于当前节点，右子树值则一定大于当前节点，所以对二叉搜索树进行中序遍历就可以得到一个递增的数组
+
+AC代码：
+
+```c++
+class Solution {
+    int ans=0;
+    void dfs(TreeNode *root,int &k){
+        if(root==nullptr)return;
+        dfs(root->left,k);
+        if(--k==0){
+            ans=root->val;
+        }
+        dfs(root->right,k);
+    }
+public:
+    int kthSmallest(TreeNode* root, int k) {
+        dfs(root,k);
+        return ans;
+    }
+};
+```
 
 ---
 
-[^1]: 朝0取整，指在数轴上整数向左取整，负数向右
+#### LC.108 将有序数组转化为二叉搜索树
 
+递归二分的过程中注意，有两种情况，r-l=1或者r==l当r==l时是指当前半区不存在
+
+AC代码：
+
+```c++
+class Solution {
+    /*选定一个中点，以当前中点为根节点，建立二叉树*/
+    vector<int> v;
+    TreeNode* dfs(int l,int r){
+        if(r==l)return nullptr;
+        if(r-l==1)return new TreeNode(v[l]);//结构体的构造中是类似于类的，所以不能用取地址应该用new
+        int m=l+(r-l)/2;
+        return new TreeNode(v[m],dfs(l,m),dfs(m+1,r));
+    }
+public:
+    TreeNode* sortedArrayToBST(vector<int>& nums) {
+        for(int i=0;i<nums.size();i++)v.push_back(nums[i]);
+        return dfs(0,nums.size());
+    }
+};
+```
+
+---
+
+### 6.堆
+
+#### LC.1792 最大平均通过率
+
+本题的关键就是每次对+1变化率最敏感的节点进行自增，但是我们不能通过变量定义，因为他不会随着节点值的改变而改变，所以我们要通过一个`const`函数返回这个值，同时重载
+
+AC代码：
+
+```c++
+class Solution {
+    struct Node{
+        int pNum,tot;
+        double cal()const{//返回自增值
+            return (pNum+1.0)/(tot+1.0)-(pNum+0.0)/tot;
+        }
+        bool operator<(const Node &a)const{
+            return cal()<a.cal();
+        }
+        Node(int pNum,int tot):pNum(pNum),tot(tot){};
+    };
+    priority_queue<Node> q;
+
+public:
+    double maxAverageRatio(vector<vector<int>>& classes, int extraStudents) {
+        for(int i=0;i<classes.size();i++)q.push(Node(classes[i][0],classes[i][1]));
+        
+        for(int i=0;i<extraStudents;i++){
+            Node a=q.top();
+            q.pop();
+            q.push(Node(a.pNum+1,a.tot+1));
+        }
+        double ans=0;
+        while(!q.empty()){
+            ans+=(q.top().pNum*1.0/q.top().tot);
+            q.pop();
+        }
+        ans/=classes.size();
+        return ans;
+    }
+};
+```
+
+---
+
+#### LC.1499 满足不等式的最大值
+
+题目要求找到最大的$$y_x+y_j+|x_i-x_j|$$但是因为i<j，所以我们可以转化为$$x_j+y_j+y_i-x_i$$这样的话j的下标就是固定的，我们只要每次都找到最大的$$y_i-x_i$$就行了，操作不难，**主要是注意每次对队列的操作都要判空**
+
+AC代码：
+
+```c++
+class Solution {
+    struct Node{
+        int x,y;
+        bool operator<(const Node &a)const{
+            return y-x<a.y-a.x;
+        }
+    };
+    priority_queue<Node> q;
+public:
+    int findMaxValueOfEquation(vector<vector<int>>& points, int k) {
+        int j=0;
+        long long ans=-0xfffffff;
+        for(int i=1;i<points.size();i++){
+            while(j<i){
+                if(points[i][0]-points[j][0]<=k)q.push((Node){points[j][0],points[j][1]});
+                j++;
+            }
+            while(!q.empty()&&points[i][0]-q.top().x>k)q.pop();
+            if(!q.empty()){
+                long long cnt=points[i][0]+points[i][1]+q.top().y-q.top().x;
+                ans=max(ans,cnt);
+            }
+        }
+        return ans;
+    }
+};
+```
+
+---
+
+#### *LC.2163 删除元素后和的最小差值
+
+前缀和+滑动区间+队列，这里因为我们要求前n-2n个元素中的n个元素最小和，用滑动区间不断选取元素，加入到优先队列中，每次区间向右滑动
+
+AC代码：
+
+```c++
+class Solution {
+    const int N=100000+5;
+    long long fst[300005];
+    long long sec[300005];
+    priority_queue<int> l;
+    priority_queue<int,vector<int>,greater<int> > r;
+public:
+    long long minimumDifference(vector<int>& nums) {
+        int n=nums.size()/3;
+        fst[n-1]=0;
+        for(int i=0;i<n;i++){
+            fst[n-1]+=nums[i];
+            l.push(nums[i]);
+        }
+        for(int i=n;i<(n<<1);i++){//计算左边的
+            fst[i]=fst[i-1]+nums[i];
+            l.push(nums[i]);
+            fst[i]-=l.top();
+            l.pop();
+        }
+        sec[2*n]=0;
+        for(int i=3*n-1;i>=2*n;i--){
+            sec[2*n]+=nums[i];
+            r.push(nums[i]);
+        }
+        for(int i=2*n-1;i>=n;i--){
+            sec[i]=sec[i+1]+nums[i];
+            r.push(nums[i]);
+            sec[i]-=r.top();
+            r.pop(); 
+        }
+        long long ans=0xffffffffff;
+        for(int i=2*n;i>=n;i--)ans=min(ans,fst[i-1]-sec[i]);
+        return ans;
+    }
+};
+```
+
+---
+
+### 7.有序集合
+
+#### LC.1418 点菜展示表
+
+合理利用数据结构
+
+AC代码：
+
+```c++
+class Solution {
+    map<string,int> col;//列映射
+    map<string,int> col1;
+    map<int,map<int,int>> table;//对应id下访问菜名
+    set<int> s;
+    vector<string> cnt;//第一行
+    vector<int> tab;//餐桌代号
+    map<int,int> hash;//映射
+    vector<vector<string>> ans;
+public:
+    vector<vector<string>> displayTable(vector<vector<string>>& orders) {
+       col["Table"]=0;
+       stringstream ss;
+       int a;
+       for(int i=0;i<orders.size();i++){
+            if(!col.count(orders[i][2]))col[orders[i][2]]=col.size(),cnt.push_back(orders[i][2]);//新列加入
+            ss.clear(),ss<<orders[i][1],ss>>a;
+            if(!s.count(a))s.insert(a),tab.push_back(a),table[a][0]=a;//新桌加入
+            //对当前菜品自增
+            table[a][col[orders[i][2]]]++;
+       }
+       sort(cnt.begin(),cnt.end());
+       cnt.insert(cnt.begin(),"Table");
+       for(int i=1;i<cnt.size();i++)col1[cnt[i]]=i;
+       for(int i=0;i<cnt.size();i++)hash[col[cnt[i]]]=col1[cnt[i]];
+       ans.push_back(cnt);
+       int c=col.size();
+       sort(tab.begin(),tab.end());
+       for(int i=0;i<tab.size();i++){//一桌桌进行访问
+            vector<string> tmp(c,"0");
+            int k=tab[i];//当前是第k桌
+            int b;
+            for(int j=0;j<c;j++){//一列列赋值
+                if(!table[k][j])continue;
+                ss.clear();
+                ss<<table[k][j];
+                ss>>tmp[hash[j]];
+            }
+            ans.push_back(tmp);
+       }
+       return ans;
+    }
+};
+```
+
+优化，可以使用set存储第一行，每次访问的时候遍历set
+
+优化代码：
+
+```c++
+class Solution {
+    set<string> list;
+    map<int,map<string,int>> table;
+    vector<vector<string>> ans;
+    stringstream ss;
+    int cnt;
+public:
+    vector<vector<string>> displayTable(vector<vector<string>>& orders) {
+        for(int i=0;i<orders.size();i++){
+            list.insert(orders[i][2]);
+            ss.clear();ss<<orders[i][1];ss>>cnt;
+            table[cnt]["Table"]=cnt;
+            table[cnt][orders[i][2]]++;
+        }
+        vector<string> title={"Table"};
+        set<string>::iterator it=list.begin();
+        for(;it!=list.end();it++)title.push_back(*it);
+        ans.push_back(title);
+        string a;
+        int len=table.size();
+        map<int,map<string,int>>::iterator i=table.begin();
+        for(;i!=table.end();i++){
+            vector<string> tmp;
+            ss.clear();ss<<(i->second["Table"]);ss>>a;
+            tmp.push_back(a);
+            for(it=list.begin();it!=list.end();it++){
+                ss.clear();ss<<i->second[*it];ss>>a;
+                tmp.push_back(a);
+            }
+            ans.push_back(tmp);
+        }
+        return ans;
+    }
+};
+```
+
+
+
+---
