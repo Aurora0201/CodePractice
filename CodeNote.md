@@ -25,12 +25,11 @@ int maxsum(int* A,int x,int y){
     int v,L,R,maxs;
     if(y-x==1)return A[x];
     int m=x+(y-x)/2;//取中值
-    int maxs=max(maxsum(A,x,m),maxsum(A,m,y));
-    int v,L,R;
+    maxs=max(maxsum(A,x,m),maxsum(A,m,y));
     v=0;L=A[m-1];
-    for(int i=m;i>=x;i--)L=max(L,v+=A[i]);
+    for(int i=m-1;i>=x;i--)L=max(L,v+=A[i]);
     v=0;R=A[m];
-    for(int i=m+1;i<y;i++)R=max(R,v+=A[i]);
+    for(int i=m;i<y;i++)R=max(R,v+=A[i]);
     return max(maxs,L+R);
 }
 ```
@@ -227,9 +226,19 @@ $$
 
 ### 5.矩阵的分块和枚举
 
+#### 1.递归
 
+当我们需要搜索路径或者说矩阵的构成存在**递推关系**时我们可以使用递归来对矩阵进行分解或者遍历
 
+例题UVa 12627
 
+#### 2.枚举行或者列
+
+当我们需要对矩阵进行分块操作时，可以通过枚举行或者列对矩阵进行分解
+
+例题P3392 暴力枚举
+
+LC.363 暴力枚举+二分查找
 
 ---
 
@@ -364,9 +373,9 @@ int main(){
 
 ![image-20220426163303144](https://s1.ax1x.com/2022/05/27/XegnET.png)
 
-单调队列和普通队列有些不同，因为右端既可以插入又可以删除，因此在代码中通常 用一个数组和 front、rear 两个指针来实现，而不是用 STL 中的 queue。如果一定要用 STL， 则需要用双端队列（即两端都可以插入和删除），即 deque
+单调队列和普通队列有些不同，因为右端既可以插入又可以删除，因此在代码中通常用一个数组和 front、rear 两个指针来实现，而不是用 STL 中的 queue。如果一定要用 STL， 则需要用双端队列（即两端都可以插入和删除），即deque
 
-尽管插入元素时可能会删除多个元素，但因为每个元素最多被删除一次，所以总的时 间复杂度仍为 O(n)，达到了理论下界（因为至少需要 O(n)的时间来检查每个元素）
+尽管插入元素时可能会删除多个元素，但因为每个元素最多被删除一次，所以总的时间复杂度仍为 O(n)，达到了理论下界（因为至少需要 O(n)的时间来检查每个元素）
 
 下面这道例题（防线 UVa1471）更加复杂，但思路是一样的：先排除一些干扰元素（无用元素），然后 把有用的元素组织成易于操作的数据结构
 
@@ -1838,6 +1847,44 @@ int main(){
 }
 ```
 
+---
+
+### 22.Laptop（区间选择）
+
+这题不算难，主要是我们要知道理想的状态是怎么样的，理想状态就是从左到右我们能一个一个的向右填，即在当前idx下，我们在当前区间能找到一个点，注意题目中所说，不存在严格的包含区间，也就是任意两个区间不可能存在一个区间完全包含一个区间，这题的做法就是我们先将区间按左边界从小到大排序，小区间在前，然后我我们再加入一个预处理，当有一个长区间在短区间前时，我们要将长区间的右边界切短到短区间的-1，因为这样一能让我们移动下标时，恰好将线段填在最右边
+
+AC代码：
+
+```c++
+struct Reg{
+    int l,r;
+    bool operator<(const Reg& a)const{
+        if(a.l!=l)return l<a.l;
+        else return r<a.r;
+    }
+}a[N];
+int n;
+int main(){
+    ios::sync_with_stdio(false);cin.tie(0);cout.tie(0);
+    int T;cin>>T;
+    while(T--){
+        cin>>n;
+        rep(i,n)cin>>a[i].l>>a[i].r;
+        sort(a,a+n);
+        for(int i=n-1;i>=1;i--)if(a[i-1].r>=a[i].r)a[i-1].r=a[i].r-1;
+        int ans=-1,idx=-N;
+        for(int i=0;i<n;i++){
+            if(idx>=a[i].l){idx++;continue;}
+            idx=a[i].r;
+            ans++;
+        }
+        cout<<ans<<endl;
+    }
+    system("pause");
+    return 0;
+}
+```
+
 
 
 ---
@@ -2061,6 +2108,90 @@ int main(){
 	}
 	system("pause");
 	return 0;
+}
+```
+
+---
+
+### 5.Chinese Mahjong (递归求解)
+
+这题的关键就是，每次枚举下次可以得到的牌，然后看得到牌后的手牌是不是能胡，如果能胡，则这副手牌听这副牌。小插曲：dfs第二个循环忘记去掉不能成顺子的东南西北和白板，导致一直WA
+
+AC代码：
+
+```c++
+#include<bits/stdc++.h>
+#define rep(i,n) for(int i=0;i<n;i++)
+using namespace std;
+
+const char* mahjong[]={
+"1T","2T","3T","4T","5T","6T","7T","8T","9T",
+"1S","2S","3S","4S","5S","6S","7S","8S","9S",
+"1W","2W","3W","4W","5W","6W","7W","8W","9W",
+"DONG","NAN","XI","BEI",
+"ZHONG","FA","BAI"};
+
+int convert(char *s){
+    for(int i=0;i<34;i++)if(!strcmp(s,mahjong[i]))return i;
+    return -1;
+}
+int c[34];// 储存每个麻将的数量
+bool dfs(int dep){
+    for(int i=0;i<34;i++){// 先解决刻子
+        if(c[i]>=3){
+            if(dep==3)return true;
+            c[i]-=3;
+            if(dfs(dep+1))return true;
+            c[i]+=3;
+        }
+    }
+    for(int i=0;i<=24;i++){// 这里是顺子
+        if(i%9<=6&&c[i]>=1&&c[i+1]>=1&&c[i+2]>=1){
+            if(dep==3)return true;
+            c[i]--;c[i+1]--;c[i+2]--;
+            if(dfs(dep+1))return true;
+            c[i]++;c[i+1]++;c[i+2]++;
+        }
+    }
+    return false;
+}
+
+bool solve(){// 在这里枚举将牌
+    for(int i=0;i<34;i++){
+        if(c[i]>=2){
+            c[i]-=2;
+            if(dfs(0))return true;
+            c[i]+=2;
+        }
+    }
+    return false;
+}
+int main(){
+    // ios::sync_with_stdio(false);cin.tie(0);cout.tie(0);
+    char s[100];
+    int cot=1;
+    int mj[15];
+    while(cin>>s){
+        if(s[0]=='0')break;
+        int ok=1;// 如果ok=1，则not ready
+        mj[0]=convert(s);
+        for(int i=1;i<13;i++){
+            cin>>s;mj[i]=convert(s);
+        }
+        cout<<"Case "<<cot++<<":";
+        for(int i=0;i<34;i++){// 枚举所有可能听的牌
+            memset(c,0,sizeof(c));
+            for(int j=0;j<13;j++)c[mj[j]]++;
+            if(c[i]>=4)continue;
+            c[i]++;
+            if(solve())cout<<" "<<mahjong[i],ok=0;
+            c[i]--; 
+        }
+        if(ok)cout<<" Not ready";
+        cout<<endl;
+    }
+    system("pause");
+    return 0;
 }
 ```
 
@@ -2460,6 +2591,14 @@ cout<<upper_bound(A.begin(),A.end(),3)-A.begin();
 
 他们都需要通过返回的地址减去起始地址begin,得到找到数字在数组中的下标
 
+需要注意的是，头文件`<set>`中定义了同名成员函数，速度相对于`<algorithm>`会快不少
+
+```c++
+set<int> st;
+int a=10;
+st.lower_bound(a);//直接使用
+```
+
 ---
 
 ### 6.cout的补充
@@ -2774,6 +2913,19 @@ ceil(x)返回不小于x的最小整数值（然后转换为double型）。
 floor(x)返回不大于x的最大整数值。
 
 round(x)返回x的四舍五入整数值。
+
+---
+
+### 16.函数引用和值传递
+
+总所周知函数的参数有两种形式，一种是引用，一种是值传递，因为值传递每次都会复制一份，所以当参数为stl类的时候（如string），重复调用函数会消耗大量的时间在复制上，所以当我们遇到重复调用函数的时候，特别是对于字符串类，还是用引用，不然很可能会超时；
+
+```c++
+void dfs(string s);//值传递
+void dfs(string& s);//引用
+```
+
+
 
 ---
 
@@ -3364,6 +3516,547 @@ public:
 };
 ```
 
+---
+
+#### LC.363 矩形区域不超过k的最大值
+
+前缀和+二分查找
+
+![image](https://images.weserv.nl/?url=https://cdn.jsdelivr.net/gh/Aurora0201/ImageStore@main/img/image-20220527182048899.png)
+
+AC代码：
+
+```c++
+class Solution {
+    int f[105][105];
+    set<int> st;
+public:
+    int maxSumSubmatrix(vector<vector<int>>& matrix, int k) {
+        int m=matrix.size();//行
+        int n=matrix[0].size();//列
+        for(int i=0;i<m;i++)f[i][0]=matrix[i][0];//初始化f[i]
+        for(int i=0;i<m;i++)for(int j=1;j<n;j++)f[i][j]=f[i][j-1]+matrix[i][j];
+        int ans=-0xfffffff;
+        for(int i=0;i<n;i++)for(int j=i;j<n;j++){//枚举列
+            st.clear();
+            int sum=0;//sum[i]
+            for(int t=0;t<m;t++){//枚举行
+                if(i==0){
+                    st.insert(sum);
+                    sum+=f[t][j];
+                }else{
+                    st.insert(sum);
+                    sum+=f[t][j]-f[t][i-1];
+                }
+                auto it=st.lower_bound(sum-k);
+                if(it!=st.end())ans=max(ans,sum-*it);
+                if(ans==k)return ans;
+            }
+        }
+        return ans;
+    }
+};
+```
+
+---
+
+### 8.字典树
+
+字典树是一种储存字符串的数据结构，类似于前缀树，增删改查的复杂度都是$$O(logn)$$，但是我们也可以用它来储存整型，如01树
+
+字典树模板
+
+```c
+struct Tree{
+        int isEnd=0;
+        Tree* next[26];
+        void init(){
+            memset(next,0,sizeof(next));
+        }
+    };
+	Tree *root=nullptr;
+    Tree* createNode(){
+        Tree* NewNode=new Tree;
+        NewNode->init();
+        return NewNode;
+    }
+    void insert(const string& s) {
+        if(root==nullptr)root=createNode();
+        Tree *p=root;
+        for(int i=0;i<s.size();i++){
+            int x=s[i]-'a';
+            if(p->next[x]==nullptr)p->next[x]=createNode();
+            p=p->next[x];
+        }
+        p->isEnd=1;
+    }
+    
+    bool dfs(Tree *root,string& s,int idx) {//模糊查询
+        if(root==nullptr)return false;
+        if(idx==s.size())return root->isEnd;
+        if(s[idx]=='.'){
+            for(int i=0;i<26;i++)if(dfs(root->next[i],s,idx+1))return true;
+            return false;
+        }else{
+            int x=s[idx]-'a';
+            return dfs(root->next[x],s,idx+1);
+        }
+    }
+    void dfs(Tree *root,int val,int idx){//数组中异或的zu
+            if(root==nullptr)return;
+            if(idx==-1)return;
+            int x=((val>>idx)&1);
+            if(root->next[!x]!=nullptr){
+                cnt+=(1<<idx);
+                return dfs(root->next[!x],val,idx-1);   
+            }else{
+                cnt+=(0<<idx);
+                return dfs(root->next[x],val,idx-1);  
+            }
+        }
+```
+
+#### LC.211 添加与搜索单词
+
+简单字典树数据结构，虽然可以用数组实现字典树，但是对于这种需要重复调用的在函数参数使用引用而不是值传递会快很多
+
+AC代码：
+
+```c++
+class WordDictionary {
+    struct Tree{
+        int isEnd=0;
+        Tree* next[26];
+        void init(){
+            memset(next,0,sizeof(next));
+        }
+    };
+public:
+    Tree *root=nullptr;
+    Tree* createNode(){
+        Tree* NewNode=new Tree;
+        NewNode->init();
+        return NewNode;
+    }
+    WordDictionary() {
+        root=createNode();
+    }
+    void addWord(const string& s) {
+        Tree *p=root;
+        for(int i=0;i<s.size();i++){
+            int x=s[i]-'a';
+            if(p->next[x]==nullptr)p->next[x]=createNode();
+            p=p->next[x];
+        }
+        p->isEnd=1;
+    }
+    
+    bool dfs(Tree *root,string& s,int idx) {
+        if(root==nullptr)return false;
+        if(idx==s.size())return root->isEnd;
+        if(s[idx]=='.'){
+            for(int i=0;i<26;i++)if(dfs(root->next[i],s,idx+1))return true;
+            return false;
+        }else{
+            int x=s[idx]-'a';
+            return dfs(root->next[x],s,idx+1);
+        }
+    }
+
+    bool search(string s){
+        return dfs(root,s,0);
+    }
+};
+```
+
+---
+
+#### LC.1268 搜索推荐系统
+
+注意的点就是，一开始要和当前字符串匹配，当超过idx后，要进行深度搜索，因为字典树本来就是字典序小的在前，所以只要搜够三个就直接return就行
+
+AC代码：
+
+```c++
+class Solution {
+    struct Tree{
+        int isEnd=0;
+        Tree* next[26];
+        void init(){
+            memset(next,0,sizeof(next));
+        }
+    };
+    Tree *root=nullptr;
+    Tree* createNode(){
+        Tree* NewNode=new Tree;
+        NewNode->init();
+        return NewNode;
+    }
+    void addWord(const string& s) {
+        if(root==nullptr)root=createNode();
+        Tree *p=root;
+        for(int i=0;i<s.size();i++){
+            int x=s[i]-'a';
+            if(p->next[x]==nullptr)p->next[x]=createNode();
+            p=p->next[x];
+        }
+        p->isEnd=1;
+    }
+    string ss;
+    int cot=0;
+    vector<string> cnt;
+    vector<vector<string>> ans;
+    void dfs(Tree *root,const string& s,int idx){
+        if(root==nullptr)return;
+        if(cot==3)return;
+        if(root->isEnd&&idx>=s.size())cnt.push_back(ss),cot++;
+        if(idx>=s.size()){
+            for(int i=0;i<26;i++){
+                ss+=i+'a';
+                dfs(root->next[i],s,idx+1);
+                ss.pop_back();
+            }
+        }else{
+            int x=s[idx]-'a';
+            ss+=s[idx];
+            return dfs(root->next[x],s,idx+1);
+        }
+    }
+public:
+    vector<vector<string>> suggestedProducts(vector<string>& products, string searchWord) {
+        for(int i=0;i<products.size();i++)addWord(products[i]);//插入字典树
+
+        for(int i=1;i<=searchWord.size();i++){
+            cnt.clear();
+            ss.clear();
+            cot=0;
+            dfs(root,searchWord.substr(0,i),0);
+            ans.push_back(cnt);
+        }
+        return ans;
+    }
+};
+```
+
+---
+
+#### LC.421 数组中两个数异或的最大值
+
+不算很难，先将每个数存入01树，注意，因为`int`型的第一位是符号位，所以我们只要前面31位就行了，所以定义`maxbit=30`，现将每个值插入字典树，这里是高位在前，对于每个值，寻找一个能让他异或最大的值就行了，一道难度适中的题
+
+AC代码：
+
+```c++
+class Solution {
+    #define maxbit 30
+    struct Tree{
+        int isEnd=0;
+        Tree* next[2];
+        void init(){
+            memset(next,0,sizeof(next));
+        }
+    };
+    Tree *root=nullptr;
+    Tree* createNode(){
+        Tree* NewNode=new Tree;
+        NewNode->init();
+        return NewNode;
+    }
+    void insert(int val) {
+        if(root==nullptr)root=createNode();
+        Tree *p=root;
+        for(int i=maxbit;i>=0;i--){
+            int x=((val>>i)&1);
+            if(p->next[x]==nullptr)p->next[x]=createNode();
+            p=p->next[x];
+        }
+        p->isEnd=1;
+    }
+    int cnt=0;
+    //对于当前的位，寻找一个能与他异或产生最大值的位，即相反位
+    void dfs(Tree *root,int val,int idx){
+        if(root==nullptr)return;
+        if(idx==-1)return;
+        int x=((val>>idx)&1);
+        if(root->next[!x]!=nullptr){
+            cnt+=(1<<idx);
+            return dfs(root->next[!x],val,idx-1);   
+        }else{
+            cnt+=(0<<idx);
+            return dfs(root->next[x],val,idx-1);  
+        }
+    }
+public:
+    int findMaximumXOR(vector<int>& nums) {
+        for(int i=0;i<nums.size();i++)insert(nums[i]);
+        int ans=-1;
+        for(int i=0;i<nums.size();i++){
+            cnt=0;
+            dfs(root,nums[i],maxbit);
+            ans=max(ans,cnt);
+        }
+        return ans;
+    }
+};
+```
+
+---
+
+#### LC.1707 数组中元素的最大异或值
+
+与上题唯一不同的地方就是加入了大小的限制，那么我们只要加入一个预处理就行了，只要每次字典树中的数都小于等于规定值，运行最大异或值的代码就行
+
+AC代码：
+
+```c++
+class Solution {
+    #define maxbit 30
+    struct Node{
+        int q,m,id;
+        bool operator<(const Node& p)const{
+            return m<p.m;
+        }
+    }a[100005];
+   	int b[100005];
+    struct Tree{
+        int isEnd=0;
+        Tree* next[2];
+        void init(){
+            memset(next,0,sizeof(next));
+        }
+    };
+    Tree *root=nullptr;
+    Tree* createNode(){
+        Tree* NewNode=new Tree;
+        NewNode->init();
+        return NewNode;
+    }
+    void insert(int val) {
+        if(root==nullptr)root=createNode();
+        Tree *p=root;
+        for(int i=maxbit;i>=0;i--){
+            int x=((val>>i)&1);
+            if(p->next[x]==nullptr)p->next[x]=createNode();
+            p=p->next[x];
+        }
+        p->isEnd=1;
+    }
+    int cnt=0;
+    //对于当前的位，寻找一个能与他异或产生最大值的位，即相反位
+    void dfs(Tree *root,int val,int idx){
+        if(root==nullptr)return;
+        if(idx==-1)return;
+        int x=((val>>idx)&1);
+        if(root->next[!x]!=nullptr){
+            cnt+=(1<<idx);
+            return dfs(root->next[!x],val,idx-1);   
+        }else{
+            cnt+=(0<<idx);
+            return dfs(root->next[x],val,idx-1);  
+        }
+    }
+public:
+    vector<int> maximizeXor(vector<int>& nums, vector<vector<int>>& queries) {
+        vector<int> ans;
+        sort(nums.begin(),nums.end());
+        for(int i=0;i<queries.size();i++){
+            a[i]=(Node){queries[i][0],queries[i][1],i};
+        }
+        sort(a,a+queries.size());
+        int j=0;//指向nums
+        for(int i=0;i<queries.size();i++){
+            while(j<nums.size()&&nums[j]<=a[i].m)insert(nums[j++]);
+            int minn=nums[0];
+            if(j==0||minn>a[i].m)b[a[i].id]=-1;
+            else{
+                cnt=0;
+                dfs(root,a[i].q,maxbit);
+                b[a[i].id]=cnt;
+            }
+        }
+        for(int i=0;i<queries.size();i++)ans.push_back(b[i]);
+        return ans;
+    }
+};
+```
+
+---
+
+### 9.动态规划
+
+#### LC.70 爬楼梯
+
+动态规划入门题，初态是一层楼和二层楼
+
+AC代码：
+
+```c
+int climbStairs(int n) {
+        int f[50];
+        f[1]=1;
+        f[2]=2;
+        for(int i=3;i<=n;i++)f[i]=f[i-1]+f[i-2];
+        return f[n];
+    }
+```
+
+---
+
+#### LC.53 最大连续子序列和
+
+1.动态规划，当前的状态设定为当前的最大和，即当前一个元素的值大于0时，当前的值就与前一个元素相加，遍历一遍后就可以得到最大子序列和
+
+AC：
+
+```c++
+int maxSubArray(vector<int>& nums) {
+    int ans=-99999;
+    for(int i=0;i<nums.size();i++){
+        dp[i]=nums[i];
+        if(i&&dp[i-1]>0)dp[i]+=dp[i-1];
+        ans=max(ans,dp[i]);
+    }
+    return ans;
+}
+```
+
+2.分治法
+
+划分子问题，合并子问题
+
+AC代码：
+
+```c++
+int maxsum(vector<int>& nums,int x,int y){
+        int v,L,R,maxs;
+        if(y-x==1)return nums[x];
+        int m=x+(y-x)/2;//取中值
+        maxs=max(maxsum(nums,x,m),maxsum(nums,m,y));//分别求两个子问题的最大值
+        v=0;L=nums[m-1];
+        for(int i=m-1;i>=x;i--)L=max(L,v+=nums[i]);
+        v=0;R=nums[m];
+        for(int i=m;i<y;i++)R=max(R,v+=nums[i]);//求L，R是当前最大值即合并
+        return max(maxs,L+R);
+    }
+```
+
+---
+
+#### LC.1420 生成数组
+
+动态规划问题，因为给出三个条件n，m，k，所以我们需要用三维状态数组来表示状态，下面我们来推导状态转移方程
+
+首先我们直接用$$f[i][s][j]$$表示长度为i，搜索代价s，最大值j的数组数量，下面有两种情况
+
+1.当最后一个数字不会影响搜索代价，也就是之前已经存在过最大元素且代价已经为k，如下图所示，这时白色部分是不受影响的，白色部分就是$$f[i-1][s][j]$$，所以$$f[i][s][j]$$可以由$$f[i-1][s][j]$$转移过来，因为这个数又有j种可能，所以$f[i][s][j]=f[i-1][s][j]\times j$
+
+![image-20220601144204634](https://images.weserv.nl/?url=https://cdn.jsdelivr.net/gh/Aurora0201/ImageStore@main/img/image-20220601144204634.png)
+
+2.当最后一个数字会影响搜索代价时，那么当前的代价就会变成s-1,而且他们的最大值都必须小于当前值,所以之前的白色部分就会变成$$f[i-1][s-1][j^`](j^`=1,2,···,j-1)$$，所以$$f[i][s][j]=\sum f[i-1][s-1][j^`]$$
+
+这里还有一个要注意的点是，当n,k固定时，$$f[i][s][1]$$并不是$$f[i][s][2]$$的子集， 所以答案就是$$\sum f[n][k][*]$$
+
+AC代码：
+
+```c++
+	long long f[55][55][105];//f(i,j,k)  i=数组长度,j=搜索消耗,k=数组当前最大值
+    int N=1e9+7;
+    int numOfArrays(int n, int m, int k) {
+        if(!k)return 0;
+        memset(f,0,sizeof(f));
+        for(int i=1;i<=m;i++)f[1][1][i]=1;
+
+        for(int i=2;i<=n;i++){
+            for(int s=1;s<=k && s<=i;s++)
+                for(int j=1;j<=m;j++){
+                    f[i][s][j]=(f[i-1][s][j]*j)%N;
+                    for(int j0=1;j0<j;j0++)f[i][s][j]+=f[i-1][s-1][j0],f[i][s][j]%=N;
+                }
+        }
+        long long ans=0;
+        for(int i=1;i<=m;i++)ans+=f[n][k][i],ans%=N;
+        return ans;    
+    }
+```
+
+AC代码（优化）：
+
+---
+
+#### POJ.1664 放苹果
+
+1.递归求解
+
+把m个苹果放到n个框中，第一种情况（m=>n），每个框都有苹果，所以现在每个框中放入一个苹果，然后剩下的m-n个苹果有solve(m-n,n)种情况，第二种情况，m个苹果放到n-1个框中，有solve(m,n-1)种情况
+
+AC代码：
+
+```c++
+int solve(int m,int n){
+	if(m==0||n==1)return 1;
+	if(m<n)return solve(m,m);
+	return solve(m-n,n)+solve(m,n-1);//放到n个框和放到n-1ge
+}
+```
+
+2.动态规划
+
+```c++
+int main(){
+	ios::sync_with_stdio(false);cin.tie(0);cout.tie(0);
+	// FIN
+	int T;cin>>T;
+	while(T--){
+		int f[15][15];//f[i][j] i=篮子数 j=苹果数 每个状态表示i个篮子j个苹果的情况下，有多少种放法
+		memset(f,0,sizeof(f));
+		int m,n;
+		cin>>m>>n;
+		for(int i=1;i<=m;i++)f[1][i]=1;
+		for(int i=1;i<=n;i++)f[i][0]=1;
+		for(int i=1;i<=n;i++)
+			for(int j=1;j<=m;j++){
+				if(j>=i)f[i][j]=f[i][j-i]+f[i-1][j];
+				else f[i][j]=f[j][j];
+			}
+		cout<<f[n][m]<<endl;
+	}
+	system("pause");
+	return 0;
+}
+```
+
+---
+
+#### LC.5 最长子回文串
+
+令$$f[i][j]$$是下标i，j的回文串长度，这里的转移方程就是从$$f[i][j]=f[i+1][j-1]+2$$需要注意的就是计算顺序，还有当前一个串是0的时候，这个式子不能成立
+
+AC代码：
+
+```c++
+class Solution {
+    int f[1005][1005];
+public:
+    string longestPalindrome(string s) {
+        memset(f,0,sizeof(f));
+        int len=s.size();
+        int cnt=0;
+        int l=0,r=0;
+        for(int i=0;i<len;i++)f[i][i]=1;
+        for(int i=len-1;i>=0;i--)
+            for(int j=i+1;j<len;j++){
+                if(j-i==1&&s[i]==s[j])f[i][j]=2;
+                else if(s[i]==s[j]&&f[i+1][j-1]!=0)f[i][j]=f[i+1][j-1]+2;
+                if(cnt<f[i][j])l=i,r=j,cnt=f[i][j];
+            }
+        return s.substr(l,r-l+1);
+    }
+};
+```
+
+---
+
 
 
 ---
+
