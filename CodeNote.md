@@ -2370,6 +2370,50 @@ TLE代码出现的问题主要是进行了重复的搜索，已知我们是从�
 
 ---
 
+### 3.过河卒（简单dp）
+
+https://www.luogu.com.cn/problem/P1002
+
+处理好ll问题，还有马的位置要设为0
+
+AC代码：
+
+```c++
+int bx,by,hx,hy;
+int del[9][2]={{-2,-1},{-1,-2},{2,1},{1,2},{-2,1},{-1,2},{1,-2},{2,-1}};
+bool isHorse(int x,int y){
+	for(int i=0;i<9;i++){
+		if(x==hx+del[i][0]&&y==hy+del[i][1])return true;
+	}
+	return false;
+}
+int main(){
+	IOS
+	ll f[25][25];
+	MEMSET(f);
+	cin>>bx>>by>>hx>>hy;
+	f[1][0]=f[0][1]=f[0][0]=1;
+	for(int i=0;i<=bx;i++)
+		for(int j=0;j<=by;j++){
+			if(i==hx&&j==hy||isHorse(i,j))f[i][j]=0;
+		}
+	for(int i=0;i<=bx;i++)
+		for(int j=0;j<=by;j++){
+			if(i==hx&&j==hy||isHorse(i,j))continue;
+			if(i>0&&j>0)f[i][j]=f[i-1][j]+f[i][j-1];
+			else if(i>0)f[i][j]=f[i-1][j];
+			else if(j>0)f[i][j]=f[i][j-1];
+		}
+	cout<<f[bx][by]<<endl;
+	system("pause");
+	return 0;
+}
+```
+
+
+
+---
+
 ## 6.STL容器/C++补充
 
 ### 1.set容器（自定义去重）
