@@ -1,0 +1,128 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>《算法零基础100讲》(第18讲) 线性枚举(二) - 统计法入门</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__html"><p></p><div class="toc"><h3>文章目录</h3><ul><li><a href="#_2">零、写在前面</a></li><li><a href="#_9">一、概念定义</a></li><li><a href="#_11">二、题目描述</a></li><li><a href="#_13">三、算法详解</a></li><li><a href="#_15">四、源码剖析</a></li><li><a href="#_37">五、推荐专栏</a></li><li><a href="#_42">六、习题练习</a></li></ul></div><p></p>
+<h1><a id="_2"></a>零、写在前面</h1>
+<p>  这是<a href="https://blog.csdn.net/whereisherofrom/category_11426012.html">《算法零基础100讲》</a> 专栏打卡学习的第 <font color="red">18</font> 天了。如果觉得本专栏太贵无法承受，在博主主页添加博主好友，获取 <font color="red"><strong>付费专栏优惠券</strong></font>。<br>
+  每天专栏的题，做不出来没关系，因为困难的题涉及知识点较多，可能会涉及到后面的章节，所以不要着急，内容能看懂，能自己分析，能做出简单题就行。<br>
+  在刷题的过程中，总结自己遇到的坑点，写出 <strong>「 解题报告 」</strong>  供他人学习，也是一种自我学习的方式。这就是经典的帮助他人的同时，成就自己。目前， <a href="https://bbs.csdn.net/forums/hero"><strong>「 万人千题 」</strong></a> 社区 每天都会有五六篇高质量的 <strong>「 解题报告 」</strong> 被我 <strong>「 加精 」</strong>。如果觉得自己有能力的，也可以来发布你的 <strong>「 解题报告 」</strong>。千万级流量，你我共同拥有。</p>
+<p>  能坚持到这一节，每天都能打卡的同学都不容易，和上一节一样，今天我们继续复习<code>for</code>循环。</p>
+<h1><a id="_9"></a>一、概念定义</h1>
+<p>  线性枚举中，一个很常用的算法就是对数组中的元素进行统计，比如：统计数组中的奇数的个数、统计数组中是 5 的倍数的数的个数，方法都是类似，需要对数组进行遍历枚举，然后根据题目条件做相应的判断，条件满足则计入统计，计数器加一。</p>
+<h1><a id="_11"></a>二、题目描述</h1>
+<blockquote>
+<p>  实现一个函数，给定一个 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathdefault">n</span></span></span></span></span> 个整数的数组，返回其中 <strong>十进制位数为偶数</strong> 的数的个数。</p>
+</blockquote>
+<h1><a id="_13"></a>三、算法详解</h1>
+<p>  枚举数组，对数组中的每个数字都进行十进制拆分，然后统计它的位数，从而确定它是 偶数位 还是 奇数位。然后对偶数位的数字进行计数器加一操作。</p>
+<h1><a id="_15"></a>四、源码剖析</h1>
+<pre><code class="prism language-c"><span class="token keyword">int</span> <span class="token function">isEvenBit</span><span class="token punctuation">(</span><span class="token keyword">int</span> num<span class="token punctuation">)</span> <span class="token punctuation">{</span>                      <span class="token comment">// (1)</span>
+    <span class="token keyword">int</span> bit <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token keyword">while</span><span class="token punctuation">(</span>num<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        num <span class="token operator">/=</span> <span class="token number">10</span><span class="token punctuation">;</span>
+        <span class="token operator">++</span>bit<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">return</span> <span class="token punctuation">(</span>bit <span class="token operator">%</span> <span class="token number">2</span> <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">int</span> <span class="token function">findNumbers</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token operator">*</span> nums<span class="token punctuation">,</span> <span class="token keyword">int</span> numsSize<span class="token punctuation">)</span><span class="token punctuation">{</span>
+    <span class="token keyword">int</span> i<span class="token punctuation">,</span> cnt <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token keyword">for</span><span class="token punctuation">(</span>i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> numsSize<span class="token punctuation">;</span> <span class="token operator">++</span>i<span class="token punctuation">)</span> <span class="token punctuation">{</span>           <span class="token comment">// (2)</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token function">isEvenBit</span><span class="token punctuation">(</span>nums<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+            <span class="token operator">++</span>cnt<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">return</span> cnt<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<ul>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span> 提炼出一个函数，判断一个数字是否是 偶数位；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span></span> 对数组的所有数字进行判定，偶数位的计数器加一；</li>
+</ul>
+<h1><a id="_37"></a>五、推荐专栏</h1>
+<center> <a href="https://blog.csdn.net/whereisherofrom/category_11158834.html"><font color="FF4500"><b>🧡《<u>C语言入门100例</u>》🧡</b></font></a></center><br>
+<center> <a href="https://blog.csdn.net/WhereIsHeroFrom/article/details/118273228"><font color="fa2560"><b><u>给定一个 n 个元素的数组，再给出 x ，查找 x 在数组中的下标 | 穷举法</u></b></font></a></center>
+<h1><a id="_42"></a>六、习题练习</h1>
+
+<table>
+<thead>
+<tr>
+<th>序号</th>
+<th>题目链接</th>
+<th>难度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><a href="https://leetcode-cn.com/problems/three-consecutive-odds/">是否存在连续三个奇数</a></td>
+<td>★☆☆☆☆</td>
+</tr>
+<tr>
+<td>2</td>
+<td><a href="https://leetcode-cn.com/problems/find-numbers-with-even-number-of-digits/">统计位数为偶数的数字</a></td>
+<td>★☆☆☆☆</td>
+</tr>
+<tr>
+<td>3</td>
+<td><a href="https://leetcode-cn.com/problems/single-element-in-a-sorted-array/">有序数组中的单一元素</a></td>
+<td>★☆☆☆☆</td>
+</tr>
+<tr>
+<td>4</td>
+<td><a href="https://leetcode-cn.com/problems/diao-zheng-shu-zu-shun-xu-shi-qi-shu-wei-yu-ou-shu-qian-mian-lcof/">调整数组顺序使奇数位于偶数前面</a></td>
+<td>★☆☆☆☆</td>
+</tr>
+<tr>
+<td>5</td>
+<td><a href="https://leetcode-cn.com/problems/find-the-middle-index-in-array/">找到数组的中间位置</a></td>
+<td>★☆☆☆☆</td>
+</tr>
+<tr>
+<td>6</td>
+<td><a href="https://leetcode-cn.com/problems/find-pivot-index/">寻找数组的中心下标</a></td>
+<td>★☆☆☆☆</td>
+</tr>
+<tr>
+<td>7</td>
+<td><a href="https://leetcode-cn.com/problems/remove-duplicates-from-sorted-array/">删除有序数组中的重复项</a></td>
+<td>★☆☆☆☆</td>
+</tr>
+<tr>
+<td>8</td>
+<td><a href="https://leetcode-cn.com/problems/binary-prefix-divisible-by-5/">可被 5 整除的二进制前缀</a></td>
+<td>★☆☆☆☆</td>
+</tr>
+<tr>
+<td>9</td>
+<td><a href="https://leetcode-cn.com/problems/smallest-integer-divisible-by-k/">可被 K 整除的最小整数</a></td>
+<td>★☆☆☆☆</td>
+</tr>
+<tr>
+<td>10</td>
+<td><a href="https://leetcode-cn.com/problems/longer-contiguous-segments-of-ones-than-zeros/">哪种连续子字符串更长</a></td>
+<td>★☆☆☆☆</td>
+</tr>
+<tr>
+<td>11</td>
+<td><a href="https://leetcode-cn.com/problems/guess-numbers/">猜数字</a></td>
+<td>★☆☆☆☆</td>
+</tr>
+<tr>
+<td>12</td>
+<td><a href="https://leetcode-cn.com/problems/design-parking-system">行车管理系统</a></td>
+<td>★☆☆☆☆</td>
+</tr>
+</tbody>
+</table><center>👇🏻添加 博主 获取付费专栏优惠券👇🏻</center>
+</div>
+</body>
+
+</html>

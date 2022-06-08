@@ -1,0 +1,125 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>《算法零基础100讲》(第81讲) 深度优先搜索(二) 排列问题</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__html"><p></p><div class="toc"><h3>文章目录</h3><ul><li><a href="#_3">零、写在前面</a></li><li><a href="#_8">一、概念定义</a></li><li><a href="#_13">二、题目描述</a></li><li><a href="#_17">三、算法详解</a></li><li><a href="#_23">四、源码剖析</a></li><li><a href="#_69">五、推荐专栏</a></li><li><a href="#_75">六、习题练习</a></li></ul></div><p></p>
+<h1><a id="_3"></a>零、写在前面</h1>
+<p>  这是<a href="https://blog.csdn.net/whereisherofrom/category_11426012.html">《算法零基础100讲》</a> 专栏打卡学习的第 <font color="red">81</font> 天了。如果觉得本专栏太贵无法承受，在博主主页添加博主好友，获取 <font color="red"><strong>付费专栏优惠券</strong></font>。<br>
+  每天专栏的题，做不出来没关系，因为困难的题涉及知识点较多，可能会涉及到后面的章节，所以不要着急，内容能看懂，能自己分析，能做出简单题就行。<br>
+  在刷题的过程中，总结自己遇到的坑点，写出 <strong>「 解题报告 」</strong>  供他人学习，也是一种自我学习的方式。这就是经典的帮助他人的同时，成就自己。目前， <a href="https://bbs.csdn.net/forums/hero"><strong>「 万人千题 」</strong></a> 社区 每天都会有五六篇高质量的 <strong>「 解题报告 」</strong> 被我 <strong>「 加精 」</strong>。如果觉得自己有能力的，也可以来发布你的 <strong>「 解题报告 」</strong>。千万级流量，你我共同拥有。</p>
+<h1><a id="_8"></a>一、概念定义</h1>
+<p>  对于组合问题，可以利用深度优先搜索，而对于排列问题，同样适用。组合问题就是，一个东西选择或者不选择；排列问题，也是一个东西选择不选择，但是加上了顺序的概念。<br>
+  对于组合而言，<span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo separator="true">,</mo><mn>2</mn><mo separator="true">,</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(1,2,3)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mord">2</span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mord">3</span><span class="mclose">)</span></span></span></span></span> 和 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo separator="true">,</mo><mn>3</mn><mo separator="true">,</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(1,3,2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mord">3</span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mord">2</span><span class="mclose">)</span></span></span></span></span> 是一样的；而对于排列问题而言，是不一样的。<br>
+  区别就在于：排列问题，在搜索的过程中，需要重新审视整个区间，并且把没有选过的元素，重新选择。</p>
+<h1><a id="_13"></a>二、题目描述</h1>
+<blockquote>
+<p>  输入一个长度小于等于 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mn>9</mn></mrow><annotation encoding="application/x-tex">9</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">9</span></span></span></span></span> 的字符串，打印出该字符串中字符的所有排列。你可以以任意顺序返回这个字符串数组，但里面不能有重复元素。</p>
+</blockquote>
+<h1><a id="_17"></a>三、算法详解</h1>
+<p>  <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span> 排列问题和组合问题的区别在于：排列问题每次都是重新选元素，而不是从之前选过的元素的后一个开始选择；<br>
+  <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span></span> 所以需要加入一个哈希数组作为标记；<br>
+  <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(3)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">3</span><span class="mclose">)</span></span></span></span></span> 对于这个问题，由于不能出现重复元素，所以在搜索的过程中，对于搜索树的每一层，都需要进行一个哈希，也就是需要两个哈希数组。<br>
+  <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>4</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(4)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">4</span><span class="mclose">)</span></span></span></span></span> 最后搜索完毕，栈中的元素就是我们要求的解。</p>
+<h1><a id="_23"></a>四、源码剖析</h1>
+<pre><code class="prism language-cpp"><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">{</span>
+    string stk<span class="token punctuation">;</span>
+    vector<span class="token operator">&lt;</span>string<span class="token operator">&gt;</span> ans<span class="token punctuation">;</span>
+    
+    <span class="token keyword">int</span> hash<span class="token punctuation">[</span><span class="token number">10</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">void</span> <span class="token function">dfs</span><span class="token punctuation">(</span><span class="token keyword">const</span> string<span class="token operator">&amp;</span> s<span class="token punctuation">,</span> <span class="token keyword">int</span> depth<span class="token punctuation">,</span> <span class="token keyword">int</span> maxDepth<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span>depth <span class="token operator">==</span> maxDepth<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            ans<span class="token punctuation">.</span><span class="token function">push_back</span><span class="token punctuation">(</span>stk<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">return</span> <span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">int</span> vhash<span class="token punctuation">[</span><span class="token number">26</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token number">0</span><span class="token punctuation">}</span><span class="token punctuation">;</span>                  <span class="token comment">// (1)</span>
+
+        <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> maxDepth<span class="token punctuation">;</span> <span class="token operator">++</span>i<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">if</span><span class="token punctuation">(</span> <span class="token operator">!</span>hash<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token punctuation">)</span> <span class="token punctuation">{</span>                  <span class="token comment">// (2)</span>
+            
+                <span class="token keyword">if</span><span class="token punctuation">(</span>vhash<span class="token punctuation">[</span>s<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">-</span> <span class="token string">'a'</span><span class="token punctuation">]</span> <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                    vhash<span class="token punctuation">[</span>s<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">-</span> <span class="token string">'a'</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
+
+                    hash<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>              <span class="token comment">// (3)</span>
+                    stk<span class="token punctuation">.</span><span class="token function">push_back</span><span class="token punctuation">(</span>s<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    <span class="token function">dfs</span><span class="token punctuation">(</span>s<span class="token punctuation">,</span> depth <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">,</span> maxDepth<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    stk<span class="token punctuation">.</span><span class="token function">pop_back</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    hash<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+
+                <span class="token punctuation">}</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+
+<span class="token keyword">public</span><span class="token operator">:</span>
+    vector<span class="token operator">&lt;</span>string<span class="token operator">&gt;</span> <span class="token function">permutation</span><span class="token punctuation">(</span>string s<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token function">sort</span><span class="token punctuation">(</span>s<span class="token punctuation">.</span><span class="token function">begin</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> s<span class="token punctuation">.</span><span class="token function">end</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token function">memset</span><span class="token punctuation">(</span>hash<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>hash<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token function">dfs</span><span class="token punctuation">(</span>s<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> s<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> ans<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+<ul>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span> <code>vhash</code>表示当前层，选择的元素，一个字符，只能选择一次；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span></span> <code>hash</code>表示对于全局来说，第 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.65952em; vertical-align: 0em;"></span><span class="mord mathdefault">i</span></span></span></span></span> 个字符只能选择一次；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(3)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">3</span><span class="mclose">)</span></span></span></span></span> 执行入栈，并且哈希标记，进入下一层搜索的过程；</li>
+</ul>
+<h1><a id="_69"></a>五、推荐专栏</h1>
+ <center> <a href="https://blog.csdn.net/whereisherofrom/category_9273531.html"><font color="886ce4"><b>💜《<u>夜深人静写算法</u>》💜</b></font></a></center>
+  
+ <center> <a href="https://blog.csdn.net/WhereIsHeroFrom/article/details/111407529"><font color="886ce4"><b>（<u>一）搜索入门</u></b></font></a></center>
+<h1><a id="_75"></a>六、习题练习</h1>
+
+<table>
+<thead>
+<tr>
+<th>序号</th>
+<th>题目链接</th>
+<th>难度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><a href="https://leetcode-cn.com/problems/zi-fu-chuan-de-pai-lie-lcof/">剑指 Offer 38. 字符串的排列</a></td>
+<td>★★☆☆☆</td>
+</tr>
+<tr>
+<td>2</td>
+<td><a href="https://leetcode-cn.com/problems/permutations/">LeetCode 46. 全排列</a></td>
+<td>★★☆☆☆</td>
+</tr>
+<tr>
+<td>3</td>
+<td><a href="https://leetcode-cn.com/problems/VvJkup/">剑指 Offer II 083. 没有重复元素集合的全排列</a></td>
+<td>★★☆☆☆</td>
+</tr>
+<tr>
+<td>4</td>
+<td><a href="https://leetcode-cn.com/problems/permutations-ii/">LeetCode 47. 全排列 II</a></td>
+<td>★★☆☆☆</td>
+</tr>
+<tr>
+<td>5</td>
+<td><a href="https://leetcode-cn.com/problems/7p8L0Z/">剑指 Offer II 084. 含有重复元素集合的全排列 </a></td>
+<td>★★☆☆☆</td>
+</tr>
+<tr>
+<td>6</td>
+<td><a href="https://leetcode-cn.com/problems/largest-time-for-given-digits/">LeetCode 949. 给定数字能组成的最大时间</a></td>
+<td>★★☆☆☆</td>
+</tr>
+</tbody>
+</table><center>👇🏻添加 博主 获取付费专栏优惠券👇🏻</center>
+</div>
+</body>
+
+</html>

@@ -1,0 +1,397 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>《画解数据结构》九个动图，画解栈</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__html"><center>本文已收录于专栏</center><center> <a href="https://blog.csdn.net/whereisherofrom/category_11227297.html"><font color="13ae01"><b>🌳《<u>画解数据结构</u>》🌳 </b></font></a> </center><br>
+<h1><a id="_2"></a>零、前言</h1>
+<p>  目前本专栏正在进行优惠活动，在博主主页添加博主好友（好友位没有满的话），可以获取 <font color="red"><strong>付费专栏优惠券</strong></font>。</p>
+<blockquote>
+<p>  <font color="FF4500"><b>「 数据结构 」</b></font> 和 <font color="FFa700"><b>「 算法 」</b></font> 是密不可分的，两者往往是<font color="ffd700"><b>「 相辅相成 」</b></font>的存在，所以，在学习 <font color="FF4500"><b>「 数据结构 」</b></font> 的过程中，不免会遇到各种<font color="FFa700"><b>「 算法 」</b></font>。<br>  到底是先学 数据结构 ，还是先学 算法，我认为不必纠结这个问题，一定是一起学的。<br>  数据结构 常用的操作一般为：<font color="13ae01"><b>「 增 」</b></font><font color="FF0500"><b>「 删 」</b></font><font color="ffd700"><b>「 改 」</b></font><font color="2290ff"><b>「 查 」</b></font>。基本上所有的数据结构都是围绕这几个操作进行展开的。<br>  那么这篇文章，作者将用 <font color="13ae01"><b>「 九张动图 」</b></font> 来阐述一种 <font color="FF4500"><b>「 后进先出 」</b></font> 的数据结构<br><br> </p><center><font size="5" color="2290ff"><b>「  栈 」</b></font></center><br>
+<img src="https://img-blog.csdnimg.cn/7ece4292edad4eaf8b2e84e0d6b441f2.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1doZXJlSXNIZXJvRnJvbQ==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>
+   栈可以用 <font><b>顺序表</b></font> 实现，也可以用 <font><b>链表</b></font> 实现，浓缩为以下两张图：<br>
+ <br>
+<img src="https://img-blog.csdnimg.cn/3c89032391d64c1687327c83a5f93cb6.gif#pic_center" alt=""><br>
+<img src="https://img-blog.csdnimg.cn/0b8600a4a3e04bdea63e1969d4d99ab9.gif#pic_center" alt="在这里插入图片描述"><br>
+  看不懂没有关系，我会把它拆开来一个一个讲，首先来看一下今天要学习的内容目录。<p></p>
+</blockquote>
+<p></p><div class="toc"><h3>文章目录</h3><ul><li><a href="#_2">零、前言</a></li><li><a href="#_14">一、概念</a></li><ul><li><a href="#1_15">1、栈的定义</a></li><li><a href="#2_18">2、栈顶</a></li><li><a href="#3_22">3、栈底</a></li></ul><li><a href="#_26">二、接口</a></li><ul><li><a href="#1_27">1、可写接口</a></li><ul><li><a href="#1_28">1）数据入栈</a></li><li><a href="#2_32">2）数据出栈</a></li><li><a href="#3_36">3）清空栈</a></li></ul><li><a href="#2_40">2、只读接口</a></li><ul><li><a href="#1_41">1）获取栈顶数据</a></li><li><a href="#2_43">2）获取栈元素个数</a></li><li><a href="#3_45">3）栈的判空</a></li></ul></ul><li><a href="#_47">三、栈的顺序表实现</a></li><ul><li><a href="#1_48">1、数据结构定义</a></li><li><a href="#2_66">2、入栈</a></li><ul><li><a href="#1_67">1、动画演示</a></li><li><a href="#2_70">2、源码详解</a></li></ul><li><a href="#3_90">3、出栈</a></li><ul><li><a href="#1_91">1、动画演示</a></li><li><a href="#2_94">2、源码详解</a></li></ul><li><a href="#4_101">4、清空栈</a></li><ul><li><a href="#1_102">1、动画演示</a></li><li><a href="#2_105">2、源码详解</a></li></ul><li><a href="#5_112">5、只读接口</a></li><li><a href="#6_128">6、栈的顺序表实现源码</a></li></ul><li><a href="#_162">四、栈的链表实现</a></li><ul><li><a href="#1_163">1、数据结构定义</a></li><li><a href="#2_184">2、入栈</a></li><ul><li><a href="#1_185">1、动画演示</a></li><li><a href="#2_189">2、源码详解</a></li></ul><li><a href="#3_206">3、出栈</a></li><ul><li><a href="#1_207">1、动画演示</a></li><li><a href="#2_210">2、源码详解</a></li></ul><li><a href="#4_224">4、清空栈</a></li><ul><li><a href="#1_225">1、动画演示</a></li><li><a href="#2_229">2、源码详解</a></li></ul><li><a href="#5_241">5、只读接口</a></li><li><a href="#6_259">6、栈的链表实现源码</a></li></ul><li><a href="#_312">五、两种实现的优缺点</a></li><ul><li><a href="#1_313">1、顺序表实现</a></li><li><a href="#2_315">2、链表实现</a></li></ul><li><a href="#_317">六、栈的入门</a></li><ul><li><a href="#1_319">1、逆序链表</a></li><li><a href="#2_321">2、括号匹配</a></li><li><a href="#3_324">3、回文链表</a></li><li><a href="#4_326">4、表达式求值</a></li><li><a href="#5_328">5、双栈判等</a></li></ul><li><a href="#_330">七、栈的进阶</a></li><ul><li><a href="#1_332">1、最小栈</a></li><li><a href="#2_334">2、化栈为队</a></li><li><a href="#3_336">3、直方图最大矩形</a></li></ul></ul></div><p></p>
+<h1><a id="_14"></a>一、概念</h1>
+<h2><a id="1_15"></a>1、栈的定义</h2>
+<p>  <strong>栈</strong> 是仅限在 <strong>表尾</strong> 进行 <strong>插入</strong> 和 <strong>删除</strong> 的 <strong>线性表</strong>。<br>
+  <strong>栈</strong> 又被称为 后进先出 （Last In First Out） 的线性表，简称 LIFO 。</p>
+<h2><a id="2_18"></a>2、栈顶</h2>
+<p>  <strong>栈</strong> 是一个线性表，我们把允许 <strong>插入</strong> 和 <strong>删除</strong> 的一端称为 <strong>栈顶</strong>。<br>
+<img src="https://img-blog.csdnimg.cn/54942d9da9714b02b972cc870fd57694.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1doZXJlSXNIZXJvRnJvbQ==,size_1,color_FFFFFF,t_70#pic_center" alt=""></p>
+<h2><a id="3_22"></a>3、栈底</h2>
+<p>  和 <strong>栈顶</strong> 相对，另一端称为 <strong>栈底</strong>，实际上，栈底的元素我们不需要关心。<br>
+<img src="https://img-blog.csdnimg.cn/6701aaa3d4e444f5b902f46fa4096b20.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1doZXJlSXNIZXJvRnJvbQ==,size_1,color_FFFFFF,t_70#pic_center" alt=""></p>
+<h1><a id="_26"></a>二、接口</h1>
+<h2><a id="1_27"></a>1、可写接口</h2>
+<h3><a id="1_28"></a>1）数据入栈</h3>
+<p>  栈的插入操作，叫做 <strong>入栈</strong>，也可称为 进栈、压栈。如下图所示，代表了三次入栈操作：<br>
+<img src="https://img-blog.csdnimg.cn/367302f0d91d46a5bea0b52d328dbdd3.gif#pic_center" alt=""></p>
+<h3><a id="2_32"></a>2）数据出栈</h3>
+<p>  栈的删除操作，叫做 <strong>出栈</strong>，也可称为 弹栈。如下图所示，代表了两次出栈操作：<br>
+<img src="https://img-blog.csdnimg.cn/33f7388fb4f146bf83d6bf7316b2d3a8.gif#pic_center" alt="在这里插入图片描述"></p>
+<h3><a id="3_36"></a>3）清空栈</h3>
+<p>  一直 <strong>出栈</strong>，直到栈为空，如下图所示：<br>
+<img src="https://img-blog.csdnimg.cn/5a150fb4006a4e919bfc661584f20ec1.gif#pic_center" alt=""></p>
+<h2><a id="2_40"></a>2、只读接口</h2>
+<h3><a id="1_41"></a>1）获取栈顶数据</h3>
+<p>  对于一个栈来说只能获取 <strong>栈顶</strong> 数据，一般不支持获取 其它数据。</p>
+<h3><a id="2_43"></a>2）获取栈元素个数</h3>
+<p>  栈元素个数一般用一个额外变量存储，<strong>入栈</strong> 时加一，<strong>出栈</strong> 时减一。这样获取栈元素的时候就不需要遍历整个栈。通过 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathdefault" style="margin-right: 0.02778em;">O</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span> 的时间复杂度获取栈元素个数。</p>
+<h3><a id="3_45"></a>3）栈的判空</h3>
+<p>  当栈元素个数为零时，就是一个空栈，空栈不允许 <strong>出栈</strong> 操作。</p>
+<h1><a id="_47"></a>三、栈的顺序表实现</h1>
+<h2><a id="1_48"></a>1、数据结构定义</h2>
+<blockquote>
+<p>对于顺序表，在 C语言 中表现为 <strong>数组</strong>，在进行 <strong>栈的定义</strong> 之前，我们需要考虑以下几个点：<br>  1）栈数据的存储方式，以及栈数据的数据类型；<br>  2）栈的大小；<br>  3）栈顶指针；</p>
+</blockquote>
+<ul>
+<li>我们可以定义一个 <strong>栈</strong> 的 <strong>结构体</strong>，C语言实现如下所示：</li>
+</ul>
+<pre><code class="prism language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name">DataType</span> <span class="token expression"><span class="token keyword">int</span>        </span><span class="token comment">// (1)</span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name">maxn</span> <span class="token expression"><span class="token number">100005</span>         </span><span class="token comment">// (2)</span></span>
+
+<span class="token keyword">struct</span> <span class="token class-name">Stack</span> <span class="token punctuation">{</span>              <span class="token comment">// (3)</span>
+    DataType data<span class="token punctuation">[</span>maxn<span class="token punctuation">]</span><span class="token punctuation">;</span>    <span class="token comment">// (4)</span>
+    <span class="token keyword">int</span> top<span class="token punctuation">;</span>                <span class="token comment">// (5)</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+<ul>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span> 用<code>DataType</code>这个宏定义来统一代表栈中数据的类型，这里将它定义为整型，根据需要可以定义成其它类型，例如浮点型、字符型、结构体 等等；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span></span> <code>maxn</code>代表我们定义的栈的最大元素个数；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(3)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">3</span><span class="mclose">)</span></span></span></span></span> <code>Stack</code>就是我们接下来会用到的 <strong>栈结构体</strong>；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>4</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(4)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">4</span><span class="mclose">)</span></span></span></span></span> <code>DataType data[maxn]</code>作为栈元素的存储方式，数据类型为<code>DataType</code>，可以自行定制；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>5</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(5)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">5</span><span class="mclose">)</span></span></span></span></span> <code>top</code>即栈顶指针，<code>data[top-1]</code>表示栈顶元素，<code>top == 0</code>代表空栈；</li>
+</ul>
+<h2><a id="2_66"></a>2、入栈</h2>
+<h3><a id="1_67"></a>1、动画演示</h3>
+<p><img src="https://img-blog.csdnimg.cn/3007039cb5194dc79e319a5679c99e7e.gif#pic_center" alt=""></p>
+<blockquote>
+<p>  如图所示，<font color="00a2e7"><b>蓝色元素</b></font> 为原本在栈中的元素，<font color="ed1c24"><b>红色元素</b></font> 为当前需要 <strong>入栈</strong> 的元素，执行完毕以后，栈顶指针加一。具体来看下代码实现。</p>
+</blockquote>
+<h3><a id="2_70"></a>2、源码详解</h3>
+<ul>
+<li><strong>入栈</strong> 操作，算上函数参数列表，总共也才几句话，代码实现如下：</li>
+</ul>
+<pre><code class="prism language-c"><span class="token keyword">void</span> <span class="token function">StackPushStack</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Stack</span> <span class="token operator">*</span>stk<span class="token punctuation">,</span> DataType dt<span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token comment">// (1)</span>
+    stk<span class="token operator">-&gt;</span>data<span class="token punctuation">[</span> stk<span class="token operator">-&gt;</span>top <span class="token punctuation">]</span> <span class="token operator">=</span> dt<span class="token punctuation">;</span>                       <span class="token comment">// (2)</span>
+    stk<span class="token operator">-&gt;</span>top <span class="token operator">=</span> stk<span class="token operator">-&gt;</span>top <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">;</span>                          <span class="token comment">// (3)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<ul>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span> <code>stk</code>是一个指向栈对象的指针，由于这个接口会修改栈对象的成员变量，所以这里必须传指针，否则，就会导致函数执行完毕，传参对象没有任何改变；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span></span> 将传参的元素放入栈中；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(3)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">3</span><span class="mclose">)</span></span></span></span></span> 将栈顶指针自增 1；</li>
+<li>注意，这个接口在调用前，需要保证 <strong>栈顶指针</strong> 小于 <strong>栈元素最大个数</strong>，即<code>stk-&gt;top &lt; maxn</code>，</li>
+<li>如果 C语言 写的熟练，我们可以把 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span></span> 和 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(3)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">3</span><span class="mclose">)</span></span></span></span></span> 合成一句话，如下：</li>
+</ul>
+<pre><code class="prism language-c"><span class="token keyword">void</span> <span class="token function">StackPushStack</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Stack</span> <span class="token operator">*</span>stk<span class="token punctuation">,</span> DataType dt<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    stk<span class="token operator">-&gt;</span>data<span class="token punctuation">[</span> stk<span class="token operator">-&gt;</span>top<span class="token operator">++</span> <span class="token punctuation">]</span> <span class="token operator">=</span> dt<span class="token punctuation">;</span>                    
+<span class="token punctuation">}</span>
+</code></pre>
+<ul>
+<li><code>stk-&gt;top++</code>表达式的值是自增前的值，并且自身进行了一次自增。</li>
+</ul>
+<h2><a id="3_90"></a>3、出栈</h2>
+<h3><a id="1_91"></a>1、动画演示</h3>
+<p><img src="https://img-blog.csdnimg.cn/0b0c7f162f2e43b0af677566f6fabcd5.gif#pic_center" alt=""></p>
+<blockquote>
+<p>  如图所示，<font color="00a2e7"><b>蓝色元素</b></font> 为原本在栈中的元素，<font color="ed1c24"><b>红色元素</b></font> 为当前需要 <strong>出栈</strong> 的元素，执行完毕以后，栈顶的指针减一。具体来看下代码实现。</p>
+</blockquote>
+<h3><a id="2_94"></a>2、源码详解</h3>
+<ul>
+<li><strong>出栈</strong> 操作，只需要简单改变将 <strong>栈顶</strong> 减一 即可，代码实现如下：</li>
+</ul>
+<pre><code class="prism language-c"><span class="token keyword">void</span> <span class="token function">StackPopStack</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Stack</span><span class="token operator">*</span> stk<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token operator">--</span>stk<span class="token operator">-&gt;</span>top<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<h2><a id="4_101"></a>4、清空栈</h2>
+<h3><a id="1_102"></a>1、动画演示</h3>
+<p><img src="https://img-blog.csdnimg.cn/814822ab72904a94a5c4803bfb10ee46.gif#pic_center" alt=""></p>
+<blockquote>
+<p>  如图所示，对于数组来说，清空栈的操作只需要将 <strong>栈顶指针</strong> 置为栈底，也就是数组下标 0 即可，下次继续 <strong>入栈</strong> 的时候会将之前的内存重复利用。</p>
+</blockquote>
+<h3><a id="2_105"></a>2、源码详解</h3>
+<ul>
+<li>清空栈的操作只需要将 <strong>栈顶</strong> 指针直接指向 <strong>栈底</strong> 即可，对于顺序表，也就是 C语言 中的数组来说，<strong>栈底</strong> 就是下标 0 的位置了，代码实现如下：</li>
+</ul>
+<pre><code class="prism language-c"><span class="token keyword">void</span> <span class="token function">StackClear</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Stack</span><span class="token operator">*</span> stk<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    stk<span class="token operator">-&gt;</span>top <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<h2><a id="5_112"></a>5、只读接口</h2>
+<ul>
+<li>只读接口包含：获取栈顶元素、获取栈大小、栈的判空，实现如下：</li>
+</ul>
+<pre><code class="prism language-c">DataType <span class="token function">StackGetTop</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Stack</span><span class="token operator">*</span> stk<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> stk<span class="token operator">-&gt;</span>data<span class="token punctuation">[</span> stk<span class="token operator">-&gt;</span>top <span class="token operator">-</span> <span class="token number">1</span> <span class="token punctuation">]</span><span class="token punctuation">;</span>      <span class="token comment">// (1)</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">int</span> <span class="token function">StackGetSize</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Stack</span><span class="token operator">*</span> stk<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> stk<span class="token operator">-&gt;</span>top<span class="token punctuation">;</span>                       <span class="token comment">// (2)</span>
+<span class="token punctuation">}</span>
+bool <span class="token function">StackIsEmpty</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Stack</span><span class="token operator">*</span> stk<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token operator">!</span><span class="token function">StackGetSize</span><span class="token punctuation">(</span>stk<span class="token punctuation">)</span><span class="token punctuation">;</span>             <span class="token comment">// (3)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<ul>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span> 数组中栈元素从 0 开始计数，所以实际获取元素时，下标为 栈顶元素下标 减一；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span></span> 因为只有在入栈的时候，栈顶指针才会加一，所以它 正好代表了 栈元素个数；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(3)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">3</span><span class="mclose">)</span></span></span></span></span> 当 <strong>栈元素</strong> 个数为 零 时，栈为空。</li>
+</ul>
+<h2><a id="6_128"></a>6、栈的顺序表实现源码</h2>
+<ul>
+<li>栈的顺序表实现的源码如下：</li>
+</ul>
+<pre><code class="prism language-c"><span class="token comment">/************************************* 栈的顺序表实现 *************************************/</span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name">DataType</span> <span class="token expression"><span class="token keyword">int</span></span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name">bool</span> <span class="token expression"><span class="token keyword">int</span></span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name">maxn</span> <span class="token expression"><span class="token number">100010</span></span></span>
+
+<span class="token keyword">struct</span> <span class="token class-name">Stack</span> <span class="token punctuation">{</span>
+    DataType data<span class="token punctuation">[</span>maxn<span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token keyword">int</span> top<span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token keyword">void</span> <span class="token function">StackClear</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Stack</span><span class="token operator">*</span> stk<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    stk<span class="token operator">-&gt;</span>top <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">void</span> <span class="token function">StackPushStack</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Stack</span> <span class="token operator">*</span>stk<span class="token punctuation">,</span> DataType dt<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    stk<span class="token operator">-&gt;</span>data<span class="token punctuation">[</span> stk<span class="token operator">-&gt;</span>top<span class="token operator">++</span> <span class="token punctuation">]</span> <span class="token operator">=</span> dt<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">void</span> <span class="token function">StackPopStack</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Stack</span><span class="token operator">*</span> stk<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token operator">--</span>stk<span class="token operator">-&gt;</span>top<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+DataType <span class="token function">StackGetTop</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Stack</span><span class="token operator">*</span> stk<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> stk<span class="token operator">-&gt;</span>data<span class="token punctuation">[</span> stk<span class="token operator">-&gt;</span>top <span class="token operator">-</span> <span class="token number">1</span> <span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">int</span> <span class="token function">StackGetSize</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Stack</span><span class="token operator">*</span> stk<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> stk<span class="token operator">-&gt;</span>top<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+bool <span class="token function">StackIsEmpty</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Stack</span><span class="token operator">*</span> stk<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token operator">!</span><span class="token function">StackGetSize</span><span class="token punctuation">(</span>stk<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token comment">/************************************* 栈的顺序表实现 *************************************/</span>
+</code></pre>
+<hr>
+<h1><a id="_162"></a>四、栈的链表实现</h1>
+<h2><a id="1_163"></a>1、数据结构定义</h2>
+<blockquote>
+<p>对于链表，在进行 <strong>栈的定义</strong> 之前，我们需要考虑以下几个点：<br>  1）栈数据的存储方式，以及栈数据的数据类型；<br>  2）栈的大小；<br>  3）栈顶指针；</p>
+</blockquote>
+<ul>
+<li>我们可以定义一个 <strong>栈</strong> 的 <strong>结构体</strong>，C语言实现如下所示：</li>
+</ul>
+<pre><code class="prism language-c"><span class="token keyword">typedef</span> <span class="token keyword">int</span> DataType<span class="token punctuation">;</span>             <span class="token comment">// (1)</span>
+<span class="token keyword">struct</span> <span class="token class-name">StackNode</span><span class="token punctuation">;</span>                 <span class="token comment">// (2)</span>
+<span class="token keyword">struct</span> <span class="token class-name">StackNode</span> <span class="token punctuation">{</span>                <span class="token comment">// (3)</span>
+    DataType data<span class="token punctuation">;</span>
+    <span class="token keyword">struct</span> <span class="token class-name">StackNode</span> <span class="token operator">*</span>next<span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token keyword">struct</span> <span class="token class-name">Stack</span> <span class="token punctuation">{</span>                    
+    <span class="token keyword">struct</span> <span class="token class-name">StackNode</span> <span class="token operator">*</span>top<span class="token punctuation">;</span>        <span class="token comment">// (4)</span>
+    <span class="token keyword">int</span> size<span class="token punctuation">;</span>                     <span class="token comment">// (5)</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+<ul>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span> 栈结点元素的 <strong>数据域</strong>，这里定义为整型；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span></span> <code>struct StackNode;</code>是对链表结点的声明；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(3)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">3</span><span class="mclose">)</span></span></span></span></span> 定义链表结点，其中<code>DataType data</code>代表 <strong>数据域</strong>；<code>struct StackNode *next</code>代表 <strong>指针域</strong>；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>4</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(4)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">4</span><span class="mclose">)</span></span></span></span></span> <code>top</code>作为 <strong>栈顶指针</strong>，当栈为空的时候，<code>top == NULL</code>；否则，永远指向栈顶；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>5</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(5)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">5</span><span class="mclose">)</span></span></span></span></span> 由于 <strong>求链表长度</strong> 的算法时间复杂度是 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathdefault" style="margin-right: 0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mclose">)</span></span></span></span></span> 的， 所以我们需要记录一个<code>size</code>来代表现在栈中有多少元素。每次 <strong>入栈</strong>时<code>size</code>自增，<strong>出栈</strong>时<code>size</code>自减。这样在询问栈的大小的时候，就可以通过 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathdefault" style="margin-right: 0.02778em;">O</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span> 的时间复杂度。</li>
+</ul>
+<h2><a id="2_184"></a>2、入栈</h2>
+<h3><a id="1_185"></a>1、动画演示</h3>
+<p><img src="https://img-blog.csdnimg.cn/787f1d2e58d84f018202e52a1db5036c.gif#pic_center" alt=""></p>
+<blockquote>
+<p>  如图所示，<font color="fd0606"><b>head</b></font> 为栈顶，<font color="fd0606"><b>tail</b></font> 为栈底，<font color="fd0606"><b>vtx</b></font> 为当前需要 <strong>入栈</strong> 的元素，即图中的 <font color="fe8a27"><b>橙色结点</b></font>。<strong>入栈</strong> 操作完成后，<strong>栈顶</strong> 元素变为 <font color="fd0606"><b>vtx</b></font>，即图中 <font color="52bb69"><b>绿色结点</b></font>。</p>
+</blockquote>
+<h3><a id="2_189"></a>2、源码详解</h3>
+<ul>
+<li><strong>入栈</strong> 操作，其实就是类似 <strong>头插法</strong>，往链表头部插入一个新的结点，代码实现如下：</li>
+</ul>
+<pre><code class="prism language-c"><span class="token keyword">void</span> <span class="token function">StackPushStack</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Stack</span> <span class="token operator">*</span>stk<span class="token punctuation">,</span> DataType dt<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">struct</span> <span class="token class-name">StackNode</span> <span class="token operator">*</span>insertNode <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">StackNode</span> <span class="token operator">*</span><span class="token punctuation">)</span> <span class="token function">malloc</span><span class="token punctuation">(</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">StackNode</span><span class="token punctuation">)</span> <span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// (1)</span>
+    insertNode<span class="token operator">-&gt;</span>next <span class="token operator">=</span> stk<span class="token operator">-&gt;</span>top<span class="token punctuation">;</span>     <span class="token comment">// (2)</span>
+    insertNode<span class="token operator">-&gt;</span>data <span class="token operator">=</span> dt<span class="token punctuation">;</span>           <span class="token comment">// (3)</span>
+    stk<span class="token operator">-&gt;</span>top <span class="token operator">=</span> insertNode<span class="token punctuation">;</span>           <span class="token comment">// (4)</span>
+    <span class="token operator">++</span> stk<span class="token operator">-&gt;</span>size<span class="token punctuation">;</span>                    <span class="token comment">// (5)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<ul>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span> 利用<code>malloc</code>生成一个链表结点<code>insertNode</code>；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span></span> 将 <strong>当前栈顶</strong> 作为<code>insertNode</code>的 <strong>后继结点</strong>；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(3)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">3</span><span class="mclose">)</span></span></span></span></span> 将 <code>insertNode</code>的 <strong>数据域</strong> 设置为传参 <code>dt</code>；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>4</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(4)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">4</span><span class="mclose">)</span></span></span></span></span> 将<code>insertNode</code>作为 <strong>新的栈顶</strong>；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>5</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(5)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">5</span><span class="mclose">)</span></span></span></span></span> 栈元素 加一；</li>
+</ul>
+<h2><a id="3_206"></a>3、出栈</h2>
+<h3><a id="1_207"></a>1、动画演示</h3>
+<p><img src="https://img-blog.csdnimg.cn/9ce409e7d89b431f8662a26b9e2e6a34.gif#pic_center" alt=""></p>
+<blockquote>
+<p>  如图所示，<font color="fd0606"><b>head</b></font> 为栈顶，<font color="fd0606"><b>tail</b></font> 为栈底，<font color="fd0606"><b>temp</b></font> 为当前需要 <strong>出栈</strong> 的元素，即图中的 <font color="fe8a27"><b>橙色结点</b></font>。<strong>出栈</strong> 操作完成后，<strong>栈顶</strong> 元素变为之前 <font color="fd0606"><b>head</b></font> 的 <strong>后继结点</strong>，即图中 <font color="52bb69"><b>绿色结点</b></font>。</p>
+</blockquote>
+<h3><a id="2_210"></a>2、源码详解</h3>
+<ul>
+<li><strong>出栈</strong> 操作，由于链表头结点就是栈顶，其实就是删除这个链表的头结点的过程。代码实现如下：</li>
+</ul>
+<pre><code class="prism language-c"><span class="token keyword">void</span> <span class="token function">StackPopStack</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Stack</span><span class="token operator">*</span> stk<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">struct</span> <span class="token class-name">StackNode</span> <span class="token operator">*</span>temp <span class="token operator">=</span> stk<span class="token operator">-&gt;</span>top<span class="token punctuation">;</span>  <span class="token comment">// (1)</span>
+    stk<span class="token operator">-&gt;</span>top <span class="token operator">=</span> temp<span class="token operator">-&gt;</span>next<span class="token punctuation">;</span>              <span class="token comment">// (2)</span>
+    <span class="token function">free</span><span class="token punctuation">(</span>temp<span class="token punctuation">)</span><span class="token punctuation">;</span>                         <span class="token comment">// (3)</span>
+    <span class="token operator">--</span>stk<span class="token operator">-&gt;</span>size<span class="token punctuation">;</span>                        <span class="token comment">// (4)    </span>
+<span class="token punctuation">}</span>
+</code></pre>
+<ul>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span> 将 <strong>栈顶指针</strong> 保存到<code>temp</code>中；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span></span> 将 <strong>栈顶指针</strong> 的 <strong>后继结点</strong> 作为新的 <strong>栈顶</strong>；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(3)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">3</span><span class="mclose">)</span></span></span></span></span> 释放之前 <strong>栈顶指针</strong> 对应的内存；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>4</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(4)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">4</span><span class="mclose">)</span></span></span></span></span> 栈元素减一；</li>
+</ul>
+<h2><a id="4_224"></a>4、清空栈</h2>
+<h3><a id="1_225"></a>1、动画演示</h3>
+<p><img src="https://img-blog.csdnimg.cn/1365e26ce8454044bd61d11734175dc0.gif#pic_center" alt=""></p>
+<blockquote>
+<p>  <strong>清空栈</strong> 可以理解为，不断的出栈，直到栈元素个数为零。</p>
+</blockquote>
+<h3><a id="2_229"></a>2、源码详解</h3>
+<ul>
+<li>对于链表而言，<strong>清空栈</strong> 的操作需要删除每个链表结点，代码实现如下：</li>
+</ul>
+<pre><code class="prism language-c"><span class="token keyword">void</span> <span class="token function">StackClear</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Stack</span><span class="token operator">*</span> stk<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">while</span><span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">StackIsEmpty</span><span class="token punctuation">(</span>stk<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>       <span class="token comment">// (1)</span>
+        <span class="token function">StackPopStack</span><span class="token punctuation">(</span>stk<span class="token punctuation">)</span><span class="token punctuation">;</span>           <span class="token comment">// (2)</span>
+    <span class="token punctuation">}</span>
+    stk<span class="token operator">-&gt;</span>top <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>                  <span class="token comment">// (3)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<ul>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span> - <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span></span> 的每次操作其实就是一个 <strong>出栈</strong> 的过程，如果 <strong>栈</strong> 不为空；则进行 <strong>出栈</strong> 操作，直到 <strong>栈</strong> 为空；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span></span> 然后将 <strong>栈顶指针</strong> 置为空，代表这是一个空栈了；</li>
+</ul>
+<h2><a id="5_241"></a>5、只读接口</h2>
+<ul>
+<li>只读接口包含：获取栈顶元素、获取栈大小、栈的判空，实现如下：</li>
+</ul>
+<pre><code class="prism language-c">DataType <span class="token function">StackGetTop</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Stack</span><span class="token operator">*</span> stk<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> stk<span class="token operator">-&gt;</span>top<span class="token operator">-&gt;</span>data<span class="token punctuation">;</span>                 <span class="token comment">// (1)</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">int</span> <span class="token function">StackGetSize</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Stack</span><span class="token operator">*</span> stk<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> stk<span class="token operator">-&gt;</span>size<span class="token punctuation">;</span>                      <span class="token comment">// (2)</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">int</span> <span class="token function">StackIsEmpty</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Stack</span><span class="token operator">*</span> stk<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token operator">!</span><span class="token function">StackGetSize</span><span class="token punctuation">(</span>stk<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+</code></pre>
+<ul>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span> <code>stk-&gt;top</code>作为 <strong>栈顶指针</strong>，它的 <strong>数据域</strong> <code>data</code>就是 <strong>栈顶元素的值</strong>，返回即可；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span></span> <code>size</code>记录的是 栈元素个数；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(3)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">3</span><span class="mclose">)</span></span></span></span></span> 当 <strong>栈元素</strong> 个数为 零 时，栈为空。</li>
+</ul>
+<h2><a id="6_259"></a>6、栈的链表实现源码</h2>
+<ul>
+<li>栈的链表实现源码如下：</li>
+</ul>
+<pre><code class="prism language-c"><span class="token comment">/************************************* 栈的链表实现 *************************************/</span>
+<span class="token keyword">typedef</span> <span class="token keyword">int</span> DataType<span class="token punctuation">;</span>
+
+<span class="token keyword">struct</span> <span class="token class-name">StackNode</span><span class="token punctuation">;</span>
+ 
+<span class="token keyword">struct</span> <span class="token class-name">StackNode</span> <span class="token punctuation">{</span>
+    DataType data<span class="token punctuation">;</span>
+    <span class="token keyword">struct</span> <span class="token class-name">StackNode</span> <span class="token operator">*</span>next<span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token keyword">struct</span> <span class="token class-name">Stack</span> <span class="token punctuation">{</span>
+    <span class="token keyword">struct</span> <span class="token class-name">StackNode</span> <span class="token operator">*</span>top<span class="token punctuation">;</span>
+    <span class="token keyword">int</span> size<span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token keyword">void</span> <span class="token function">StackPushStack</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Stack</span> <span class="token operator">*</span>stk<span class="token punctuation">,</span> DataType dt<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">struct</span> <span class="token class-name">StackNode</span> <span class="token operator">*</span>insertNode <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">StackNode</span> <span class="token operator">*</span><span class="token punctuation">)</span> <span class="token function">malloc</span><span class="token punctuation">(</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">StackNode</span><span class="token punctuation">)</span> <span class="token punctuation">)</span><span class="token punctuation">;</span>
+    insertNode<span class="token operator">-&gt;</span>next <span class="token operator">=</span> stk<span class="token operator">-&gt;</span>top<span class="token punctuation">;</span>
+    insertNode<span class="token operator">-&gt;</span>data <span class="token operator">=</span> dt<span class="token punctuation">;</span>
+    stk<span class="token operator">-&gt;</span>top <span class="token operator">=</span> insertNode<span class="token punctuation">;</span>
+    <span class="token operator">++</span> stk<span class="token operator">-&gt;</span>size<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">void</span> <span class="token function">StackPopStack</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Stack</span><span class="token operator">*</span> stk<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">struct</span> <span class="token class-name">StackNode</span> <span class="token operator">*</span>temp <span class="token operator">=</span> stk<span class="token operator">-&gt;</span>top<span class="token punctuation">;</span>
+    stk<span class="token operator">-&gt;</span>top <span class="token operator">=</span> temp<span class="token operator">-&gt;</span>next<span class="token punctuation">;</span>
+    <span class="token operator">--</span>stk<span class="token operator">-&gt;</span>size<span class="token punctuation">;</span> 
+    <span class="token function">free</span><span class="token punctuation">(</span>temp<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+DataType <span class="token function">StackGetTop</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Stack</span><span class="token operator">*</span> stk<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> stk<span class="token operator">-&gt;</span>top<span class="token operator">-&gt;</span>data<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">int</span> <span class="token function">StackGetSize</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Stack</span><span class="token operator">*</span> stk<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> stk<span class="token operator">-&gt;</span>size<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">int</span> <span class="token function">StackIsEmpty</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Stack</span><span class="token operator">*</span> stk<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token operator">!</span><span class="token function">StackGetSize</span><span class="token punctuation">(</span>stk<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">void</span> <span class="token function">StackClear</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Stack</span><span class="token operator">*</span> stk<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">while</span><span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">StackIsEmpty</span><span class="token punctuation">(</span>stk<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token function">StackPopStack</span><span class="token punctuation">(</span>stk<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    stk<span class="token operator">-&gt;</span>top <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span> 
+    stk<span class="token operator">-&gt;</span>size <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token comment">/************************************* 栈的链表实现 *************************************/</span>
+</code></pre>
+<hr>
+<h1><a id="_312"></a>五、两种实现的优缺点</h1>
+<h2><a id="1_313"></a>1、顺序表实现</h2>
+<p>  在利用顺序表实现栈时，<strong>入栈</strong> 和 <strong>出栈</strong> 的常数时间复杂度低，且 <strong>清空栈</strong> 操作相比 <strong>链表实现</strong> 能做到 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathdefault" style="margin-right: 0.02778em;">O</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span>，唯一的不足之处是：需要预先申请好空间，而且当空间不够时，需要进行扩容，扩容方式本文未提及，可以参考以下文章：<a href="https://blog.csdn.net/WhereIsHeroFrom/article/details/108750216">《C/C++ 面试 100 例》（四）vector 扩容策略</a>。</p>
+<h2><a id="2_315"></a>2、链表实现</h2>
+<p>  在利用链表实现栈时，<strong>入栈</strong> 和 <strong>出栈</strong> 的常数时间复杂度略高，主要是每插入一个栈元素都需要申请空间，每删除一个栈元素都需要释放空间，且 <strong>清空栈</strong> 操作是 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathdefault" style="margin-right: 0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mclose">)</span></span></span></span></span> 的，直接将 <strong>栈顶指针</strong> 置空会导致内存泄漏。好处就是：不需要预先分配空间，且在内存允许范围内，可以一直 <strong>入栈</strong>，没有顺序表的限制。</p>
+<h1><a id="_317"></a>六、栈的入门</h1>
+<blockquote>
+<p>  好啦，接下来，让我们做几个栈的题目练习一下吧。</p>
+</blockquote>
+<h2><a id="1_319"></a>1、逆序链表</h2>
+<p><a href="https://blog.csdn.net/WhereIsHeroFrom/article/details/118718713">《LeetCode 206. 反转链表》解题报告</a></p>
+<h2><a id="2_321"></a>2、括号匹配</h2>
+<p><a href="https://blog.csdn.net/WhereIsHeroFrom/article/details/119685172">《LeetCode 20. 有效的括号》解题报告</a><br>
+<a href="https://blog.csdn.net/WhereIsHeroFrom/article/details/119685384">《LeetCode 32. 最长有效括号》解题报告</a></p>
+<h2><a id="3_324"></a>3、回文链表</h2>
+<p><a href="https://blog.csdn.net/WhereIsHeroFrom/article/details/119685593">《LeetCode 234. 回文链表》解题报告</a></p>
+<h2><a id="4_326"></a>4、表达式求值</h2>
+<p><a href="https://blog.csdn.net/WhereIsHeroFrom/article/details/119685823">《LeetCode 682. 棒球比赛》解题报告</a></p>
+<h2><a id="5_328"></a>5、双栈判等</h2>
+<p><a href="https://blog.csdn.net/WhereIsHeroFrom/article/details/119685716">《LeetCode 844. 比较含退格的字符串》解题报告</a></p>
+<h1><a id="_330"></a>七、栈的进阶</h1>
+<blockquote>
+<p>  栈的进阶主要是单调栈相关的内容，可以参考我的另一篇文章：<a href="https://blog.csdn.net/WhereIsHeroFrom/article/details/113102591">夜深人静写算法（十一）- 单调栈</a>。看完以后，别忘了进行相关题目的练习。</p>
+</blockquote>
+<h2><a id="1_332"></a>1、最小栈</h2>
+<p><a href="https://blog.csdn.net/WhereIsHeroFrom/article/details/119693067">《LeetCode 155. 最小栈》解题报告</a></p>
+<h2><a id="2_334"></a>2、化栈为队</h2>
+<p><a href="https://blog.csdn.net/WhereIsHeroFrom/article/details/119696525">《LeetCode 232. 用栈实现队列》解题报告</a></p>
+<h2><a id="3_336"></a>3、直方图最大矩形</h2>
+<p><a href="https://blog.csdn.net/WhereIsHeroFrom/article/details/119074785">《LeetCode 84. 柱状图中最大的矩形》解题报告</a></p>
+<hr>
+<ul>
+<li>关于 <font color="eb3f41"><b>「 栈 」</b></font> 的内容到这里就结束了。</li>
+<li>有关<a href="https://blog.csdn.net/whereisherofrom/category_11227297.html"><font color="13ae01"><b>🌳《<u>画解数据结构</u>》🌳 </b></font></a>的源码均开源，链接如下：<a href="https://github.com/WhereIsHeroFrom/Code_Templates/tree/master/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E7%94%BB%E8%A7%A3%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84">《画解数据结构》</a></li>
+</ul>
+<hr>
+<center>👇🏻添加 博主 获取付费专栏优惠券👇🏻</center>
+</div>
+</body>
+
+</html>

@@ -1,0 +1,133 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>《算法零基础100讲》(第25讲) 字符串算法(五) - 字符串反转</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__html"><p></p><div class="toc"><h3>文章目录</h3><ul><li><a href="#_2">零、写在前面</a></li><li><a href="#_7">一、概念定义</a></li><li><a href="#_9">二、题目描述</a></li><li><a href="#_12">三、算法详解</a></li><li><a href="#_14">四、源码剖析</a></li><li><a href="#_57">五、推荐专栏</a></li><li><a href="#_63">六、习题练习</a></li></ul></div><p></p>
+<h1><a id="_2"></a>零、写在前面</h1>
+<p>  这是<a href="https://blog.csdn.net/whereisherofrom/category_11426012.html">《算法零基础100讲》</a> 专栏打卡学习的第 <font color="red">25</font> 天了。如果觉得本专栏太贵无法承受，在博主主页添加博主好友，获取 <font color="red"><strong>付费专栏优惠券</strong></font>。<br>
+  每天专栏的题，做不出来没关系，因为困难的题涉及知识点较多，可能会涉及到后面的章节，所以不要着急，内容能看懂，能自己分析，能做出简单题就行。<br>
+  在刷题的过程中，总结自己遇到的坑点，写出 <strong>「 解题报告 」</strong>  供他人学习，也是一种自我学习的方式。这就是经典的帮助他人的同时，成就自己。目前， <a href="https://bbs.csdn.net/forums/hero"><strong>「 万人千题 」</strong></a> 社区 每天都会有五六篇高质量的 <strong>「 解题报告 」</strong> 被我 <strong>「 加精 」</strong>。如果觉得自己有能力的，也可以来发布你的 <strong>「 解题报告 」</strong>。千万级流量，你我共同拥有。</p>
+<h1><a id="_7"></a>一、概念定义</h1>
+<p>  字符串反转，其实就是第 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mn>0</mn></mrow><annotation encoding="application/x-tex">0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">0</span></span></span></span></span> 个字符和最后一个字符交换，第 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mn>1</mn></mrow><annotation encoding="application/x-tex">1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">1</span></span></span></span></span> 个字符和倒数第二个字符交换，以此类推，第 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.65952em; vertical-align: 0em;"></span><span class="mord mathdefault">i</span></span></span></span></span> 个字符 和 第 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>n</mi><mo>−</mo><mi>i</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">n-i-1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.66666em; vertical-align: -0.08333em;"></span><span class="mord mathdefault">n</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 0.74285em; vertical-align: -0.08333em;"></span><span class="mord mathdefault">i</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">1</span></span></span></span></span> 个字符交换。</p>
+<h1><a id="_9"></a>二、题目描述</h1>
+<blockquote>
+<p>  给你一个字符串 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>s</mi></mrow><annotation encoding="application/x-tex">s</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathdefault">s</span></span></span></span></span> ，仅反转字符串中的所有元音字母，并返回结果字符串。元音字母包括 <code>'a'</code>、<code>'e'</code>、<code>'i'</code>、<code>'o'</code>、<code>'u'</code>，且可能以大小写两种形式出现。</p>
+</blockquote>
+<h1><a id="_12"></a>三、算法详解</h1>
+<p>  定义两个指针 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.65952em; vertical-align: 0em;"></span><span class="mord mathdefault">i</span></span></span></span></span> 和 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>j</mi></mrow><annotation encoding="application/x-tex">j</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.85396em; vertical-align: -0.19444em;"></span><span class="mord mathdefault" style="margin-right: 0.05724em;">j</span></span></span></span></span>，<span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.65952em; vertical-align: 0em;"></span><span class="mord mathdefault">i</span></span></span></span></span> 从头开始扫描，<span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>j</mi></mrow><annotation encoding="application/x-tex">j</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.85396em; vertical-align: -0.19444em;"></span><span class="mord mathdefault" style="margin-right: 0.05724em;">j</span></span></span></span></span> 从尾开始扫描，如果两者都是元音的情况下，执行一次交换操作，否则 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.65952em; vertical-align: 0em;"></span><span class="mord mathdefault">i</span></span></span></span></span> 不断自增，<span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>j</mi></mrow><annotation encoding="application/x-tex">j</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.85396em; vertical-align: -0.19444em;"></span><span class="mord mathdefault" style="margin-right: 0.05724em;">j</span></span></span></span></span> 不断自减，知道两者重合为止。</p>
+<h1><a id="_14"></a>四、源码剖析</h1>
+<pre><code class="prism language-c"><span class="token keyword">char</span> vowels<span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token string">"aeiouAEIOU"</span><span class="token punctuation">;</span>
+
+bool <span class="token function">isVowel</span><span class="token punctuation">(</span><span class="token keyword">char</span> c<span class="token punctuation">)</span> <span class="token punctuation">{</span>             <span class="token comment">// (1)</span>
+    <span class="token keyword">int</span> i<span class="token punctuation">;</span>
+    <span class="token keyword">for</span><span class="token punctuation">(</span>i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> vowels<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token operator">++</span>i<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span>vowels<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">==</span> c<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">return</span> true<span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>    
+    <span class="token keyword">return</span> false<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">void</span> <span class="token function">swap</span><span class="token punctuation">(</span><span class="token keyword">char</span> <span class="token operator">*</span>a<span class="token punctuation">,</span> <span class="token keyword">char</span> <span class="token operator">*</span>b<span class="token punctuation">)</span> <span class="token punctuation">{</span>       <span class="token comment">// (2)</span>
+    <span class="token keyword">char</span> tmp <span class="token operator">=</span> <span class="token operator">*</span>a<span class="token punctuation">;</span>
+    <span class="token operator">*</span>a <span class="token operator">=</span> <span class="token operator">*</span>b<span class="token punctuation">;</span>
+    <span class="token operator">*</span>b <span class="token operator">=</span> tmp<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">char</span> <span class="token operator">*</span> <span class="token function">reverseVowels</span><span class="token punctuation">(</span><span class="token keyword">char</span> <span class="token operator">*</span> s<span class="token punctuation">)</span><span class="token punctuation">{</span>
+    <span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">,</span> j <span class="token operator">=</span> <span class="token function">strlen</span><span class="token punctuation">(</span>s<span class="token punctuation">)</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>     <span class="token comment">// (3)</span>
+    <span class="token keyword">while</span><span class="token punctuation">(</span>i <span class="token operator">&lt;</span> j<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">while</span><span class="token punctuation">(</span>s<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">&amp;&amp;</span> <span class="token operator">!</span><span class="token function">isVowel</span><span class="token punctuation">(</span>s<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+            <span class="token operator">++</span>i<span class="token punctuation">;</span>                    <span class="token comment">// (4)</span>
+        <span class="token keyword">while</span><span class="token punctuation">(</span>j <span class="token operator">&gt;=</span> <span class="token number">0</span> <span class="token operator">&amp;&amp;</span> <span class="token operator">!</span><span class="token function">isVowel</span><span class="token punctuation">(</span>s<span class="token punctuation">[</span>j<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+            <span class="token operator">--</span>j<span class="token punctuation">;</span>                    <span class="token comment">// (5)</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span>i <span class="token operator">&gt;=</span> j<span class="token punctuation">)</span> <span class="token keyword">break</span><span class="token punctuation">;</span>           <span class="token comment">// (6)</span>
+        <span class="token function">swap</span><span class="token punctuation">(</span> <span class="token operator">&amp;</span>s<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token operator">&amp;</span>s<span class="token punctuation">[</span>j<span class="token punctuation">]</span> <span class="token punctuation">)</span><span class="token punctuation">;</span>       <span class="token comment">// (7)</span>
+        <span class="token operator">++</span>i<span class="token punctuation">,</span> <span class="token operator">--</span>j<span class="token punctuation">;</span>                   <span class="token comment">// (8)</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">return</span> s<span class="token punctuation">;</span>
+
+<span class="token punctuation">}</span>
+</code></pre>
+<ul>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span> 实现一个函数，判断一个字符是否是元音；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span></span> 实现一个函数，交换两个字符；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(3)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">3</span><span class="mclose">)</span></span></span></span></span> 定义两个指针：<span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.65952em; vertical-align: 0em;"></span><span class="mord mathdefault">i</span></span></span></span></span> 和 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>j</mi></mrow><annotation encoding="application/x-tex">j</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.85396em; vertical-align: -0.19444em;"></span><span class="mord mathdefault" style="margin-right: 0.05724em;">j</span></span></span></span></span>；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>4</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(4)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">4</span><span class="mclose">)</span></span></span></span></span> 如果 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.65952em; vertical-align: 0em;"></span><span class="mord mathdefault">i</span></span></span></span></span> 对应的字符不是元音，则自增 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.65952em; vertical-align: 0em;"></span><span class="mord mathdefault">i</span></span></span></span></span>；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>5</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(5)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">5</span><span class="mclose">)</span></span></span></span></span> 如果 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>j</mi></mrow><annotation encoding="application/x-tex">j</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.85396em; vertical-align: -0.19444em;"></span><span class="mord mathdefault" style="margin-right: 0.05724em;">j</span></span></span></span></span> 对应的字符不是元音，则自减 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>j</mi></mrow><annotation encoding="application/x-tex">j</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.85396em; vertical-align: -0.19444em;"></span><span class="mord mathdefault" style="margin-right: 0.05724em;">j</span></span></span></span></span>；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>6</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(6)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">6</span><span class="mclose">)</span></span></span></span></span> 如果 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>i</mi><mo>≥</mo><mi>j</mi></mrow><annotation encoding="application/x-tex">i \ge j</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.79549em; vertical-align: -0.13597em;"></span><span class="mord mathdefault">i</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">≥</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.85396em; vertical-align: -0.19444em;"></span><span class="mord mathdefault" style="margin-right: 0.05724em;">j</span></span></span></span></span>，则说明没必要再进行交换，退出循环；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>7</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(7)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">7</span><span class="mclose">)</span></span></span></span></span> 否则，交换 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.65952em; vertical-align: 0em;"></span><span class="mord mathdefault">i</span></span></span></span></span> 和 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>j</mi></mrow><annotation encoding="application/x-tex">j</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.85396em; vertical-align: -0.19444em;"></span><span class="mord mathdefault" style="margin-right: 0.05724em;">j</span></span></span></span></span> 对应的字符；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>8</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(8)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">8</span><span class="mclose">)</span></span></span></span></span> <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.65952em; vertical-align: 0em;"></span><span class="mord mathdefault">i</span></span></span></span></span> 和 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>j</mi></mrow><annotation encoding="application/x-tex">j</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.85396em; vertical-align: -0.19444em;"></span><span class="mord mathdefault" style="margin-right: 0.05724em;">j</span></span></span></span></span> 两个指针继续往中间逼近；</li>
+</ul>
+<h1><a id="_57"></a>五、推荐专栏</h1>
+<center> <a href="https://blog.csdn.net/whereisherofrom/category_11158834.html"><font color="FF4500"><b>🧡《<u>C语言入门100例</u>》🧡</b></font></a></center><br>
+<center> <a href="https://blog.csdn.net/WhereIsHeroFrom/article/details/118208316"><font color="fa2560"><b><u>给定 a 和 b ，交换它们的值并输出 | 四种解法</u></b></font></a></center>
+<h1><a id="_63"></a>六、习题练习</h1>
+
+<table>
+<thead>
+<tr>
+<th>序号</th>
+<th>题目链接</th>
+<th>难度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><a href="https://leetcode-cn.com/problems/reverse-string/">反转字符串</a></td>
+<td>★☆☆☆☆</td>
+</tr>
+<tr>
+<td>2</td>
+<td><a href="https://leetcode-cn.com/problems/reverse-prefix-of-word/">反转单词前缀</a></td>
+<td>★☆☆☆☆</td>
+</tr>
+<tr>
+<td>3</td>
+<td><a href="https://leetcode-cn.com/problems/reverse-vowels-of-a-string/">反转字符串中的元音字母</a></td>
+<td>★☆☆☆☆</td>
+</tr>
+<tr>
+<td>4</td>
+<td><a href="https://leetcode-cn.com/problems/fan-zhuan-dan-ci-shun-xu-lcof/"> 翻转单词顺序</a></td>
+<td>★★☆☆☆</td>
+</tr>
+<tr>
+<td>5</td>
+<td><a href="https://leetcode-cn.com/problems/reverse-words-in-a-string/">翻转字符串里的单词</a></td>
+<td>★★☆☆☆</td>
+</tr>
+<tr>
+<td>6</td>
+<td><a href="https://leetcode-cn.com/problems/reverse-words-in-a-string-iii/">反转字符串中的单词 III</a></td>
+<td>★★☆☆☆</td>
+</tr>
+<tr>
+<td>7</td>
+<td><a href="https://leetcode-cn.com/problems/reverse-string-ii/">反转字符串 II</a></td>
+<td>★★☆☆☆</td>
+</tr>
+<tr>
+<td>8</td>
+<td><a href="https://leetcode-cn.com/problems/reverse-only-letters/">仅仅反转字母</a></td>
+<td>★★☆☆☆</td>
+</tr>
+<tr>
+<td>9</td>
+<td><a href="https://leetcode-cn.com/problems/reverse-integer/">整数反转</a></td>
+<td>★★☆☆☆</td>
+</tr>
+</tbody>
+</table><center>👇🏻添加 博主 获取付费专栏优惠券👇🏻</center>
+</div>
+</body>
+
+</html>

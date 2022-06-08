@@ -1,0 +1,257 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>夜深人静写算法（四十）- 八大排序</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__html"><center><b><font size="7" color="767676"> 目录 </font></b></center>
+<center><b><font size="4" color="000000"> 零、算法概述 </font></b></center>
+<center><b><font size="4" color="dC141C"> 一、冒泡排序 </font></b></center>
+<center><b><font size="4" color="f7803b"> 二、选择排序 </font></b></center>
+<center><b><font size="4" color="FFe100"> 三、插入排序 </font></b></center>
+<center><b><font size="4" color="13ba19"> 四、希尔排序 </font></b></center>
+<center><b><font size="4" color="138a19"> 五、归并排序 </font></b></center>
+<center><b><font size="4" color="007029"> 六、快速排序 </font></b></center>
+<center><b><font size="4" color="0070a9"> 七、计数排序 </font></b></center>
+<center><b><font size="4" color="0070f9"> 八、基数快速 </font></b></center>
+ 
+ 
+<blockquote>
+<center><b><font size="6" color="000000"> 零、算法概述 </font></b></center>  目前本专栏正在进行优惠活动，在博主主页添加博主好友，可以获取 <font color="red">付费专栏优惠券</font>。<br> 
+  本章主要讲的内容是通过一些动图，学会<font color="FF0500"><b>「 八大排序 」</b></font> 算法。各个排序算法中的思想都非常经典，如果能够一一消化，那么在学习算法的路上也会轻松许多。<br>  从<font color="FF0000"><b>「 冒泡排序 」</b></font>中，我们会利用数据交换这个算法；<font color="d041e1"><b>「 选择排序 」</b></font>中，我们将学会从一个数组中找最大值；<font color="ff9900"><b>「 插入排序 」</b></font>中，我们将学会对一个有序数组执行插入到对应位置的操作；<font color="90c531"><b>「 希尔排序 」</b></font>，让我们了解了增量的强大性；<font color="a419d3"><b>「 归并排序 」</b></font>中，让我们了解了如何利用两个有序数组进行合并；<font color="ffb700"><b>「 快速排序 」</b></font>，很快！<font color="cc0000"><b>「 计数排序 」</b></font>，利用了哈希表的思想；<font color="50c3ee"><b>「 基数排序 」</b></font> 中，引入了桶的概念。
+<p><img src="https://img-blog.csdnimg.cn/f1ea0baa85cd49c396165c3f5c7c9d8b.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA6Iux6ZuE5ZOq6YeM5Ye65p2l,size_19,color_FFFFFF,t_70,g_se,x_16#pic_center" alt=""><br>
+<img src="https://img-blog.csdnimg.cn/20210703122654382.gif#pic_center" alt=""></p>
+</blockquote>
+<center><b><font size="6" color="dC141C"> 一、冒泡排序 </font></b></center>
+ 
+<p><img src="https://img-blog.csdnimg.cn/99f37fb95391458484b78d40005d07f5.gif#pic_center" alt=""></p>
+
+<table>
+<thead>
+<tr>
+<th>图示</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><font color="acd7e5">■ 的柱形</font></td>
+<td>代表尚未排好序的数</td>
+</tr>
+<tr>
+<td><font color="007f00">■ 的柱形</font></td>
+<td>代表正在执行比较的两个数</td>
+</tr>
+<tr>
+<td><font color="fea400">■ 的柱形</font></td>
+<td>代表已经排好序的数</td>
+</tr>
+</tbody>
+</table><p>  我们看到，首先需要将 <font color="138a19"><b>「第一个元素」</b></font> 和 <font color="138a19"><b>「第二个元素」</b></font> 进行 <font color="dC141C"><b>「比较」</b></font>，如果 <strong>前者</strong> 大于 <strong>后者</strong>，则进行 <font color="0070D9"><b>「交换」</b></font>，然后再比较 <font color="138a19"><b>「第二个元素」</b></font> 和 <font color="138a19"><b>「第三个元素」</b></font> ，以此类推，直到 <font color="FEa500"><b>「最大的那个元素」</b></font> 被移动到 <font color="FEa500"><b>「最后的位置」</b></font> 。<br>  然后，进行第二轮<font color="dC141C"><b>「比较」</b></font>，直到 <font color="FEa500"><b>「次大的那个元素」</b></font> 被移动到 <font color="FEa500"><b>「倒数第二的位置」</b></font> 。<br>  最后，经过一定轮次的<font color="dC141C"><b>「比较」</b></font> 和 <font color="0070D9"><b>「交换」</b></font>之后，一定可以保证所有元素都是 <font color="f7803b"><b> 「升序」</b></font> 排列的。</p>
+<hr>
+<center><b><font size="6" color="f7803b"> 二、选择排序 </font></b></center>
+ 
+<p><img src="https://img-blog.csdnimg.cn/1b1ec4fcf6024ad4a659fab5f21a7075.gif#pic_center" alt=""></p>
+
+<table>
+<thead>
+<tr>
+<th>图示</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><font color="acd7e5">■ 的柱形</font></td>
+<td>代表尚未排好序的数</td>
+</tr>
+<tr>
+<td><font color="007f00">■ 的柱形</font></td>
+<td>代表正在执行 比较 的数</td>
+</tr>
+<tr>
+<td><font color="fea400">■ 的柱形</font></td>
+<td>代表已经排好序的数</td>
+</tr>
+<tr>
+<td><font color="dc143c">■ 的柱形</font></td>
+<td>有两种：1、记录最小元素 2、执行交换的元素</td>
+</tr>
+</tbody>
+</table><p>  我们发现，首先从 <font color="138a19"><b>「第一个元素」</b></font> 到 <font color="138a19"><b>「最后一个元素」</b></font> 中选择出一个 <font color="FEa500"><b>「最小的元素」</b></font>，和 <font color="138a19"><b>「第一个元素」</b></font> 进行 <font color="0070D9"><b>「交换」</b></font>；<br>  然后，从 <font color="138a19"><b>「第二个元素」</b></font> 到 <font color="138a19"><b>「最后一个元素」</b></font> 中选择出一个 <font color="FEa500"><b>「最小的元素」</b></font>，和 <font color="138a19"><b>「第二个元素」</b></font> 进行 <font color="0070D9"><b>「交换」</b></font>。<br>  最后，一定可以保证所有元素都是 <font color="f7803b"><b> 「升序」</b></font> 排列的。</p>
+<hr>
+<center><b><font size="6" color="FFe100"> 三、插入排序 </font></b></center>
+ 
+<p><img src="https://img-blog.csdnimg.cn/4d5d54dcbc7b47b18c45e0a23b906780.gif#pic_center" alt=""></p>
+
+<table>
+<thead>
+<tr>
+<th>图示</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><font color="acd7e5">■ 的柱形</font></td>
+<td>代表尚未排好序的数</td>
+</tr>
+<tr>
+<td><font color="007f00">■ 的柱形</font></td>
+<td>代表正在执行 比较 和 移动 的数</td>
+</tr>
+<tr>
+<td><font color="fea400">■ 的柱形</font></td>
+<td>代表已经排好序的数</td>
+</tr>
+<tr>
+<td><font color="dc143c">■ 的柱形</font></td>
+<td>代表待执行插入的数</td>
+</tr>
+</tbody>
+</table><p>  我们看到，首先需要将 <font color="138a19"><b>「第二个元素」</b></font> 和 <font color="138a19"><b>「第一个元素」</b></font> 进行 <font color="dC141C"><b>「比较」</b></font>，如果 <strong>前者</strong> 小于等于 <strong>后者</strong>，则将 <strong>后者</strong> 进行向后 <font color="0070D9"><b>「移动」</b></font>，<strong>前者</strong> 则执行插入；<br>  然后，进行第二轮<font color="dC141C"><b>「比较」</b></font>，即 <font color="138a19"><b>「第三个元素」</b></font> 和 <font color="138a19"><b>「第二个元素」、「第一个元素」</b></font> 进行 <font color="dC141C"><b>「比较」</b></font>， 直到 <font color="FEa500"><b>「前三个元素」</b></font> 保持有序 。<br>  最后，经过一定轮次的<font color="dC141C"><b>「比较」</b></font> 和 <font color="0070D9"><b>「移动」</b></font>之后，一定可以保证所有元素都是 <font color="f7803b"><b> 「升序」</b></font> 排列的。</p>
+<hr>
+<center><b><font size="6" color="13ba19"> 四、希尔排序 </font></b></center>
+ 
+<p><img src="https://img-blog.csdnimg.cn/9c7f663f5b68487492cbde507799c909.gif#pic_center" alt=""></p>
+<p>  一下子看完不是很理解，没有关系，我们把这几个过程分拆开来。第一趟分解后，如图所示：<br><br>
+<img src="https://img-blog.csdnimg.cn/1025f2ce90484614aaf4a807f84d45da.gif#pic_center" alt=""><br>
+  增量为 4，所有元素总共分为 4 组，分别为 <font color="ec1c24"><b>[8, 3]</b></font>、<font color="f17f28"><b>[5, 7]</b></font>、<font color="fef100"><b>[6, 10]</b></font>、<font color="22b04c"><b>[4, 2]</b></font>，同组内部分别执行插入排序，得到 <font color="ec1c24"><b>[3, 8]</b></font>、<font color="f17f28"><b>[5, 7]</b></font>、<font color="fef100"><b>[6, 10]</b></font>、<font color="22b04c"><b>[2, 4]</b></font>（由于每组只有两个元素，所以升序的情况位置不变，降序的情况执行组内元素位置交换，抖动一下代表保持原顺序不变，有一种 “我不换 ~~ 我不换” 的意思在里面 ）。</p>
+<p>  第二趟分解后，如图所示：<br><br>
+<img src="https://img-blog.csdnimg.cn/87de99e1b07e40a793e9fdd0b60a3c3d.gif#pic_center" alt="在这里插入图片描述"><br>
+  增量为 2，所有元素总共分为 2 组，分别为 <font color="ec1c24"><b>[3, 6, 8, 10]</b></font>、<font color="00a2e7"><b>[5, 2, 7, 4]</b></font>，同组内部分别执行插入排序，<font color="ec1c24"><b>[3, 6, 8, 10]</b></font>已经升序，保持原样；<font color="00a2e7"><b>[5, 2, 7, 4]</b></font> 执行三次插入排序后变成 <font color="00a2e7"><b>[2, 4, 5, 7]</b></font>。<br>
+  第三趟分解后，如图所示：<br><br>
+<img src="https://img-blog.csdnimg.cn/be7ec3e112634d97ad5d9a1dac5383b3.gif#pic_center" alt=""><br>
+  增量为 1，所有元素归为 1 组，为 <font color="22b14c"><b>[3, 2, 6, 4, 8, 5, 10, 7]</b></font>。对它执行简单插入排序，执行完毕后，必然可以保证所有元素有序。</p>
+<hr>
+<center><b><font size="6" color="138a19"> 五、归并排序 </font></b></center>
+ 
+<p><img src="https://img-blog.csdnimg.cn/66cb902fe6e64b388d77f56c5378bb53.gif#pic_center" alt=""></p>
+
+<table>
+<thead>
+<tr>
+<th>图示</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><font color="acd7e5">■ 的柱形</font></td>
+<td>代表尚未排好序的数</td>
+</tr>
+<tr>
+<td><font color="fe0000">■ 的柱形</font></td>
+<td>代表已经排好序的数</td>
+</tr>
+<tr>
+<td><font color="000000">其他颜色 ■ 的柱形</font></td>
+<td>正在递归、归并中的数</td>
+</tr>
+</tbody>
+</table><p>  我们发现，首先将 <font color="138a19"><b>「 8个元素 」</b></font> 分成 <font color="138a19"><b>「 4个元素 」</b></font>，再将 <font color="138a19"><b>「 4个元素 」</b></font> 分成 <font color="138a19"><b>「 2个元素 」</b></font>，然后<font color="dC141C"><b> 「比较」</b></font>这<font color="138a19"><b>「 2个元素 」</b></font>的值，使其在自己的原地数组内有序，然后两个 <font color="138a19"><b>「 2个元素 」</b></font> 的数组归并变成 <font color="138a19"><b>「 4个元素 」</b></font> 的<font color="f7803b"><b> 「升序」</b></font>数组，再将两个<font color="138a19"><b>「 4个元素 」</b></font> 的数组归并变成 <font color="138a19"><b>「 8个元素 」</b></font> 的<font color="f7803b"><b> 「升序」</b></font>数组。</p>
+<hr>
+<center><b><font size="6" color="007029"> 六、快速排序 </font></b></center>
+ 
+<p><img src="https://img-blog.csdnimg.cn/61c73759243a45d3bbc91755792ef57b.gif#pic_center" alt=""></p>
+
+<table>
+<thead>
+<tr>
+<th>图示</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><font color="acd7e5">■ 的柱形</font></td>
+<td>代表尚未排好序的数</td>
+</tr>
+<tr>
+<td><font color="ffff00">■ 的柱形</font></td>
+<td>代表随机选定的基准数</td>
+</tr>
+<tr>
+<td><font color="fea500">■ 的柱形</font></td>
+<td>代表已经排序好的数</td>
+</tr>
+<tr>
+<td><font color="dc143c">■ 的柱形</font></td>
+<td>代表正在遍历比较的数</td>
+</tr>
+<tr>
+<td><font color="3cb371">■ 的柱形</font></td>
+<td>代表比基准数小的数</td>
+</tr>
+<tr>
+<td><font color="9932cc">■ 的柱形</font></td>
+<td>代表比基准数大的数</td>
+</tr>
+</tbody>
+</table><p>  我们发现，首先随机选择了一个 7 作为<font color="930a19"><b>「 基准数 」</b></font>，并且将它和最左边的数交换。然后往后依次遍历判断，小于 7 的数为 <font color="3cb371"><b>「 绿色 」</b></font> ，大于 7 的数为<font color="9932cc"><b>「 紫色 」</b></font>，遍历完毕以后，将 7 和 <font color="3cb371"><b>「 下标最大的那个比 7 小的数 」</b></font>交换位置，至此，7的左边位置上的数都小于它，右边位置上的数都大于它，左边和右边的数继续递归求解即可。</p>
+<hr>
+<center><b><font size="6" color="0070a9"> 七、计数排序 </font></b></center>
+ 
+<p><img src="https://img-blog.csdnimg.cn/780f4f67571a465c9d6f5ec39ea861db.gif#pic_center" alt=""></p>
+
+<table>
+<thead>
+<tr>
+<th>图示</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><font color="cccccc">■ 的柱形</font></td>
+<td>计数为 0 的数</td>
+</tr>
+<tr>
+<td><font color="acd7e5">■ 的柱形</font></td>
+<td>计数为 1 的数</td>
+</tr>
+<tr>
+<td><font color="95bae9">■ 的柱形</font></td>
+<td>计数为 2 的数</td>
+</tr>
+<tr>
+<td><font color="8eb1ea">■ 的柱形</font></td>
+<td>计数为 3 的数</td>
+</tr>
+<tr>
+<td><font color="7e9dec">■ 的柱形</font></td>
+<td>计数为 4 的数</td>
+</tr>
+</tbody>
+</table><p>  我们看到，首先程序生成了一个区间范围为 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">[</mo><mn>1</mn><mo separator="true">,</mo><mn>9</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[1, 9]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">[</span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mord">9</span><span class="mclose">]</span></span></span></span></span> 的 <font color="0070D8"><b>「 计数器数组 」</b></font>，并且一开始所有值的计数都为 0。<br>  然后，遍历枚举<font color="FFa700"><b>「 原数组 」</b></font>的所有元素，在 元素值 对应的计数器上执行 <font color="0070D8"><b>「 计数 」</b></font> 操作。<br>  最后，遍历枚举<font color="0070D8"><b>「 计数器数组 」</b></font>，按照数组中元素个数放回到 <font color="FFa700"><b>「 原数组 」</b></font> 中。这样，一定可以保证所有元素都是 <font color="f7803b"><b> 「升序」</b></font> 排列的。</p>
+<hr>
+<center><b><font size="6" color="0070f9"> 八、基数排序 </font></b></center>
+ 
+<p><img src="https://img-blog.csdnimg.cn/61741d6de371470cabcc74b4a726b053.gif#pic_center" alt=""><br>
+<font color="C03a3a"><b>「 红色的数字位 」</b></font> 代表需要进行  <font color="dC141C"><b>「 哈希 」</b></font> 映射到给定 <font color="0070D8"><b>「 队列 」</b></font> 中的数字位。<br>
+  我们看到，首先程序生成了一个区间范围为 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">[</mo><mn>0</mn><mo separator="true">,</mo><mn>9</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[0, 9]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">[</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mord">9</span><span class="mclose">]</span></span></span></span></span> 的 <font color="0070D8"><b>「 基数队列 」</b></font>。<br>  然后，总共进行了 4 轮<font color="13ba19"><b>「 迭代 」</b></font>（因为最大的数总共 4 个数位）。<br>  每次迭代，遍历枚举 <font color="FFa700"><b>「 原数组 」</b></font> 中的所有数，并且取得本次迭代对应位的数字，通过<font color="dC141C"><b>「 哈希 」</b></font>，映射到它<font color="0070D8"><b>「 对应的队列 」</b></font>中 。然后将 <font color="0070D8"><b>「 队列 」</b></font> 中的数据按顺序塞回 <font color="FFa700"><b>「 原数组 」</b></font> 完成一次<font color="13ba19"><b>「 迭代 」</b></font>，4 次<font color="13ba19"><b>「 迭代 」</b></font>后，一定可以保证所有元素都是 <font color="f7803b"><b> 「升序」</b></font> 排列的。</p>
+<hr>
+<p>  <strong>冒泡排序：</strong> 不断迭代，每次迭代就把当前最大的元素往右边靠；<br>
+  <strong>选择排序：</strong> 不断迭代，每次迭代选择当前最小元素往左边靠；<br>
+  <strong>插入排序：</strong> 不断迭代，每次维护一个有序数组，并且将当前元素插入到有序数组合适位置；<br>
+  <strong>希尔排序：</strong> 枚举增量，对不同下标增量进行分组，分别执行插入排序，再减小增量重复执行；<br>
+  <strong>归并排序：</strong> 每次将数组分成长度接近的两部分，分别执行归并排序后，进行合并，再回溯；<br>
+  <strong>快速排序：</strong> 选择一个基点，比基点小的元素到它左边，比基点大的元素到它右边，分别对两堆递归执行快速排序；<br>
+  <strong>计数排序：</strong> 一次遍历，将所有数组映射到哈希表中，再遍历哈希表进行输出；<br>
+  <strong>基数排序：</strong> 从最低的位开始映射到 0 - 9 的桶，利用计数排序思想，让最低位先保证有序。再处理次低位，直到最高位处理完毕后，数组有序；</p>
+<hr>
+<ul>
+<li>有关<a href="https://blog.csdn.net/whereisherofrom/category_11227297.html"><font color="13ae01"><b>🌳《<u>排序</u>》🌳 </b></font></a>的源码均开源，链接如下：<a href="https://github.com/WhereIsHeroFrom/Code_Templates/tree/master/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E7%94%BB%E8%A7%A3%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E6%8E%92%E5%BA%8F">《八大排序》</a></li>
+<li>如果还有不懂的问题，可以 <font color="red"><b>通过主页</b></font> 找到作者的微信进行在线咨询。</li>
+</ul>
+<hr>
+<p><img src="https://img-blog.csdnimg.cn/20210105190605774.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1doZXJlSXNIZXJvRnJvbQ==,size_16,color_FFFFFF,t_70" alt=""></p>
+</div>
+</body>
+
+</html>

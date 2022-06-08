@@ -1,0 +1,414 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>《画解数据结构》九张动图，画解队列</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__html"><center>本文已收录于专栏</center><center> <a href="https://blog.csdn.net/whereisherofrom/category_11227297.html"><font color="13ae01"><b>🌳《<u>画解数据结构</u>》🌳 </b></font></a> </center><br>
+<h1><a id="_2"></a>零、前言</h1>
+<p>  目前本专栏正在进行优惠活动，在博主主页添加博主好友（好友位没有满的话），可以获取 <font color="red"><strong>付费专栏优惠券</strong></font>。</p>
+<blockquote>
+<p>  <font color="FF4500"><b>「 数据结构 」</b></font> 和 <font color="FFa700"><b>「 算法 」</b></font> 是密不可分的，两者往往是<font color="ffd700"><b>「 相辅相成 」</b></font>的存在，所以，在学习 <font color="FF4500"><b>「 数据结构 」</b></font> 的过程中，不免会遇到各种<font color="FFa700"><b>「 算法 」</b></font>。<br>  到底是先学 数据结构 ，还是先学 算法，我认为不必纠结这个问题，一定是一起学的。<br>  数据结构 常用的操作一般为：<font color="13ae01"><b>「 增 」</b></font><font color="FF0500"><b>「 删 」</b></font><font color="ffd700"><b>「 改 」</b></font><font color="2290ff"><b>「 查 」</b></font>。基本上所有的数据结构都是围绕这几个操作进行展开的。<br>  那么这篇文章，作者将用 <font color="13ae01"><b>「 九张动图 」</b></font> 来阐述一种 <font color="FF4500"><b>「 先进先出 」</b></font> 的数据结构<br><br> </p><center><font size="5" color="2290ff"><b>「  队列 」</b></font></center><br>
+<img src="https://img-blog.csdnimg.cn/9ccb0470d68b414496a01c0e0506ecfc.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1doZXJlSXNIZXJvRnJvbQ==,size_16,color_FFFFFF,t_70#pic_center" alt=""><p></p>
+<center><b>🙉饭不食，水不饮，题必须刷🙉</b></center><br>
+<center><font color="FFD700">C语言免费动漫教程，和我一起打卡！</font></center>
+<center> <a href="https://blog.csdn.net/whereisherofrom/category_11131373.html"><font color="FFD700"><b>🌞《<u>光天化日学C语言</u>》🌞</b></font></a></center><br>
+<center><font color="FF4500">LeetCode 太难？先看简单题！</font></center>
+<center> <a href="https://blog.csdn.net/whereisherofrom/category_11158834.html"><font color="FF4500"><b>🧡《<u>C语言入门100例</u>》🧡</b></font></a></center><br>
+<center><font color="13ae01">数据结构难？不存在的！</font></center>
+<center> <a href="https://blog.csdn.net/whereisherofrom/category_11227297.html"><font color="13ae01"><b>🌳《<u>画解数据结构</u>》🌳 </b></font></a> </center><br>
+<center><font color="2290ff">闭关刷 LeetCode，剑指大厂Offer！</font></center>
+<center> <a href="https://docs.qq.com/mind/DU01SVGpab2tWdlNj"><font color="2290ff"><b>🌌《<u>LeetCode 刷题指引</u>》🌌</b></font></a></center><br>
+<center><font color="886ce4">LeetCode 太简单？算法学起来！</font></center>
+<center> <a href="https://blog.csdn.net/whereisherofrom/category_9273531.html"><font color="886ce4"><b>💜《<u>夜深人静写算法</u>》💜</b></font></a></center><br>
+   队列可以用 <font><b>顺序表</b></font> 实现，也可以用 <font><b>链表</b></font> 实现，浓缩为以下三张图：
+<p><img src="https://img-blog.csdnimg.cn/7bf21b1cd2d14e5d81a9fa15f218ecba.gif#pic_center" alt=""></p><center><b>队列操作三部曲</b></center><br>
+<img src="https://img-blog.csdnimg.cn/c84d83855377473ab43852b947329ccd.gif#pic_center" alt=""><center><b>队列的链表实现</b></center><br>
+<img src="https://img-blog.csdnimg.cn/ced681ee7bee4003aff369e0ff5966a1.gif#pic_center" alt=""><center><b>队列的顺序表实现</b></center><br>
+  看不懂没有关系，我会把它拆开来一个一个讲，首先来看一下今天要学习的内容目录。<p></p>
+</blockquote>
+<p></p><div class="toc"><h3>文章目录</h3><ul><li><a href="#_2">零、前言</a></li><li><a href="#_25">一、概念</a></li><ul><li><a href="#1_26">1、队列的定义</a></li><li><a href="#2_30">2、队首</a></li><li><a href="#3_34">3、队尾</a></li></ul><li><a href="#_37">二、接口</a></li><ul><li><a href="#1_38">1、可写接口</a></li><ul><li><a href="#1_39">1）数据入队</a></li><li><a href="#2_42">2）数据出队</a></li><li><a href="#3_46">3）清空队列</a></li></ul><li><a href="#2_50">2、只读接口</a></li><ul><li><a href="#1_51">1）获取队首数据</a></li><li><a href="#2_53">2）获取队列元素个数</a></li><li><a href="#3_55">3）队列的判空</a></li></ul></ul><li><a href="#_58">三、队列的顺序表实现</a></li><ul><li><a href="#1_59">1、数据结构定义</a></li><li><a href="#2_77">2、入队</a></li><ul><li><a href="#1_78">1、动画演示</a></li><li><a href="#2_81">2、源码详解</a></li></ul><li><a href="#3_102">3、出队</a></li><ul><li><a href="#1_103">1、动画演示</a></li><li><a href="#2_107">2、源码详解</a></li></ul><li><a href="#4_114">4、清空队列</a></li><ul><li><a href="#1_115">1、动画演示</a></li><li><a href="#2_120">2、源码详解</a></li></ul><li><a href="#5_127">5、只读接口</a></li><li><a href="#6_144">6、队列的顺序表实现源码</a></li></ul><li><a href="#_180">四、队列的链表实现</a></li><ul><li><a href="#1_181">1、数据结构定义</a></li><li><a href="#2_202">2、入队</a></li><ul><li><a href="#1_203">1、动画演示</a></li><li><a href="#2_207">2、源码详解</a></li></ul><li><a href="#3_229">3、出队</a></li><ul><li><a href="#1_230">1、动画演示</a></li><li><a href="#2_233">2、源码详解</a></li></ul><li><a href="#4_252">4、清空队列</a></li><ul><li><a href="#1_253">1、动画演示</a></li><li><a href="#2_256">2、源码详解</a></li></ul><li><a href="#5_268">5、只读接口</a></li><li><a href="#6_286">6、队列的链表实现源码</a></li></ul><li><a href="#_341">五、两种实现的优缺点</a></li><ul><li><a href="#1_342">1、顺序表实现</a></li><li><a href="#2_345">2、链表实现</a></li></ul><li><a href="#_351">六、队列的入门</a></li><ul><li><a href="#1_353">1、滑动窗口</a></li><li><a href="#2_356">2、广度优先搜索</a></li></ul><li><a href="#_360">七、队列的进阶</a></li><ul><li><a href="#1_361">1、辅助队列</a></li><li><a href="#2_363">2、单调队列</a></li></ul></ul></div><p></p>
+<h1><a id="_25"></a>一、概念</h1>
+<h2><a id="1_26"></a>1、队列的定义</h2>
+<p>  <strong>队列</strong> 是仅限在 <strong>一端</strong> 进行 <strong>插入</strong>，<strong>另一端</strong> 进行 <strong>删除</strong> 的 <strong>线性表</strong>。<br>
+  <strong>队列</strong> 又被称为 先进先出 （First In First Out） 的线性表，简称 FIFO 。<br>
+<img src="https://img-blog.csdnimg.cn/320013ec60b94cb9b8e5fa7b9343d0e4.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1doZXJlSXNIZXJvRnJvbQ==,size_2,color_FFFFFF,t_70#pic_center" alt=""></p>
+<h2><a id="2_30"></a>2、队首</h2>
+<p>  允许进行元素删除的一端称为 <strong>队首</strong>。如下图所示：<br>
+<img src="https://img-blog.csdnimg.cn/797118422c9c43729915004c2b03e8c8.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1doZXJlSXNIZXJvRnJvbQ==,size_2,color_FFFFFF,t_70#pic_center" alt=""></p>
+<h2><a id="3_34"></a>3、队尾</h2>
+<p>  允许进行元素插入的一端称为 <strong>队尾</strong>。如下图所示：<br>
+<img src="https://img-blog.csdnimg.cn/6d2e9994c21144c28d3eee007f3fecfb.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1doZXJlSXNIZXJvRnJvbQ==,size_2,color_FFFFFF,t_70#pic_center" alt=""></p>
+<h1><a id="_37"></a>二、接口</h1>
+<h2><a id="1_38"></a>1、可写接口</h2>
+<h3><a id="1_39"></a>1）数据入队</h3>
+<p>  队列的插入操作，叫做 <strong>入队</strong>。它是将 <strong>数据元素</strong> 从 <strong>队尾</strong> 进行插入的过程，如图所示，表示的是 <strong>插入</strong> 两个数据（绿色 和 蓝色）的过程：<br>
+<img src="https://img-blog.csdnimg.cn/cef3932334b14063b41d8efcf363c51f.gif#pic_center" alt=""></p>
+<h3><a id="2_42"></a>2）数据出队</h3>
+<p>  队列的删除操作，叫做 <strong>出队</strong>。它是将 <strong>队首</strong> 元素进行删除的过程，如图所示，表示的是 依次 <strong>删除</strong> 两个数据（红色 和 橙色）的过程：<br>
+<img src="https://img-blog.csdnimg.cn/ee4bfda682f54a5688b2c6a7c31c709c.gif#pic_center" alt=""></p>
+<h3><a id="3_46"></a>3）清空队列</h3>
+<p>  队列的清空操作，就是一直 <strong>出队</strong>，直到队列为空的过程，当 <strong>队首</strong> 和 <strong>队尾</strong> 重合时，就代表队尾为空了，如图所示：<br>
+<img src="https://img-blog.csdnimg.cn/bb6b16d141c7465699c21ac703f39a13.gif#pic_center" alt=""></p>
+<h2><a id="2_50"></a>2、只读接口</h2>
+<h3><a id="1_51"></a>1）获取队首数据</h3>
+<p>  对于一个队列来说只能获取 <strong>队首</strong> 数据，一般不支持获取 其它数据。</p>
+<h3><a id="2_53"></a>2）获取队列元素个数</h3>
+<p>  队列元素个数一般用一个额外变量存储，<strong>入队</strong> 时加一，<strong>出队</strong> 时减一。这样获取队列元素的时候就不需要遍历整个队列。通过 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathdefault" style="margin-right: 0.02778em;">O</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span> 的时间复杂度获取队列元素个数。</p>
+<h3><a id="3_55"></a>3）队列的判空</h3>
+<p>  当队列元素个数为零时，就是一个 <strong>空队</strong>，<strong>空队</strong> 不允许 <strong>出队</strong> 操作。</p>
+<h1><a id="_58"></a>三、队列的顺序表实现</h1>
+<h2><a id="1_59"></a>1、数据结构定义</h2>
+<blockquote>
+<p>对于顺序表，在 C语言 中表现为 <strong>数组</strong>，在进行 <strong>队列的定义</strong> 之前，我们需要考虑以下几个点：<br>  1）队列数据的存储方式，以及队列数据的数据类型；<br>  2）队列的大小；<br>  3）队首指针；<br>  4）队尾指针；</p>
+</blockquote>
+<ul>
+<li>我们可以定义一个 <strong>队列</strong> 的 <strong>结构体</strong>，C语言实现如下所示：</li>
+</ul>
+<pre><code class="prism language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name">DataType</span> <span class="token expression"><span class="token keyword">int</span>       </span><span class="token comment">// (1)</span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name">maxn</span> <span class="token expression"><span class="token number">100005</span>        </span><span class="token comment">// (2)</span></span>
+
+<span class="token keyword">struct</span> <span class="token class-name">Queue</span> <span class="token punctuation">{</span>             <span class="token comment">// (3)</span>
+    DataType data<span class="token punctuation">[</span>maxn<span class="token punctuation">]</span><span class="token punctuation">;</span>   <span class="token comment">// (4)</span>
+    <span class="token keyword">int</span> head<span class="token punctuation">,</span> tail<span class="token punctuation">;</span>        <span class="token comment">// (5)</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+<ul>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span> 用<code>DataType</code>这个宏定义来统一代表队列中数据的类型，这里将它定义为整型，根据需要可以定义成其它类型，例如浮点型、字符型、结构体 等等；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span></span> <code>maxn</code>代表我们定义的队列的最大元素个数；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(3)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">3</span><span class="mclose">)</span></span></span></span></span> <code>Queue</code>就是我们接下来会用到的 <strong>队列结构体</strong>；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>4</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(4)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">4</span><span class="mclose">)</span></span></span></span></span> <code>DataType data[maxn]</code>作为队列元素的存储方式，即 <strong>数组</strong>，数据类型为<code>DataType</code>，可以自行定制；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>5</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(5)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">5</span><span class="mclose">)</span></span></span></span></span> <code>head</code>即队首指针，<code>tail</code>即队尾指针，<code>head == tail</code>代表空队；当队列非空时，<code>data[head]</code>代表了队首元素（而队尾元素是不需要关心的）；</li>
+</ul>
+<h2><a id="2_77"></a>2、入队</h2>
+<h3><a id="1_78"></a>1、动画演示</h3>
+<p><img src="https://img-blog.csdnimg.cn/dcfba5e817f24d21b56c5ac5be195c6d.gif#pic_center" alt=""></p>
+<blockquote>
+<p>  如图所示，<font color="22b14b"><b>绿色元素</b></font> 为新插入队尾的数据，执行完毕以后，队尾指针加一，队首指针不变。需要注意的是，顺序表实现时，队尾指针指向的位置是没有数据的，具体来看下代码实现。</p>
+</blockquote>
+<h3><a id="2_81"></a>2、源码详解</h3>
+<ul>
+<li><strong>入队</strong> 操作，算上函数参数列表，总共也才几句话，代码实现如下：</li>
+</ul>
+<pre><code class="prism language-c"><span class="token keyword">void</span> <span class="token function">QueueEnqueue</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Queue</span> <span class="token operator">*</span>que<span class="token punctuation">,</span> DataType dt<span class="token punctuation">)</span> <span class="token punctuation">{</span>  <span class="token comment">// (1)</span>
+    que<span class="token operator">-&gt;</span>data<span class="token punctuation">[</span> que<span class="token operator">-&gt;</span>tail <span class="token punctuation">]</span> <span class="token operator">=</span> dt<span class="token punctuation">;</span>                     <span class="token comment">// (2)</span>
+    que<span class="token operator">-&gt;</span>tail <span class="token operator">=</span> que<span class="token operator">-&gt;</span>tail <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">;</span>                       <span class="token comment">// (3)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<ul>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span> <code>que</code>是一个指向队列对象的指针，由于这个接口会修改队列对象的成员变量，所以这里必须传指针，否则，就会导致函数执行完毕，传参对象没有任何改变；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span></span> 将传参的元素 <strong>入队</strong>；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(3)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">3</span><span class="mclose">)</span></span></span></span></span> 将 <strong>队尾指针</strong> 自增 1；</li>
+<li>注意，这个接口在调用前，需要保证 <strong>队尾指针</strong> 小于 <strong>队列元素最大个数</strong>，即<code>que-&gt;tail &lt; maxn</code>，</li>
+<li>如果 C语言 写的熟练，我们可以把 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span></span> 和 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(3)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">3</span><span class="mclose">)</span></span></span></span></span> 合成一句话，如下：</li>
+</ul>
+<pre><code class="prism language-c"><span class="token keyword">void</span> <span class="token function">QueueEnqueue</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Queue</span> <span class="token operator">*</span>que<span class="token punctuation">,</span> DataType dt<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    que<span class="token operator">-&gt;</span>data<span class="token punctuation">[</span> que<span class="token operator">-&gt;</span>tail<span class="token operator">++</span> <span class="token punctuation">]</span> <span class="token operator">=</span> dt<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<ul>
+<li><code>que-&gt;tail++</code>表达式的值是自增前的值，并且自身进行了一次自增。</li>
+</ul>
+<h2><a id="3_102"></a>3、出队</h2>
+<h3><a id="1_103"></a>1、动画演示</h3>
+<p><img src="https://img-blog.csdnimg.cn/124a1d2581864c11b2ecfb2e54d3b398.gif#pic_center" alt=""></p>
+<blockquote>
+<p>  如图所示，<font color="fe7f27"><b>橙色元素</b></font> 为原先的 <strong>队首元素</strong>，执行 <strong>出队</strong> 操作以后，<font color="fed100"><b>黃色元素</b></font> 成为当前的 <strong>队首元素</strong>，执行完毕以后，队首指针加一。由于是顺序表实现，队首元素前面的那些元素已经变成无效的了，具体来看下代码实现。</p>
+</blockquote>
+<h3><a id="2_107"></a>2、源码详解</h3>
+<ul>
+<li><strong>出队</strong> 操作，只需要简单的改变，将 <strong>队首指针</strong> 加一 即可，代码实现如下：</li>
+</ul>
+<pre><code class="prism language-c"><span class="token keyword">void</span> <span class="token function">QueueDequeue</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Queue</span><span class="token operator">*</span> que<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token operator">++</span>que<span class="token operator">-&gt;</span>head<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<h2><a id="4_114"></a>4、清空队列</h2>
+<h3><a id="1_115"></a>1、动画演示</h3>
+<p><img src="https://img-blog.csdnimg.cn/0794f3f16f024ddaaf10c820ca8f3f6c.gif#pic_center" alt=""></p>
+<blockquote>
+<p>  如图所示，对于数组来说，清空队列的操作只需要将 <strong>队首指针</strong> 和 <strong>队尾指针</strong> 都置零 即可，数据不需要清理，下次继续 <strong>入队</strong> 的时候会将之前的内存重复利用。</p>
+</blockquote>
+<h3><a id="2_120"></a>2、源码详解</h3>
+<ul>
+<li>清空队列的操作只需要将 <strong>队首指针</strong> 和 <strong>队尾指针</strong> 都归零即可，代码实现如下：</li>
+</ul>
+<pre><code class="prism language-c"><span class="token keyword">void</span> <span class="token function">QueueClear</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Queue</span><span class="token operator">*</span> que<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    que<span class="token operator">-&gt;</span>head <span class="token operator">=</span> que<span class="token operator">-&gt;</span>tail <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<h2><a id="5_127"></a>5、只读接口</h2>
+<ul>
+<li>只读接口包含：获取队首元素、获取队列大小、队列的判空，实现如下：</li>
+</ul>
+<pre><code class="prism language-c">DataType <span class="token function">QueueGetFront</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Queue</span><span class="token operator">*</span> que<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> que<span class="token operator">-&gt;</span>data<span class="token punctuation">[</span> que<span class="token operator">-&gt;</span>head <span class="token punctuation">]</span><span class="token punctuation">;</span>      <span class="token comment">// (1)</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">int</span> <span class="token function">QueueGetSize</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Queue</span><span class="token operator">*</span> que<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> que<span class="token operator">-&gt;</span>tail <span class="token operator">-</span> que<span class="token operator">-&gt;</span>head<span class="token punctuation">;</span>       <span class="token comment">// (2)</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">int</span> <span class="token function">QueueIsEmpty</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Queue</span><span class="token operator">*</span> que<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token operator">!</span><span class="token function">QueueGetSize</span><span class="token punctuation">(</span>que<span class="token punctuation">)</span><span class="token punctuation">;</span>          <span class="token comment">// (3)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<ul>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span> <code>que-&gt;head</code>代表了 <strong>队首指针</strong>，即 <strong>队首下标</strong>，所以真正的 <strong>队首元素</strong> 是 <code>que-&gt;data[ que-&gt;head ]</code>；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span></span> 因为只有在 <strong>入队</strong> 的时候，<strong>队尾指针</strong> 加一；<strong>出队</strong> 的时候，<strong>队首指针</strong> 加一；所以 <strong>队列元素个数</strong> 就是两者的差值；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(3)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">3</span><span class="mclose">)</span></span></span></span></span> 当 <strong>队列元素</strong> 个数为 零 时，队列为空。</li>
+</ul>
+<h2><a id="6_144"></a>6、队列的顺序表实现源码</h2>
+<ul>
+<li>队列的顺序表实现的源码如下：</li>
+</ul>
+<pre><code class="prism language-c"><span class="token comment">/**************************** 顺序表 实现队列 ****************************/</span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name">DataType</span> <span class="token expression"><span class="token keyword">int</span></span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name">maxn</span> <span class="token expression"><span class="token number">100005</span></span></span>
+
+<span class="token keyword">struct</span> <span class="token class-name">Queue</span> <span class="token punctuation">{</span>
+    DataType data<span class="token punctuation">[</span>maxn<span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token keyword">int</span> head<span class="token punctuation">,</span> tail<span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token keyword">void</span> <span class="token function">QueueClear</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Queue</span><span class="token operator">*</span> que<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    que<span class="token operator">-&gt;</span>head <span class="token operator">=</span> que<span class="token operator">-&gt;</span>tail <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">void</span> <span class="token function">QueueEnqueue</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Queue</span> <span class="token operator">*</span>que<span class="token punctuation">,</span> DataType dt<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    que<span class="token operator">-&gt;</span>data<span class="token punctuation">[</span> que<span class="token operator">-&gt;</span>tail<span class="token operator">++</span> <span class="token punctuation">]</span> <span class="token operator">=</span> dt<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">void</span> <span class="token function">QueueDequeue</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Queue</span><span class="token operator">*</span> que<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token operator">++</span>que<span class="token operator">-&gt;</span>head<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+DataType <span class="token function">QueueGetFront</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Queue</span><span class="token operator">*</span> que<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> que<span class="token operator">-&gt;</span>data<span class="token punctuation">[</span> que<span class="token operator">-&gt;</span>head <span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">int</span> <span class="token function">QueueGetSize</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Queue</span><span class="token operator">*</span> que<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> que<span class="token operator">-&gt;</span>tail <span class="token operator">-</span> que<span class="token operator">-&gt;</span>head<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">int</span> <span class="token function">QueueIsEmpty</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Queue</span><span class="token operator">*</span> que<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token operator">!</span><span class="token function">QueueGetSize</span><span class="token punctuation">(</span>que<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">/**************************** 顺序表 实现队列 ****************************/</span>
+</code></pre>
+<h1><a id="_180"></a>四、队列的链表实现</h1>
+<h2><a id="1_181"></a>1、数据结构定义</h2>
+<blockquote>
+<p>对于链表，在进行 <strong>队列的定义</strong> 之前，我们需要考虑以下几个点：<br>  1）队列数据的存储方式，以及队列数据的数据类型；<br>  2）队列的大小；<br>  3）队首指针；<br>  4）队尾指针；</p>
+</blockquote>
+<ul>
+<li>我们可以定义一个 <strong>队列</strong> 的 <strong>结构体</strong>，C语言实现如下所示：</li>
+</ul>
+<pre><code class="prism language-c"><span class="token keyword">typedef</span> <span class="token keyword">int</span> DataType<span class="token punctuation">;</span>               <span class="token comment">// (1)</span>
+<span class="token keyword">struct</span> <span class="token class-name">QueueNode</span><span class="token punctuation">;</span>                   <span class="token comment">// (2)</span>
+<span class="token keyword">struct</span> <span class="token class-name">QueueNode</span> <span class="token punctuation">{</span>                  <span class="token comment">// (3)</span>
+    DataType data<span class="token punctuation">;</span>
+    <span class="token keyword">struct</span> <span class="token class-name">QueueNode</span> <span class="token operator">*</span>next<span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token keyword">struct</span> <span class="token class-name">Queue</span> <span class="token punctuation">{</span>
+    <span class="token keyword">struct</span> <span class="token class-name">QueueNode</span> <span class="token operator">*</span>head<span class="token punctuation">,</span> <span class="token operator">*</span>tail<span class="token punctuation">;</span>  <span class="token comment">// (4)</span>
+    <span class="token keyword">int</span> size<span class="token punctuation">;</span>                       <span class="token comment">// (5)</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+<ul>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span> 队列结点元素的 <strong>数据域</strong>，这里定义为整型；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span></span> <code>struct QueueNode;</code>是对 <strong>链表结点</strong> 的声明；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(3)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">3</span><span class="mclose">)</span></span></span></span></span> 定义链表结点，其中<code>DataType data</code>代表 <strong>数据域</strong>；<code>struct QueueNode *next</code>代表 <strong>指针域</strong>；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>4</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(4)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">4</span><span class="mclose">)</span></span></span></span></span> <code>head</code>作为 <strong>队首指针</strong>，<code>tail</code>作为 <strong>队尾指针</strong>；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>5</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(5)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">5</span><span class="mclose">)</span></span></span></span></span> 由于 <strong>求链表长度</strong> 的算法时间复杂度是 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathdefault" style="margin-right: 0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mclose">)</span></span></span></span></span> 的， 所以我们需要记录一个<code>size</code>来代表现在队列中有多少元素。每次 <strong>入队</strong>时<code>size</code>自增，<strong>出队</strong>时<code>size</code>自减。这样在询问 队列 的大小的时候，就可以通过 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathdefault" style="margin-right: 0.02778em;">O</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span> 的时间复杂度。</li>
+</ul>
+<h2><a id="2_202"></a>2、入队</h2>
+<h3><a id="1_203"></a>1、动画演示</h3>
+<p><img src="https://img-blog.csdnimg.cn/13f8d07804a7410cada938e0bf5016ed.gif#pic_center" alt=""></p>
+<blockquote>
+<p>  如图所示，<font color="fd0606"><b>head</b></font> 为 <strong>队首元素</strong>，<font color="fd0606"><b>tail</b></font> 为 <strong>队尾元素</strong>，<font color="fd0606"><b>vtx</b></font> 为当前需要 <strong>入队</strong> 的元素，即图中的 <font color="fe8a27"><b>橙色结点</b></font>。<strong>入队</strong> 操作完成后，<strong>队尾元素</strong> 变为 <font color="fd0606"><b>vtx</b></font>，即图中 <font color="52bb69"><b>绿色结点</b></font>。</p>
+</blockquote>
+<h3><a id="2_207"></a>2、源码详解</h3>
+<ul>
+<li><strong>入队</strong> 操作，其实就是类似 <strong>尾插法</strong>，往链表尾部插入一个新的结点，代码实现如下：</li>
+</ul>
+<pre><code class="prism language-c"><span class="token keyword">void</span> <span class="token function">QueueEnqueue</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Queue</span> <span class="token operator">*</span>que<span class="token punctuation">,</span> DataType dt<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">struct</span> <span class="token class-name">QueueNode</span> <span class="token operator">*</span>insertNode <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">QueueNode</span> <span class="token operator">*</span><span class="token punctuation">)</span> <span class="token function">malloc</span><span class="token punctuation">(</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">QueueNode</span><span class="token punctuation">)</span> <span class="token punctuation">)</span><span class="token punctuation">;</span>           
+    insertNode<span class="token operator">-&gt;</span>data <span class="token operator">=</span> dt<span class="token punctuation">;</span>                  <span class="token comment">// (1)</span>
+    insertNode<span class="token operator">-&gt;</span>next <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span><span class="token punctuation">(</span>que<span class="token operator">-&gt;</span>tail<span class="token punctuation">)</span> <span class="token punctuation">{</span>                         <span class="token comment">// (2)</span>
+        que<span class="token operator">-&gt;</span>tail<span class="token operator">-&gt;</span>next <span class="token operator">=</span> insertNode<span class="token punctuation">;</span>
+        que<span class="token operator">-&gt;</span>tail <span class="token operator">=</span> insertNode<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span class="token keyword">else</span> <span class="token punctuation">{</span>
+        que<span class="token operator">-&gt;</span>head <span class="token operator">=</span> que<span class="token operator">-&gt;</span>tail <span class="token operator">=</span> insertNode<span class="token punctuation">;</span> <span class="token comment">// (3)</span>
+    <span class="token punctuation">}</span>
+    <span class="token operator">++</span>que<span class="token operator">-&gt;</span>size<span class="token punctuation">;</span>                            <span class="token comment">// (4)</span>
+<span class="token punctuation">}</span>
+
+</code></pre>
+<ul>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span> 利用<code>malloc</code>生成一个链表结点<code>insertNode</code>，并且填充 <strong>数据域</strong> 和 <strong>指针域</strong>；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span></span> 如果当前 <strong>队尾</strong> 不为空，则将<code>insertNode</code>作为 <strong>队尾</strong> 的 <strong>后继结点</strong>，并且更新<code>insertNode</code>作为新的 <strong>后继结点</strong>；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(3)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">3</span><span class="mclose">)</span></span></span></span></span> 否则，<strong>队首</strong> 和 <strong>队尾</strong> 都为<code>insertNode</code>；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>4</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(4)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">4</span><span class="mclose">)</span></span></span></span></span> 队列元素 加一；</li>
+</ul>
+<h2><a id="3_229"></a>3、出队</h2>
+<h3><a id="1_230"></a>1、动画演示</h3>
+<p><img src="https://img-blog.csdnimg.cn/0976b4164ac743d08b4c34e72928e857.gif#pic_center" alt=""></p>
+<blockquote>
+<p>  如图所示，<font color="fd0606"><b>head</b></font> 为 <strong>队首元素</strong>，<font color="fd0606"><b>tail</b></font> 为 <strong>队尾元素</strong>，<font color="fd0606"><b>temp</b></font> 为当前需要 <strong>出队</strong> 的元素，即图中的 <font color="fe8a27"><b>橙色结点</b></font>。<strong>出队</strong> 操作完成后，<strong>队首元素</strong> 变为之前 <font color="fd0606"><b>head</b></font> 的 <strong>后继结点</strong>，即图中 <font color="52bb69"><b>绿色结点</b></font>。</p>
+</blockquote>
+<h3><a id="2_233"></a>2、源码详解</h3>
+<ul>
+<li><strong>出队</strong> 操作，由于链表头结点就是 <strong>队首</strong>，其实就是删除这个链表的头结点的过程。代码实现如下：</li>
+</ul>
+<pre><code class="prism language-c"><span class="token keyword">void</span> <span class="token function">QueueDequeue</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Queue</span><span class="token operator">*</span> que<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">struct</span> <span class="token class-name">QueueNode</span> <span class="token operator">*</span>temp <span class="token operator">=</span> que<span class="token operator">-&gt;</span>head<span class="token punctuation">;</span>  <span class="token comment">// (1)</span>
+    que<span class="token operator">-&gt;</span>head <span class="token operator">=</span> temp<span class="token operator">-&gt;</span>next<span class="token punctuation">;</span>              <span class="token comment">// (2)</span>
+    <span class="token function">free</span><span class="token punctuation">(</span>temp<span class="token punctuation">)</span><span class="token punctuation">;</span>                          <span class="token comment">// (3)</span>
+    <span class="token operator">--</span>que<span class="token operator">-&gt;</span>size<span class="token punctuation">;</span>                         <span class="token comment">// (4)</span>
+    <span class="token keyword">if</span><span class="token punctuation">(</span>que<span class="token operator">-&gt;</span>size <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>                 <span class="token comment">// (5)</span>
+        que<span class="token operator">-&gt;</span>tail <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span> 
+<span class="token punctuation">}</span>
+</code></pre>
+<ul>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span> 将 <strong>队首</strong> 保存到<code>temp</code>中；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span></span> 将 <strong>队首</strong> 的 <strong>后继结点</strong> 作为新的 <strong>队首</strong>；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(3)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">3</span><span class="mclose">)</span></span></span></span></span> 释放之前 <strong>队首</strong> 对应的内存；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>4</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(4)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">4</span><span class="mclose">)</span></span></span></span></span> 队列元素减一；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>5</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(5)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">5</span><span class="mclose">)</span></span></span></span></span> 当队列元素为空时，别忘了将 <strong>队尾</strong> 指针置空；</li>
+</ul>
+<h2><a id="4_252"></a>4、清空队列</h2>
+<h3><a id="1_253"></a>1、动画演示</h3>
+<p><img src="https://img-blog.csdnimg.cn/2e9e5008c6ee42e292f41c05b0a42f42.gif#pic_center" alt=""></p>
+<blockquote>
+<p>  <strong>清空队列</strong> 可以理解为：不断的 <strong>出队</strong>，直到 <strong>队列元素</strong> 个数为零为止。由于链表结点是动态申请的内存，所以在没有其它结点引用时，是需要释放内存的，不像数组那样直接将 <strong>队首指针</strong> 和 <strong>队尾指针</strong> 置空就行的。</p>
+</blockquote>
+<h3><a id="2_256"></a>2、源码详解</h3>
+<ul>
+<li>对于链表而言，<strong>清空队列</strong> 的操作需要删除每个链表结点，代码实现如下：</li>
+</ul>
+<pre><code class="prism language-c"><span class="token keyword">void</span> <span class="token function">QueueClear</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Queue</span><span class="token operator">*</span> que<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">while</span><span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">QueueIsEmpty</span><span class="token punctuation">(</span>que<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>     <span class="token comment">// (1)</span>
+        <span class="token function">QueueDequeue</span><span class="token punctuation">(</span>que<span class="token punctuation">)</span><span class="token punctuation">;</span>          <span class="token comment">// (2)</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<ul>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span> - <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span></span> 的每次操作其实就是一个 <strong>出队</strong> 的过程，如果 <strong>队列</strong> 不为空；则进行 <strong>出队</strong> 操作，直到 <strong>队列</strong> 为空；</li>
+</ul>
+<h2><a id="5_268"></a>5、只读接口</h2>
+<ul>
+<li>只读接口包含：获取队首元素、获取队列大小、队列的判空，实现如下：</li>
+</ul>
+<pre><code class="prism language-c">DataType <span class="token function">QueueGetFront</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Queue</span><span class="token operator">*</span> que<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> que<span class="token operator">-&gt;</span>head<span class="token operator">-&gt;</span>data<span class="token punctuation">;</span>              <span class="token comment">// (1)</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">int</span> <span class="token function">QueueGetSize</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Queue</span><span class="token operator">*</span> que<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> que<span class="token operator">-&gt;</span>size<span class="token punctuation">;</span>                    <span class="token comment">// (2)</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">int</span> <span class="token function">QueueIsEmpty</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Queue</span><span class="token operator">*</span> que<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token operator">!</span><span class="token function">QueueGetSize</span><span class="token punctuation">(</span>que<span class="token punctuation">)</span><span class="token punctuation">;</span>           <span class="token comment">// (3)</span>
+<span class="token punctuation">}</span>
+
+</code></pre>
+<ul>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span> <code>que-&gt;head</code>作为 <strong>队首指针</strong>，它的 <strong>数据域</strong> <code>data</code>就是 <strong>队首元素的值</strong>，返回即可；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span></span> <code>size</code>记录的是 <strong>队列元素</strong> 的个数；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(3)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">3</span><span class="mclose">)</span></span></span></span></span> 当 <strong>队列元素</strong> 个数为 零 时，队列为空。</li>
+</ul>
+<h2><a id="6_286"></a>6、队列的链表实现源码</h2>
+<pre><code class="prism language-c"><span class="token comment">/**************************** 链表 实现队列 ****************************/</span>
+<span class="token keyword">typedef</span> <span class="token keyword">int</span> DataType<span class="token punctuation">;</span>
+
+<span class="token keyword">struct</span> <span class="token class-name">QueueNode</span><span class="token punctuation">;</span>
+<span class="token keyword">struct</span> <span class="token class-name">QueueNode</span> <span class="token punctuation">{</span>
+    DataType data<span class="token punctuation">;</span>
+    <span class="token keyword">struct</span> <span class="token class-name">QueueNode</span> <span class="token operator">*</span>next<span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token keyword">struct</span> <span class="token class-name">Queue</span> <span class="token punctuation">{</span>
+    <span class="token keyword">struct</span> <span class="token class-name">QueueNode</span> <span class="token operator">*</span>head<span class="token punctuation">,</span> <span class="token operator">*</span>tail<span class="token punctuation">;</span>
+    <span class="token keyword">int</span> size<span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token keyword">void</span> <span class="token function">QueueEnqueue</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Queue</span> <span class="token operator">*</span>que<span class="token punctuation">,</span> DataType dt<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">struct</span> <span class="token class-name">QueueNode</span> <span class="token operator">*</span>insertNode <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">QueueNode</span> <span class="token operator">*</span><span class="token punctuation">)</span> <span class="token function">malloc</span><span class="token punctuation">(</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">QueueNode</span><span class="token punctuation">)</span> <span class="token punctuation">)</span><span class="token punctuation">;</span>
+    insertNode<span class="token operator">-&gt;</span>data <span class="token operator">=</span> dt<span class="token punctuation">;</span>
+    insertNode<span class="token operator">-&gt;</span>next <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span><span class="token punctuation">(</span>que<span class="token operator">-&gt;</span>tail<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        que<span class="token operator">-&gt;</span>tail<span class="token operator">-&gt;</span>next <span class="token operator">=</span> insertNode<span class="token punctuation">;</span>
+        que<span class="token operator">-&gt;</span>tail <span class="token operator">=</span> insertNode<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span class="token keyword">else</span> <span class="token punctuation">{</span>
+        que<span class="token operator">-&gt;</span>head <span class="token operator">=</span> que<span class="token operator">-&gt;</span>tail <span class="token operator">=</span> insertNode<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token operator">++</span>que<span class="token operator">-&gt;</span>size<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">void</span> <span class="token function">QueueDequeue</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Queue</span><span class="token operator">*</span> que<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">struct</span> <span class="token class-name">QueueNode</span> <span class="token operator">*</span>temp <span class="token operator">=</span> que<span class="token operator">-&gt;</span>head<span class="token punctuation">;</span>
+    que<span class="token operator">-&gt;</span>head <span class="token operator">=</span> temp<span class="token operator">-&gt;</span>next<span class="token punctuation">;</span>
+    <span class="token function">free</span><span class="token punctuation">(</span>temp<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token operator">--</span>que<span class="token operator">-&gt;</span>size<span class="token punctuation">;</span>
+    <span class="token keyword">if</span><span class="token punctuation">(</span>que<span class="token operator">-&gt;</span>size <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        que<span class="token operator">-&gt;</span>tail <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span> 
+<span class="token punctuation">}</span>
+
+DataType <span class="token function">QueueGetFront</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Queue</span><span class="token operator">*</span> que<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> que<span class="token operator">-&gt;</span>head<span class="token operator">-&gt;</span>data<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">int</span> <span class="token function">QueueGetSize</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Queue</span><span class="token operator">*</span> que<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> que<span class="token operator">-&gt;</span>size<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">int</span> <span class="token function">QueueIsEmpty</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Queue</span><span class="token operator">*</span> que<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token operator">!</span><span class="token function">QueueGetSize</span><span class="token punctuation">(</span>que<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">void</span> <span class="token function">QueueClear</span><span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Queue</span><span class="token operator">*</span> que<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    que<span class="token operator">-&gt;</span>head <span class="token operator">=</span> que<span class="token operator">-&gt;</span>tail <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+    que<span class="token operator">-&gt;</span>size <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">/**************************** 链表 实现队列 ****************************/</span>
+</code></pre>
+<h1><a id="_341"></a>五、两种实现的优缺点</h1>
+<h2><a id="1_342"></a>1、顺序表实现</h2>
+<p>  在利用顺序表实现队列时，<strong>入队</strong> 和 <strong>出队</strong> 的常数时间复杂度低，且 <strong>清空队列</strong> 操作相比 <strong>链表实现</strong> 能做到 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathdefault" style="margin-right: 0.02778em;">O</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span>，唯一的不足之处是：需要预先申请好空间，而且当空间不够时，需要进行扩容，扩容方式本文未提及，可以参考以下文章：<a href="https://blog.csdn.net/WhereIsHeroFrom/article/details/108750216">《C/C++ 面试 100 例》（四）vector 扩容策略</a>。<br>
+  当然，可以采用 <strong>循环队列</strong>，能够很大程度上避免扩容问题，但是当 <strong>入队速度</strong> 大于 <strong>出队速度</strong> 时，不免还是会遇到扩容的问题。</p>
+<h2><a id="2_345"></a>2、链表实现</h2>
+<p>  在利用链表实现队列时，<strong>入队</strong> 和 <strong>出队</strong> 的常数时间复杂度略高，主要是每插入一个队列元素都需要申请空间，每删除一个队列元素都需要释放空间，且 <strong>清空队列</strong> 操作是 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathdefault" style="margin-right: 0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mclose">)</span></span></span></span></span> 的，直接将 <strong>队首指针</strong> 和 <strong>队尾指针</strong> 置空会导致内存泄漏。<br>
+  好处就是：不需要预先分配空间，且在内存允许范围内，可以一直 <strong>入队</strong>，没有顺序表的限制。当然，链表的实现明显比数组实现要复杂，编码的时候容易出错。</p>
+<hr>
+<p>  需要注意的是，本文在讲解过程中，<strong>顺序表实现</strong> 的 <strong>队尾</strong> 和 <strong>链表实现</strong> 的 <strong>队尾</strong> 不是一个概念，顺序表实现的队尾没有实际元素值，而链表实现的则不然，请自行加以区分。</p>
+<h1><a id="_351"></a>六、队列的入门</h1>
+<blockquote>
+<p>好啦，接下来，让我们做几个队列的题目练习一下吧。</p>
+</blockquote>
+<h2><a id="1_353"></a>1、滑动窗口</h2>
+<p><a href="https://blog.csdn.net/WhereIsHeroFrom/article/details/119767798">LeetCode 933. 最近的请求次数</a><br>
+<a href="https://blog.csdn.net/WhereIsHeroFrom/article/details/119768345">LeetCode 346. 数据流中的移动平均值</a></p>
+<h2><a id="2_356"></a>2、广度优先搜索</h2>
+<p><a href="https://blog.csdn.net/WhereIsHeroFrom/article/details/118654368">LeetCode 542. 01 矩阵</a><br>
+<a href="https://blog.csdn.net/WhereIsHeroFrom/article/details/118655754">LeetCode 994. 腐烂的橘子</a><br>
+<a href="https://blog.csdn.net/WhereIsHeroFrom/article/details/118657057">LeetCode 116. 填充每个节点的下一个右侧节点指针</a></p>
+<h1><a id="_360"></a>七、队列的进阶</h1>
+<h2><a id="1_361"></a>1、辅助队列</h2>
+<p><a href="https://blog.csdn.net/WhereIsHeroFrom/article/details/119768563">LeetCode 225. 用队列实现栈</a></p>
+<h2><a id="2_363"></a>2、单调队列</h2>
+<p><a href="https://blog.csdn.net/WhereIsHeroFrom/article/details/119771304">LeetCode 1696. 跳跃游戏 VI</a><br>
+<a href="https://blog.csdn.net/WhereIsHeroFrom/article/details/119771468">LeetCode 1438. 绝对差不超过限制的最长连续子数组</a><br>
+<a href="https://blog.csdn.net/WhereIsHeroFrom/article/details/119768845">LeetCode 239. 滑动窗口最大值</a><br>
+<a href="https://blog.csdn.net/WhereIsHeroFrom/article/details/119771399">LeetCode1425. 带限制的子序列和</a></p>
+<hr>
+<ul>
+<li>关于 <font color="eb3f41"><b>「 队列 」</b></font> 的内容到这里就结束了。</li>
+<li>有关<a href="https://blog.csdn.net/whereisherofrom/category_11227297.html"><font color="13ae01"><b>🌳《<u>画解数据结构</u>》🌳 </b></font></a>的源码均开源，链接如下：<a href="https://github.com/WhereIsHeroFrom/Code_Templates/tree/master/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E7%94%BB%E8%A7%A3%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84">《画解数据结构》</a></li>
+</ul>
+<hr>
+<center>👇🏻添加 博主 获取付费专栏优惠券👇🏻</center>
+</div>
+</body>
+
+</html>

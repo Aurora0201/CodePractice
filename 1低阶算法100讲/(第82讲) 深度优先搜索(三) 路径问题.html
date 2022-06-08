@@ -1,0 +1,130 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>《算法零基础100讲》(第82讲) 深度优先搜索(三) 路径问题</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__html"><p></p><div class="toc"><h3>文章目录</h3><ul><li><a href="#_3">零、写在前面</a></li><li><a href="#_8">一、概念定义</a></li><li><a href="#_13">二、题目描述</a></li><li><a href="#_17">三、算法详解</a></li><li><a href="#_23">四、源码剖析</a></li><li><a href="#_74">五、推荐专栏</a></li><li><a href="#_80">六、习题练习</a></li></ul></div><p></p>
+<h1><a id="_3"></a>零、写在前面</h1>
+<p>  这是<a href="https://blog.csdn.net/whereisherofrom/category_11426012.html">《算法零基础100讲》</a> 专栏打卡学习的第 <font color="red">82</font> 天了。如果觉得本专栏太贵无法承受，在博主主页添加博主好友，获取 <font color="red"><strong>付费专栏优惠券</strong></font>。<br>
+  每天专栏的题，做不出来没关系，因为困难的题涉及知识点较多，可能会涉及到后面的章节，所以不要着急，内容能看懂，能自己分析，能做出简单题就行。<br>
+  在刷题的过程中，总结自己遇到的坑点，写出 <strong>「 解题报告 」</strong>  供他人学习，也是一种自我学习的方式。这就是经典的帮助他人的同时，成就自己。目前， <a href="https://bbs.csdn.net/forums/hero"><strong>「 万人千题 」</strong></a> 社区 每天都会有五六篇高质量的 <strong>「 解题报告 」</strong> 被我 <strong>「 加精 」</strong>。如果觉得自己有能力的，也可以来发布你的 <strong>「 解题报告 」</strong>。千万级流量，你我共同拥有。</p>
+<h1><a id="_8"></a>一、概念定义</h1>
+<p>  路径问题，最常见的是在二叉树上找路径，当然也有可能是在图上找，例如有向图的最短路问题，可以用深度优先搜索，然而，更加通用做法是 广搜。<br>
+  深搜的路径问题，一般还是树上问题居多。<br>
+  对于深搜的路径问题，时间复杂度一般都是 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>n</mi><mo>+</mo><mi>m</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(n + m)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathdefault" style="margin-right: 0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathdefault">m</span><span class="mclose">)</span></span></span></span></span>，<span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathdefault">n</span></span></span></span></span> 代表点数，<span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>m</mi></mrow><annotation encoding="application/x-tex">m</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathdefault">m</span></span></span></span></span> 代表边数，也就是每个点，每条边至多访问一次。</p>
+<h1><a id="_13"></a>二、题目描述</h1>
+<blockquote>
+<p>  给你二叉树的根节点 <code>root</code>和一个整数目标和 <code>targetSum</code>，找出所有 从根节点到叶子节点 <strong>路径总和</strong> 等于给定 <strong>目标和</strong> 的路径。叶子节点是指没有子节点的节点。</p>
+</blockquote>
+<h1><a id="_17"></a>三、算法详解</h1>
+<p>  <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span> 从根结点不断往下遍历，每次可以选择左子树，或者右子树。<br>
+  <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span></span> 遍历到左子树，或者右子树以后，就是相同的过程调用。<br>
+  <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(3)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">3</span><span class="mclose">)</span></span></span></span></span> 于是，可以采用递归，即深度优先搜索。<br>
+  <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>4</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(4)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">4</span><span class="mclose">)</span></span></span></span></span> 遍历过程中，记录从 <strong>根结点</strong> 到 <strong>当前遍历结点</strong> 的 <strong>权值和</strong>，一旦等于就是一个可行解，放入结果数组。</p>
+<h1><a id="_23"></a>四、源码剖析</h1>
+<pre><code class="prism language-cpp"><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">{</span>
+    vector<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">&gt;</span> stk<span class="token punctuation">;</span>
+    <span class="token keyword">bool</span> <span class="token function">isLeaf</span><span class="token punctuation">(</span>TreeNode<span class="token operator">*</span> root<span class="token punctuation">)</span> <span class="token punctuation">{</span>                <span class="token comment">// (1)</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span>root <span class="token operator">==</span> <span class="token constant">NULL</span><span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> <span class="token punctuation">(</span><span class="token operator">!</span>root<span class="token operator">-&gt;</span>left <span class="token operator">&amp;&amp;</span> <span class="token operator">!</span>root<span class="token operator">-&gt;</span>right<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">void</span> <span class="token function">dfs</span><span class="token punctuation">(</span>TreeNode<span class="token operator">*</span> root<span class="token punctuation">,</span> <span class="token keyword">int</span> targetSum<span class="token punctuation">,</span> vector<span class="token operator">&lt;</span>vector<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">&gt;&gt;</span><span class="token operator">&amp;</span> ans<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span>root <span class="token operator">==</span> <span class="token constant">NULL</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">return</span> <span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        
+        <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token function">isLeaf</span><span class="token punctuation">(</span>root<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">if</span><span class="token punctuation">(</span>targetSum <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>       
+                ans<span class="token punctuation">.</span><span class="token function">push_back</span><span class="token punctuation">(</span> stk <span class="token punctuation">)</span><span class="token punctuation">;</span>            <span class="token comment">// (2)</span>
+            <span class="token punctuation">}</span>
+            <span class="token keyword">return</span> <span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        
+        <span class="token keyword">if</span><span class="token punctuation">(</span>root<span class="token operator">-&gt;</span>left<span class="token punctuation">)</span> <span class="token punctuation">{</span>                        <span class="token comment">// (3)</span>
+            stk<span class="token punctuation">.</span><span class="token function">push_back</span><span class="token punctuation">(</span>root<span class="token operator">-&gt;</span>left<span class="token operator">-&gt;</span>val<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token function">dfs</span><span class="token punctuation">(</span>root<span class="token operator">-&gt;</span>left<span class="token punctuation">,</span> targetSum <span class="token operator">-</span> root<span class="token operator">-&gt;</span>left<span class="token operator">-&gt;</span>val<span class="token punctuation">,</span> ans<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            stk<span class="token punctuation">.</span><span class="token function">pop_back</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+         
+        <span class="token keyword">if</span><span class="token punctuation">(</span>root<span class="token operator">-&gt;</span>right<span class="token punctuation">)</span> <span class="token punctuation">{</span>                       <span class="token comment">// (4)</span>
+            stk<span class="token punctuation">.</span><span class="token function">push_back</span><span class="token punctuation">(</span>root<span class="token operator">-&gt;</span>right<span class="token operator">-&gt;</span>val<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token function">dfs</span><span class="token punctuation">(</span>root<span class="token operator">-&gt;</span>right<span class="token punctuation">,</span> targetSum <span class="token operator">-</span> root<span class="token operator">-&gt;</span>right<span class="token operator">-&gt;</span>val<span class="token punctuation">,</span> ans<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            stk<span class="token punctuation">.</span><span class="token function">pop_back</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token keyword">public</span><span class="token operator">:</span>
+    vector<span class="token operator">&lt;</span>vector<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">&gt;&gt;</span> <span class="token function">pathSum</span><span class="token punctuation">(</span>TreeNode<span class="token operator">*</span> root<span class="token punctuation">,</span> <span class="token keyword">int</span> targetSum<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        vector<span class="token operator">&lt;</span>vector<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">&gt;&gt;</span> ans<span class="token punctuation">;</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span>root <span class="token operator">==</span> <span class="token constant">NULL</span><span class="token punctuation">)</span> <span class="token keyword">return</span> ans<span class="token punctuation">;</span>
+        stk<span class="token punctuation">.</span><span class="token function">clear</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        stk<span class="token punctuation">.</span><span class="token function">push_back</span><span class="token punctuation">(</span>root<span class="token operator">-&gt;</span>val<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token function">dfs</span><span class="token punctuation">(</span>root<span class="token punctuation">,</span> targetSum <span class="token operator">-</span> root<span class="token operator">-&gt;</span>val<span class="token punctuation">,</span> ans<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> ans<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+</code></pre>
+<ul>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span> 这个接口判断是否是叶子结点；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span></span> 找到了一组可行的路径，将它放入结果数组；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(3)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">3</span><span class="mclose">)</span></span></span></span></span> 递归遍历左子树；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>4</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(4)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">4</span><span class="mclose">)</span></span></span></span></span> 递归遍历右子树；</li>
+</ul>
+<h1><a id="_74"></a>五、推荐专栏</h1>
+ <center> <a href="https://blog.csdn.net/whereisherofrom/category_9273531.html"><font color="886ce4"><b>💜《<u>夜深人静写算法</u>》💜</b></font></a></center>
+  
+ <center> <a href="https://blog.csdn.net/WhereIsHeroFrom/article/details/111407529"><font color="886ce4"><b>（<u>一）搜索入门</u></b></font></a></center>
+<h1><a id="_80"></a>六、习题练习</h1>
+
+<table>
+<thead>
+<tr>
+<th>序号</th>
+<th>题目链接</th>
+<th>难度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><a href="https://leetcode-cn.com/problems/word-search/">LeetCode 79. 单词搜索</a></td>
+<td>★★☆☆☆</td>
+</tr>
+<tr>
+<td>2</td>
+<td><a href="https://leetcode-cn.com/problems/bP4bmD/">剑指 Offer II 110. 所有路径</a></td>
+<td>★★☆☆☆</td>
+</tr>
+<tr>
+<td>3</td>
+<td><a href="https://leetcode-cn.com/problems/path-sum-ii/">LeetCode 113. 路径总和 II</a></td>
+<td>★★☆☆☆</td>
+</tr>
+<tr>
+<td>4</td>
+<td><a href="https://leetcode-cn.com/problems/er-cha-shu-zhong-he-wei-mou-yi-zhi-de-lu-jing-lcof/">剑指 Offer 34. 二叉树中和为某一值的路径</a></td>
+<td>★★☆☆☆</td>
+</tr>
+<tr>
+<td>5</td>
+<td><a href="https://leetcode-cn.com/problems/all-paths-from-source-to-target/">LeetCode 797. 所有可能的路径</a></td>
+<td>★★★☆☆</td>
+</tr>
+<tr>
+<td>6</td>
+<td><a href="https://leetcode-cn.com/problems/maximum-path-quality-of-a-graph/?from=from_parent_mindnote">LeetCode 2065. 最大化一张图中的路径价值</a></td>
+<td>★★★★☆</td>
+</tr>
+</tbody>
+</table><center>👇🏻添加 博主 获取付费专栏优惠券👇🏻</center>
+</div>
+</body>
+
+</html>

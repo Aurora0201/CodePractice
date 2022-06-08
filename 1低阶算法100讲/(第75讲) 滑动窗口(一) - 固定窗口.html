@@ -1,0 +1,113 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>《算法零基础100讲》(第75讲) 滑动窗口(一) - 固定窗口</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__html"><p></p><div class="toc"><h3>文章目录</h3><ul><li><a href="#_3">零、写在前面</a></li><li><a href="#_8">一、概念定义</a></li><li><a href="#_15">二、题目描述</a></li><li><a href="#_18">三、算法详解</a></li><li><a href="#_23">四、源码剖析</a></li><li><a href="#_48">五、推荐专栏</a></li><li><a href="#_55">六、习题练习</a></li></ul></div><p></p>
+<h1><a id="_3"></a>零、写在前面</h1>
+<p>  这是<a href="https://blog.csdn.net/whereisherofrom/category_11426012.html">《算法零基础100讲》</a> 专栏打卡学习的第 <font color="red">75</font> 天了。如果觉得本专栏太贵无法承受，在博主主页添加博主好友，获取 <font color="red"><strong>付费专栏优惠券</strong></font>。<br>
+  每天专栏的题，做不出来没关系，因为困难的题涉及知识点较多，可能会涉及到后面的章节，所以不要着急，内容能看懂，能自己分析，能做出简单题就行。<br>
+  在刷题的过程中，总结自己遇到的坑点，写出 <strong>「 解题报告 」</strong>  供他人学习，也是一种自我学习的方式。这就是经典的帮助他人的同时，成就自己。目前， <a href="https://bbs.csdn.net/forums/hero"><strong>「 万人千题 」</strong></a> 社区 每天都会有五六篇高质量的 <strong>「 解题报告 」</strong> 被我 <strong>「 加精 」</strong>。如果觉得自己有能力的，也可以来发布你的 <strong>「 解题报告 」</strong>。千万级流量，你我共同拥有。</p>
+<h1><a id="_8"></a>一、概念定义</h1>
+<p>  对于滑动窗口，有固定的窗口，也有非固定的窗口，一般是基于数组进行求解。对于一个数组中两个相邻窗口，势必会有一大部分重叠的部分，这部分重叠的内容是不需要重复计算的，所以我们可以通过相邻的窗口进行数据的延续使用。<br>
+<img src="https://img-blog.csdnimg.cn/94ef186662a2415b831cf6e5d3e12c07.png#pic_center" alt=""><br>
+  如上图所示，两个相邻的长度为 4 的窗口（图中红色部分），下一个窗口一定比前一个窗口 少一个数据，以及多另一个数据。<br>
+<img src="https://img-blog.csdnimg.cn/57b9525f977a42bab27810b586c7e53a.png#pic_center" alt="、"><br>
+  橙色为切换窗口时少的那个数据，黄色为切换窗口时多出来的那个数据，所以，可以直接沿用之前的数据，并且减去橙色数据，加上黄色数据。就是我们下一个窗口的值了。这就是滑动窗口的一个经典思路。</p>
+<h1><a id="_15"></a>二、题目描述</h1>
+<blockquote>
+<p>  给你一个整数数组 <code>arr</code>和两个整数 <code>k</code>和 <code>threshold</code>。请你返回长度为 <code>k</code>且平均值大于等于 <code>threshold</code>的子数组数目。</p>
+</blockquote>
+<h1><a id="_18"></a>三、算法详解</h1>
+<p>  <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span> 首先，统计前 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>k</mi></mrow><annotation encoding="application/x-tex">k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.69444em; vertical-align: 0em;"></span><span class="mord mathdefault" style="margin-right: 0.03148em;">k</span></span></span></span></span> 个数的和<code>sum</code>，作为第一个窗口的值，并且判断是否满足<code>sum &gt;= threshold</code>，如果满足，则计数器加一；<br>
+  <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span></span> 然后，窗口不断右移，每次通过前一个相邻窗口，用 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathdefault" style="margin-right: 0.02778em;">O</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span> 的时间计算得到下一个窗口的值，并且判断条件是否满足，满足则计时器加一；<br>
+  <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(3)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">3</span><span class="mclose">)</span></span></span></span></span> 最后返回计数器的值；</p>
+<h1><a id="_23"></a>四、源码剖析</h1>
+<pre><code class="prism language-c"><span class="token keyword">int</span> <span class="token function">numOfSubarrays</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token operator">*</span> arr<span class="token punctuation">,</span> <span class="token keyword">int</span> arrSize<span class="token punctuation">,</span> <span class="token keyword">int</span> k<span class="token punctuation">,</span> <span class="token keyword">int</span> threshold<span class="token punctuation">)</span><span class="token punctuation">{</span>
+    <span class="token keyword">int</span> i<span class="token punctuation">;</span>
+    <span class="token keyword">int</span> sum <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">,</span> ret <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    threshold <span class="token operator">*=</span> k<span class="token punctuation">;</span>
+    <span class="token keyword">for</span><span class="token punctuation">(</span>i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> k<span class="token punctuation">;</span> <span class="token operator">++</span>i<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        sum <span class="token operator">+=</span> arr<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">if</span><span class="token punctuation">(</span>sum <span class="token operator">&gt;=</span> threshold<span class="token punctuation">)</span> <span class="token operator">++</span>ret<span class="token punctuation">;</span>       <span class="token comment">// (1)</span>
+    
+    <span class="token keyword">for</span><span class="token punctuation">(</span>i <span class="token operator">=</span> k<span class="token punctuation">;</span> i <span class="token operator">&lt;</span> arrSize<span class="token punctuation">;</span> <span class="token operator">++</span>i<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        sum <span class="token operator">-=</span> arr<span class="token punctuation">[</span>i<span class="token operator">-</span>k<span class="token punctuation">]</span><span class="token punctuation">;</span>              <span class="token comment">// (2)</span>
+        sum <span class="token operator">+=</span> arr<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span>sum <span class="token operator">&gt;=</span> threshold<span class="token punctuation">)</span> <span class="token operator">++</span> ret<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">return</span> ret<span class="token punctuation">;</span>                       <span class="token comment">// (3)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<ul>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span> 首先，统计前 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>k</mi></mrow><annotation encoding="application/x-tex">k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.69444em; vertical-align: 0em;"></span><span class="mord mathdefault" style="margin-right: 0.03148em;">k</span></span></span></span></span> 个数的和<code>sum</code>，作为第一个窗口的值，并且判断是否满足<code>sum &gt;= threshold</code>，如果满足，则计数器加一；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span></span> 然后，窗口不断右移，每次通过前一个相邻窗口，用 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathdefault" style="margin-right: 0.02778em;">O</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span> 的时间计算得到下一个窗口的值，并且判断条件是否满足，满足则计时器加一；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(3)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">3</span><span class="mclose">)</span></span></span></span></span> 最后返回计数器的值；</li>
+</ul>
+<h1><a id="_48"></a>五、推荐专栏</h1>
+<center> <a href="https://blog.csdn.net/whereisherofrom/category_11227297.html"><font color="13ae01"><b>🧶《<u>画解数据结构</u>》🧶 </b></font></a> </center><br>
+<center> <a href="https://blog.csdn.net/WhereIsHeroFrom/article/details/118979494"><font color="13ae01"><b><u>画解顺序表</u></b></font></a> </center><br>
+<h1><a id="_55"></a>六、习题练习</h1>
+
+<table>
+<thead>
+<tr>
+<th>序号</th>
+<th>题目链接</th>
+<th>难度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><a href="https://leetcode-cn.com/problems/VabMRr/">剑指 Offer II 015. 字符串中的所有变位词</a></td>
+<td>★★☆☆☆</td>
+</tr>
+<tr>
+<td>2</td>
+<td><a href="https://leetcode-cn.com/problems/MPnaiL/">剑指 Offer II 014. 字符串中的变位词</a></td>
+<td>★★☆☆☆</td>
+</tr>
+<tr>
+<td>3</td>
+<td><a href="https://leetcode-cn.com/problems/permutation-in-string/">LeetCode 567. 字符串的排列</a></td>
+<td>★★☆☆☆</td>
+</tr>
+<tr>
+<td>4</td>
+<td><a href="https://leetcode-cn.com/problems/find-all-anagrams-in-a-string/">LeetCode 438. 找到字符串中所有字母异位词</a></td>
+<td>★★☆☆☆</td>
+</tr>
+<tr>
+<td>5</td>
+<td><a href="https://leetcode-cn.com/problems/k-radius-subarray-averages/">LeetCode 2090. 半径为 k 的子数组平均值</a></td>
+<td>★★☆☆☆</td>
+</tr>
+<tr>
+<td>6</td>
+<td><a href="https://leetcode-cn.com/problems/number-of-sub-arrays-of-size-k-and-average-greater-than-or-equal-to-threshold/?from=from_parent_mindnote">LeetCode 1343. 大小为 K 且平均值大于等于阈值的子数组数目</a></td>
+<td>★★★☆☆</td>
+</tr>
+<tr>
+<td>7</td>
+<td><a href="https://leetcode-cn.com/problems/sliding-window-maximum/">LeetCode 239. 滑动窗口最大值</a></td>
+<td>★★★☆☆</td>
+</tr>
+<tr>
+<td>8</td>
+<td><a href="https://leetcode-cn.com/problems/hua-dong-chuang-kou-de-zui-da-zhi-lcof/?from=from_parent_mindnote">剑指 Offer 59 - I. 滑动窗口的最大值 </a></td>
+<td>★★★☆☆</td>
+</tr>
+</tbody>
+</table><center>👇🏻添加 博主 获取付费专栏优惠券👇🏻</center>
+</div>
+</body>
+
+</html>

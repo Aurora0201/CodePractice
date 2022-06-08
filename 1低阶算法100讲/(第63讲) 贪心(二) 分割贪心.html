@@ -1,0 +1,99 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>《算法零基础100讲》(第63讲) 贪心(二) 分割贪心</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__html"><p></p><div class="toc"><h3>文章目录</h3><ul><li><a href="#_2">零、写在前面</a></li><li><a href="#_8">一、概念定义</a></li><li><a href="#_12">二、题目描述</a></li><li><a href="#_15">三、算法详解</a></li><li><a href="#_21">四、源码剖析</a></li><li><a href="#_43">五、推荐专栏</a></li><li><a href="#_50">六、习题练习</a></li></ul></div><p></p>
+<h1><a id="_2"></a>零、写在前面</h1>
+<p>  这是<a href="https://blog.csdn.net/whereisherofrom/category_11426012.html">《算法零基础100讲》</a> 专栏打卡学习的第 <font color="red">63</font> 天了。如果觉得本专栏太贵无法承受，在博主主页添加博主好友，获取 <font color="red"><strong>付费专栏优惠券</strong></font>。<br>
+  每天专栏的题，做不出来没关系，因为困难的题涉及知识点较多，可能会涉及到后面的章节，所以不要着急，内容能看懂，能自己分析，能做出简单题就行。<br>
+  在刷题的过程中，总结自己遇到的坑点，写出 <strong>「 解题报告 」</strong>  供他人学习，也是一种自我学习的方式。这就是经典的帮助他人的同时，成就自己。目前， <a href="https://bbs.csdn.net/forums/hero"><strong>「 万人千题 」</strong></a> 社区 每天都会有五六篇高质量的 <strong>「 解题报告 」</strong> 被我 <strong>「 加精 」</strong>。如果觉得自己有能力的，也可以来发布你的 <strong>「 解题报告 」</strong>。千万级流量，你我共同拥有。</p>
+<h1><a id="_8"></a>一、概念定义</h1>
+<p>  贪心问题让人又爱又恨，因为贪心问题没有固定的解法，相比动态规划而言，贪心问题要难起来，会更难。<br>
+  贪心问题的难点在于 「 证明 」，也就是说，你怎么知道这种做法是对的，有时候可能只是想当然。<br>
+  本文会介绍一种比较常用的贪心策略，就是分割贪心，据说对于一个数组将它分割成不同的子段，分别进行贪心计算。</p>
+<h1><a id="_12"></a>二、题目描述</h1>
+<blockquote>
+<p>  在一个平衡字符串中 <code>'L'</code>和 <code>'R'</code>字符的数量是相同的。给你一个平衡字符串 s，请你将它分割成尽可能多的平衡字符串。返回可以通过分割得到的平衡字符串的最大数量 。</p>
+</blockquote>
+<h1><a id="_15"></a>三、算法详解</h1>
+<p>  我们定义一个字符串中<code>'L'</code>的数量减去<code>'R'</code>的数量为这个字符串的平衡度。<br>
+  平衡字符串的平衡度必然为零，两个平衡字符串连接必然还是平衡字符串。题目要求的是最大数量，所以分成两个一定比把它们连接起来更优。<br>
+  只需要从左往右统计平衡度，一旦发现平衡度为零，则进行分割。并且对计数器自增，最后的计数器就是我们要求的答案了。</p>
+<h1><a id="_21"></a>四、源码剖析</h1>
+<pre><code class="prism language-c"><span class="token keyword">int</span> <span class="token function">balancedStringSplit</span><span class="token punctuation">(</span><span class="token keyword">char</span> <span class="token operator">*</span> s<span class="token punctuation">)</span><span class="token punctuation">{</span>
+    <span class="token keyword">int</span> i<span class="token punctuation">;</span>
+    <span class="token keyword">int</span> sum <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>                         <span class="token comment">// (1)</span>
+    <span class="token keyword">int</span> ans <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>                         <span class="token comment">// (2)</span>
+    <span class="token keyword">for</span><span class="token punctuation">(</span>i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> s<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token operator">++</span>i<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        sum <span class="token operator">+=</span> <span class="token punctuation">(</span>s<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">==</span> <span class="token char">'L'</span><span class="token punctuation">)</span> <span class="token operator">?</span> <span class="token number">1</span> <span class="token operator">:</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>   <span class="token comment">// (3)</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span>sum <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token operator">++</span>ans<span class="token punctuation">;</span>                       <span class="token comment">// (4)</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">return</span> ans<span class="token punctuation">;</span>                          <span class="token comment">// (5)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<ul>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span> 定义平衡度 sum 初始化为 0；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span></span> 定义计数器 ans 初始化为 0；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(3)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">3</span><span class="mclose">)</span></span></span></span></span> 遍历字符串，如果是 L 平衡度加一；如果是 R 平衡度减一；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>4</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(4)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">4</span><span class="mclose">)</span></span></span></span></span> 当平衡度为零时，执行一次分割，计数器加一；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>5</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(5)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">5</span><span class="mclose">)</span></span></span></span></span> 最后返回计数器即可；</li>
+</ul>
+<h1><a id="_43"></a>五、推荐专栏</h1>
+<center> <a href="https://blog.csdn.net/whereisherofrom/category_11227297.html"><font color="13ae01"><b>🌳《<u>画解数据结构</u>》🌳 </b></font></a> </center><br>
+<center> <a href="https://blog.csdn.net/WhereIsHeroFrom/article/details/118979494"><font color="13ae01"><b><u>画解顺序表</u></b></font></a> </center><br>
+<h1><a id="_50"></a>六、习题练习</h1>
+
+<table>
+<thead>
+<tr>
+<th>序号</th>
+<th>题目链接</th>
+<th>难度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><a href="https://leetcode-cn.com/problems/split-a-string-in-balanced-strings/">分割平衡字符串</a></td>
+<td>★☆☆☆☆</td>
+</tr>
+<tr>
+<td>2</td>
+<td><a href="https://leetcode-cn.com/problems/minimum-operations-to-make-the-array-increasing/">1827. 最少操作使数组递增</a></td>
+<td>★☆☆☆☆</td>
+</tr>
+<tr>
+<td>3</td>
+<td><a href="https://leetcode-cn.com/problems/minimum-moves-to-convert-string/">转换字符串的最少操作次数</a></td>
+<td>★☆☆☆☆</td>
+</tr>
+<tr>
+<td>4</td>
+<td><a href="https://leetcode-cn.com/problems/maximize-sum-of-array-after-k-negations/">K 次取反后最大化的数组和</a></td>
+<td>★★☆☆☆</td>
+</tr>
+<tr>
+<td>5</td>
+<td><a href="https://leetcode-cn.com/problems/partition-array-into-three-parts-with-equal-sum/">将数组分成和相等的三个部分</a></td>
+<td>★★☆☆☆</td>
+</tr>
+<tr>
+<td>6</td>
+<td><a href="https://leetcode-cn.com/problems/can-place-flowers/">种花问题</a></td>
+<td>★★☆☆☆</td>
+</tr>
+</tbody>
+</table><center>👇🏻添加 博主 获取付费专栏优惠券👇🏻</center>
+</div>
+</body>
+
+</html>

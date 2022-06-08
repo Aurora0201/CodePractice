@@ -1,0 +1,891 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>《画解数据结构》（2 - 6）- 霍夫曼树</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__html"><p></p><div class="toc"><h3>文章目录</h3><ul><ul><li><a href="#_1">一、概述</a></li><ul><li><a href="#1_3">1、算法简述</a></li><li><a href="#2_10">2、引例</a></li><ul><li><a href="#_12">源字节流</a></li><li><a href="#_15">压缩字典</a></li><li><a href="#_28">编码</a></li><li><a href="#_35">规范化</a></li><li><a href="#_44">解码</a></li></ul></ul><li><a href="#_47">二、概念</a></li><ul><li><a href="#1_48">1、变长编码</a></li><li><a href="#2_51">2、前缀编码</a></li><li><a href="#3_56">3、比特串</a></li><li><a href="#4_59">4、压缩率</a></li></ul><li><a href="#_79">三、算法详解</a></li><ul><li><a href="#1_80">1、算法要求</a></li><li><a href="#2_86">2、算法简述</a></li><ul><li><a href="#_92">压缩前的串</a></li><li><a href="#_97">频次统计</a></li><li><a href="#_110">霍夫曼树构造</a></li><li><a href="#_138">霍夫曼编码</a></li><li><a href="#_154">霍夫曼压缩</a></li><li><a href="#_166">不可达字符</a></li><li><a href="#_172">霍夫曼解压缩</a></li></ul></ul><li><a href="#_197">四、数据结构和接口设计</a></li><ul><li><a href="#1_200">1、压缩结构</a></li><li><a href="#2_229">2、编码字典</a></li><li><a href="#3_260">3、编码写入</a></li><ul><li><a href="#i__Bit_262">i. 写入完整 Bit</a></li><li><a href="#ii__Bit_279">ii. 写入非完整 Bit</a></li><ul><li><a href="#_319">直接写入</a></li><li><a href="#_341">超出字节</a></li></ul><li><a href="#iii__byte_371">iii. 写入 byte</a></li><li><a href="#iv__short_380">iv. 写入 short</a></li><li><a href="#iv__int_392">iv. 写入 int</a></li></ul></ul></ul></ul></div><p></p>
+<h2><a id="_1"></a>一、概述</h2>
+<h3><a id="1_3"></a>1、算法简述</h3>
+<ul>
+<li>众所周知，计算机中数据的存储和传输的最小单位是字节（byte），一个ASCII 码占用 1 个字节， 每个字节为 8 个比特位（Bit）；例如，字符 ‘e’ 的二进制表示为 01100101；</li>
+<li>进程间通信传输字节流的过程中，为了节省带宽，往往会对传输的数据进行压缩。</li>
+<li>压缩算法有很多，今天介绍一种比较好理解的贪心算法 - 霍夫曼编码；</li>
+<li>霍夫曼编码的本质就是对每个出现过的 ASCII 字符，通过一个压缩字典，映射成另一个字符，映射后的字符是二进制比特串：001、0101、00 等等；</li>
+<li>解压缩就是这个过程的逆过程；</li>
+</ul>
+<h3><a id="2_10"></a>2、引例</h3>
+<h4><a id="_12"></a>源字节流</h4>
+<ul>
+<li>首先，一个字符串 “HelloWorld”，在没有进行压缩的情况下采用 ASCII 编码，占用字节总数为 10，即 10 * 8 = 80 个比特位。</li>
+</ul>
+<h4><a id="_15"></a>压缩字典</h4>
+<ul>
+<li>然后，通过霍夫曼算法生成压缩字典如下（具体生成过程是霍夫曼树的构造过程，下文会详细讲述）：</li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th>字符</th>
+<th>压缩前编码(ASCII)</th>
+<th>压缩后编码</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>d</td>
+<td>01100100</td>
+<td>001</td>
+</tr>
+<tr>
+<td>e</td>
+<td>01100101</td>
+<td>010</td>
+</tr>
+<tr>
+<td>l</td>
+<td>01101100</td>
+<td>10</td>
+</tr>
+<tr>
+<td>o</td>
+<td>01101111</td>
+<td>111</td>
+</tr>
+<tr>
+<td>r</td>
+<td>01110010</td>
+<td>011</td>
+</tr>
+<tr>
+<td>H</td>
+<td>01001000</td>
+<td>1101</td>
+</tr>
+<tr>
+<td>W</td>
+<td>01010111</td>
+<td>000</td>
+</tr>
+</tbody>
+</table><h4><a id="_28"></a>编码</h4>
+<ul>
+<li>继而，遍历源字节流，对对应的字符进行编码替换，得到新的比特流；</li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th>H</th>
+<th>e</th>
+<th>l</th>
+<th>l</th>
+<th>o</th>
+<th>W</th>
+<th>o</th>
+<th>r</th>
+<th>l</th>
+<th>d</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1101</td>
+<td>010</td>
+<td>10</td>
+<td>10</td>
+<td>111</td>
+<td>000</td>
+<td>111</td>
+<td>011</td>
+<td>10</td>
+<td>001</td>
+</tr>
+</tbody>
+</table><h4><a id="_35"></a>规范化</h4>
+<ul>
+<li>最后，将比特流再转换成字节流，由于编码后比特流长度不一定是8的倍数，所以最后的 XXXX 是补足位（补足位具体的值下文会接着探讨）；</li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th>第1字节</th>
+<th>第2字节</th>
+<th>第3字节</th>
+<th>第4字节</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>11010101</td>
+<td>01011100</td>
+<td>01110111</td>
+<td>0001XXXX</td>
+</tr>
+</tbody>
+</table><ul>
+<li>观察一下就会发现，每个压缩后的编码长度都是小于8的，所以压缩后的总位数一定是会小于压缩前的；压缩前 80 个比特位，压缩后 32 个比特位，压缩率为 40%；</li>
+</ul>
+<h4><a id="_44"></a>解码</h4>
+<ul>
+<li>解码过程是霍夫曼树的路径查找过程，了解霍夫曼树的构造过程，这个解码过程就一目了然了，下文也会详细介绍；</li>
+</ul>
+<h2><a id="_47"></a>二、概念</h2>
+<h3><a id="1_48"></a>1、变长编码</h3>
+<ul>
+<li>每个 ASCII 字符占用字节数都为1，所以它是一种定长编码；区别于定长编码，霍夫曼编码是一种变长编码，即每个 ASCII 码进行编码映射后的二进制比特串的长度不相等；它是根据字符出现的概率来构造平均长度最短的编码，换言之，如果一个字符在文档中出现的次数多，那么它的映射后的二进制比特串就应该相对较短；反正，如果出现的次数少，那么它的映射后的二进制比特串就应该相对较长；</li>
+</ul>
+<h3><a id="2_51"></a>2、前缀编码</h3>
+<ul>
+<li>前缀编码的含义是：编码集合中，任意两个编码 A 和 B，A 不能是 B 的前缀；</li>
+<li>这是为了保证在传输过程中，不用增加分隔符来区分两个编码值；</li>
+<li>霍夫曼编码是一种前缀编码，为什么呢？下文继续讲；</li>
+</ul>
+<h3><a id="3_56"></a>3、比特串</h3>
+<ul>
+<li>简单认为就是数组，数组的最小单位是二进制比特位，也就是只有两种值：0或1；</li>
+</ul>
+<h3><a id="4_59"></a>4、压缩率</h3>
+<ul>
+<li>压缩率 = 压缩后字节数 / 压缩前字节数；</li>
+<li>压缩率的值越小越好；</li>
+<li>压缩率取决于字符集合，字符集合越大，压缩率越大（压缩率越小越好），256个字符都有的话，等于不压缩，因为基本所有的编码后的字符长度都是8，和原字符一致，甚至有可能更高；</li>
+<li>如果压缩字符里面存在中文，不适合采用 霍夫曼压缩 （还是基于字符集合，中文会占用负数的 ASCII 码）；</li>
+<li>了解算法以后再来看压缩率，会更加直观；</li>
+<li>如果所有字符都平均分布，则字符个数和压缩率的实测结果如下；</li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th>字符个数</th>
+<th>压缩率(越低越好)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>12.50%</td>
+</tr>
+<tr>
+<td>2</td>
+<td>18.77%</td>
+</tr>
+<tr>
+<td>4</td>
+<td>28.14%</td>
+</tr>
+<tr>
+<td>8</td>
+<td>39.08%</td>
+</tr>
+<tr>
+<td>16</td>
+<td>50.80%</td>
+</tr>
+<tr>
+<td>32</td>
+<td>62.91%</td>
+</tr>
+<tr>
+<td>64</td>
+<td>75.21%</td>
+</tr>
+<tr>
+<td>128</td>
+<td>87.61%</td>
+</tr>
+<tr>
+<td>256</td>
+<td>100.00%</td>
+</tr>
+</tbody>
+</table><h2><a id="_79"></a>三、算法详解</h2>
+<h3><a id="1_80"></a>1、算法要求</h3>
+<ul>
+<li>1、编码后的码值是二进制的比特串；</li>
+<li>2、编码后的任意两个比特串 A 和 B， A 不能是 B 的前缀，这是为了保证在传输过程中，不用增加分隔符来区分两个编码值；</li>
+<li>3、出现频率高的字符，编码后的比特串相对较短；出现频率低的字符，编码后的比特串相对较长；</li>
+<li>4、编码完要保证编码总长度最小；</li>
+</ul>
+<h3><a id="2_86"></a>2、算法简述</h3>
+<ul>
+<li>1、统计字节流中出现的字符次数（频率）；</li>
+<li>2、按照字符频率放入一个小顶优先队列中（小顶堆）；</li>
+<li>3、如果优先队列中只剩一个结点，则这个结点为霍夫曼树的根结点；否则，取出频率最小和次小的两个，进行合并，产生一个新的结点再塞回优先队列中；其中，这个新的结点的左右子树分别是频率最小和次小的那两个结点，新的结点的频率值为两个子树频率值的和；</li>
+<li>4、重复3的过程，构造出来的树就是霍夫曼树；</li>
+</ul>
+<h4><a id="_92"></a>压缩前的串</h4>
+<pre><code>    HelloWorld
+</code></pre>
+<h4><a id="_97"></a>频次统计</h4>
+
+<table>
+<thead>
+<tr>
+<th>字符</th>
+<th>压缩前编码</th>
+<th>出现频次</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>d</td>
+<td>01100100</td>
+<td>1</td>
+</tr>
+<tr>
+<td>e</td>
+<td>01100101</td>
+<td>1</td>
+</tr>
+<tr>
+<td>l</td>
+<td>01101100</td>
+<td>3</td>
+</tr>
+<tr>
+<td>o</td>
+<td>01101111</td>
+<td>2</td>
+</tr>
+<tr>
+<td>r</td>
+<td>01110010</td>
+<td>1</td>
+</tr>
+<tr>
+<td>H</td>
+<td>01001000</td>
+<td>1</td>
+</tr>
+<tr>
+<td>W</td>
+<td>01010111</td>
+<td>1</td>
+</tr>
+</tbody>
+</table><ul>
+<li>启发：出现频次多的字符，编码后的比特串应该尽量短；</li>
+</ul>
+<h4><a id="_110"></a>霍夫曼树构造</h4>
+<div class="mermaid sequence-diagram"><svg id="mermaid-svg-F96F0HVldcvm4ENQ" width="100%" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" height="550" style="max-width: 440.48748779296875px;" viewBox="0 0 440.48748779296875 550"><style>#mermaid-svg-F96F0HVldcvm4ENQ {font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:16px;fill:#333;}#mermaid-svg-F96F0HVldcvm4ENQ .error-icon{fill:#552222;}#mermaid-svg-F96F0HVldcvm4ENQ .error-text{fill:#552222;stroke:#552222;}#mermaid-svg-F96F0HVldcvm4ENQ .edge-thickness-normal{stroke-width:2px;}#mermaid-svg-F96F0HVldcvm4ENQ .edge-thickness-thick{stroke-width:3.5px;}#mermaid-svg-F96F0HVldcvm4ENQ .edge-pattern-solid{stroke-dasharray:0;}#mermaid-svg-F96F0HVldcvm4ENQ .edge-pattern-dashed{stroke-dasharray:3;}#mermaid-svg-F96F0HVldcvm4ENQ .edge-pattern-dotted{stroke-dasharray:2;}#mermaid-svg-F96F0HVldcvm4ENQ .marker{fill:#333333;stroke:#333333;}#mermaid-svg-F96F0HVldcvm4ENQ .marker.cross{stroke:#333333;}#mermaid-svg-F96F0HVldcvm4ENQ svg{font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:16px;}#mermaid-svg-F96F0HVldcvm4ENQ .label{font-family:"trebuchet ms",verdana,arial,sans-serif;color:#333;}#mermaid-svg-F96F0HVldcvm4ENQ .cluster-label text{fill:#333;}#mermaid-svg-F96F0HVldcvm4ENQ .cluster-label span{color:#333;}#mermaid-svg-F96F0HVldcvm4ENQ .label text,#mermaid-svg-F96F0HVldcvm4ENQ span{fill:#333;color:#333;}#mermaid-svg-F96F0HVldcvm4ENQ .node rect,#mermaid-svg-F96F0HVldcvm4ENQ .node circle,#mermaid-svg-F96F0HVldcvm4ENQ .node ellipse,#mermaid-svg-F96F0HVldcvm4ENQ .node polygon,#mermaid-svg-F96F0HVldcvm4ENQ .node path{fill:#ECECFF;stroke:#9370DB;stroke-width:1px;}#mermaid-svg-F96F0HVldcvm4ENQ .node .label{text-align:center;}#mermaid-svg-F96F0HVldcvm4ENQ .node.clickable{cursor:pointer;}#mermaid-svg-F96F0HVldcvm4ENQ .arrowheadPath{fill:#333333;}#mermaid-svg-F96F0HVldcvm4ENQ .edgePath .path{stroke:#333333;stroke-width:2.0px;}#mermaid-svg-F96F0HVldcvm4ENQ .flowchart-link{stroke:#333333;fill:none;}#mermaid-svg-F96F0HVldcvm4ENQ .edgeLabel{background-color:#e8e8e8;text-align:center;}#mermaid-svg-F96F0HVldcvm4ENQ .edgeLabel rect{opacity:0.5;background-color:#e8e8e8;fill:#e8e8e8;}#mermaid-svg-F96F0HVldcvm4ENQ .cluster rect{fill:#ffffde;stroke:#aaaa33;stroke-width:1px;}#mermaid-svg-F96F0HVldcvm4ENQ .cluster text{fill:#333;}#mermaid-svg-F96F0HVldcvm4ENQ .cluster span{color:#333;}#mermaid-svg-F96F0HVldcvm4ENQ div.mermaidTooltip{position:absolute;text-align:center;max-width:200px;padding:2px;font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:12px;background:hsl(80, 100%, 96.2745098039%);border:1px solid #aaaa33;border-radius:2px;pointer-events:none;z-index:100;}#mermaid-svg-F96F0HVldcvm4ENQ :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}</style><g><g class="output"><g class="clusters"></g><g class="edgePaths"><g class="edgePath LS-10 LE-4" id="L-10-4" style="opacity: 1;"><path class="path" d="M203.11562585830688,45.401163461937344L193.19765718777975,53.167636218281125C183.2796885172526,60.9341089746249,163.44375117619833,76.46705448731245,153.52578250567117,90.56686057698955C143.60781383514404,104.66666666666667,143.60781383514404,117.33333333333333,143.60781383514404,123.66666666666667L143.60781383514404,130" marker-end="url(#arrowhead262)" style="fill:none"></path><defs><marker id="arrowhead262" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="strokeWidth" markerWidth="8" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowheadPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker></defs></g><g class="edgePath LS-10 LE-6" style="opacity: 1;" id="L-10-6"><path class="path" d="M239.89687585830688,40.414147961110075L256.69244893391925,49.01178996759173C273.4880220095317,57.60943197407338,307.0791681607564,74.80471598703669,323.87474123636883,89.73569132685168C340.6703143119812,104.66666666666667,340.6703143119812,117.33333333333333,340.6703143119812,123.66666666666667L340.6703143119812,130" marker-end="url(#arrowhead263)" style="fill:none"></path><defs><marker id="arrowhead263" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="strokeWidth" markerWidth="8" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowheadPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker></defs></g><g class="edgePath LS-6 LE-l" style="opacity: 1;" id="L-6-l"><path class="path" d="M326.4734396934509,174.8577114449536L322.236200094223,181.38142620412796C317.9989604949951,187.9051409633024,309.5244812965393,200.95257048165118,305.2872416973114,213.80961857415892C301.0500020980835,226.66666666666666,301.0500020980835,239.33333333333334,301.0500020980835,245.66666666666666L301.0500020980835,252" marker-end="url(#arrowhead264)" style="fill:none"></path><defs><marker id="arrowhead264" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="strokeWidth" markerWidth="8" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowheadPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker></defs></g><g class="edgePath LS-4 LE-N1" style="opacity: 1;" id="L-4-N1"><path class="path" d="M129.41093921661377,164.08137358143998L118.75208489100139,172.40114465119996C108.09323056538899,180.72091572095997,86.77552191416423,197.36045786047998,76.11666758855183,212.01356226357333C65.45781326293945,226.66666666666666,65.45781326293945,239.33333333333334,65.45781326293945,245.66666666666666L65.45781326293945,252" marker-end="url(#arrowhead265)" style="fill:none"></path><defs><marker id="arrowhead265" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="strokeWidth" markerWidth="8" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowheadPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker></defs></g><g class="edgePath LS-N1 LE-W" style="opacity: 1;" id="L-N1-W"><path class="path" d="M51.26093864440918,296.3097766121281L46.8539072672526,302.92481384344006C42.44687589009603,309.53985107475205,33.632813135782875,322.769925537376,29.2257817586263,335.7182961020214C24.818750381469727,348.6666666666667,24.818750381469727,361.3333333333333,24.818750381469727,367.6666666666667L24.818750381469727,374" marker-end="url(#arrowhead266)" style="fill:none"></path><defs><marker id="arrowhead266" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="strokeWidth" markerWidth="8" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowheadPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker></defs></g><g class="edgePath LS-N1 LE-d" style="opacity: 1;" id="L-N1-d"><path class="path" d="M79.65468788146973,296.3097766121281L84.0617192586263,302.92481384344006C88.46875063578288,309.53985107475205,97.28281339009602,322.769925537376,101.68984476725261,335.7182961020214C106.09687614440918,348.6666666666667,106.09687614440918,361.3333333333333,106.09687614440918,367.6666666666667L106.09687614440918,374" marker-end="url(#arrowhead267)" style="fill:none"></path><defs><marker id="arrowhead267" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="strokeWidth" markerWidth="8" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowheadPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker></defs></g><g class="edgePath LS-4 LE-N2" style="opacity: 1;" id="L-4-N2"><path class="path" d="M157.80468845367432,163.8181441614804L168.78046989440918,172.18178680123367C179.75625133514404,180.54542944098694,201.70781421661377,197.27271472049347,212.68359565734863,211.96969069358008C223.6593770980835,226.66666666666666,223.6593770980835,239.33333333333334,223.6593770980835,245.66666666666666L223.6593770980835,252" marker-end="url(#arrowhead268)" style="fill:none"></path><defs><marker id="arrowhead268" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="strokeWidth" markerWidth="8" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowheadPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker></defs></g><g class="edgePath LS-N2 LE-e" style="opacity: 1;" id="L-N2-e"><path class="path" d="M209.46250247955322,297.3558398829638L205.37239821751913,303.7965332358031C201.28229395548502,310.2372265886425,193.10208543141684,323.1186132943213,189.01198116938272,335.8926399804939C184.92187690734863,348.6666666666667,184.92187690734863,361.3333333333333,184.92187690734863,367.6666666666667L184.92187690734863,374" marker-end="url(#arrowhead269)" style="fill:none"></path><defs><marker id="arrowhead269" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="strokeWidth" markerWidth="8" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowheadPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker></defs></g><g class="edgePath LS-N2 LE-r" style="opacity: 1;" id="L-N2-r"><path class="path" d="M237.85625171661377,297.3558398829638L241.94635597864786,303.7965332358031C246.03646024068198,310.2372265886425,254.21666876475015,323.1186132943213,258.30677302678424,335.8926399804939C262.39687728881836,348.6666666666667,262.39687728881836,361.3333333333333,262.39687728881836,367.6666666666667L262.39687728881836,374" marker-end="url(#arrowhead270)" style="fill:none"></path><defs><marker id="arrowhead270" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="strokeWidth" markerWidth="8" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowheadPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker></defs></g><g class="edgePath LS-6 LE-3" style="opacity: 1;" id="L-6-3"><path class="path" d="M354.8671889305115,175.62413208707474L358.8807306289673,182.0201100725623C362.8942723274231,188.4160880580498,370.9213557243347,201.2080440290249,374.9348974227905,213.9373553478458C378.94843912124634,226.66666666666666,378.94843912124634,239.33333333333334,378.94843912124634,245.66666666666666L378.94843912124634,252" marker-end="url(#arrowhead271)" style="fill:none"></path><defs><marker id="arrowhead271" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="strokeWidth" markerWidth="8" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowheadPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker></defs></g><g class="edgePath LS-3 LE-N3" style="opacity: 1;" id="L-3-N3"><path class="path" d="M364.75156450271606,297.0665680275483L360.57682490348816,303.5554733562903C356.40208530426025,310.0443786850322,348.05260610580444,323.0221893425161,343.87786650657654,335.8444280045914C339.70312690734863,348.6666666666667,339.70312690734863,361.3333333333333,339.70312690734863,367.6666666666667L339.70312690734863,374" marker-end="url(#arrowhead272)" style="fill:none"></path><defs><marker id="arrowhead272" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="strokeWidth" markerWidth="8" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowheadPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker></defs></g><g class="edgePath LS-N3 LE-......" style="opacity: 1;" id="L-N3-......"><path class="path" d="M325.50625228881836,415.6520607473472L320.1341168085734,422.71005062278937C314.76198132832843,429.7680404982314,304.01771036783856,443.88402024911574,298.64557488759357,457.2753434578912C293.27343940734863,470.6666666666667,293.27343940734863,483.3333333333333,293.27343940734863,489.6666666666667L293.27343940734863,496" marker-end="url(#arrowhead273)" style="fill:none"></path><defs><marker id="arrowhead273" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="strokeWidth" markerWidth="8" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowheadPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker></defs></g><g class="edgePath LS-N3 LE-H" style="opacity: 1;" id="L-N3-H"><path class="path" d="M353.9000015258789,415.6520607473472L359.27213700612384,422.71005062278937C364.64427248636883,429.7680404982314,375.3885434468587,443.88402024911574,380.7606789271037,457.2753434578912C386.13281440734863,470.6666666666667,386.13281440734863,483.3333333333333,386.13281440734863,489.6666666666667L386.13281440734863,496" marker-end="url(#arrowhead274)" style="fill:none"></path><defs><marker id="arrowhead274" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="strokeWidth" markerWidth="8" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowheadPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker></defs></g><g class="edgePath LS-3 LE-o" style="opacity: 1;" id="L-3-o"><path class="path" d="M393.1453137397766,297.0665680275483L397.3200533390045,303.5554733562903C401.4947929382324,310.0443786850322,409.84427213668823,323.0221893425161,414.01901173591614,335.8444280045914C418.19375133514404,348.6666666666667,418.19375133514404,361.3333333333333,418.19375133514404,367.6666666666667L418.19375133514404,374" marker-end="url(#arrowhead275)" style="fill:none"></path><defs><marker id="arrowhead275" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="strokeWidth" markerWidth="8" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowheadPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker></defs></g></g><g class="edgeLabels"><g class="edgeLabel" transform="translate(143.60781383514404,92)" style="opacity: 1;"><g transform="translate(-4.196875095367432,-13)" class="label"><rect rx="0" ry="0" width="8.393750190734863" height="26"></rect><foreignObject width="8.393750190734863" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span id="L-L-10-4" class="edgeLabel L-LS-10' L-LE-4">0</span></div></foreignObject></g></g><g class="edgeLabel" style="opacity: 1;" transform="translate(340.6703143119812,92)"><g transform="translate(-4.196875095367432,-13)" class="label"><rect rx="0" ry="0" width="8.393750190734863" height="26"></rect><foreignObject width="8.393750190734863" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span id="L-L-10-6" class="edgeLabel L-LS-10' L-LE-6">1</span></div></foreignObject></g></g><g class="edgeLabel" style="opacity: 1;" transform="translate(301.0500020980835,214)"><g transform="translate(-4.196875095367432,-13)" class="label"><rect rx="0" ry="0" width="8.393750190734863" height="26"></rect><foreignObject width="8.393750190734863" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span id="L-L-6-l" class="edgeLabel L-LS-6' L-LE-l">0</span></div></foreignObject></g></g><g class="edgeLabel" style="opacity: 1;" transform="translate(65.45781326293945,214)"><g transform="translate(-4.196875095367432,-13)" class="label"><rect rx="0" ry="0" width="8.393750190734863" height="26"></rect><foreignObject width="8.393750190734863" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span id="L-L-4-N1" class="edgeLabel L-LS-4' L-LE-N1">0</span></div></foreignObject></g></g><g class="edgeLabel" style="opacity: 1;" transform="translate(24.818750381469727,336)"><g transform="translate(-4.196875095367432,-13)" class="label"><rect rx="0" ry="0" width="8.393750190734863" height="26"></rect><foreignObject width="8.393750190734863" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span id="L-L-N1-W" class="edgeLabel L-LS-N1' L-LE-W">0</span></div></foreignObject></g></g><g class="edgeLabel" style="opacity: 1;" transform="translate(106.09687614440918,336)"><g transform="translate(-4.196875095367432,-13)" class="label"><rect rx="0" ry="0" width="8.393750190734863" height="26"></rect><foreignObject width="8.393750190734863" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span id="L-L-N1-d" class="edgeLabel L-LS-N1' L-LE-d">1</span></div></foreignObject></g></g><g class="edgeLabel" style="opacity: 1;" transform="translate(223.6593770980835,214)"><g transform="translate(-4.196875095367432,-13)" class="label"><rect rx="0" ry="0" width="8.393750190734863" height="26"></rect><foreignObject width="8.393750190734863" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span id="L-L-4-N2" class="edgeLabel L-LS-4' L-LE-N2">1</span></div></foreignObject></g></g><g class="edgeLabel" style="opacity: 1;" transform="translate(184.92187690734863,336)"><g transform="translate(-4.196875095367432,-13)" class="label"><rect rx="0" ry="0" width="8.393750190734863" height="26"></rect><foreignObject width="8.393750190734863" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span id="L-L-N2-e" class="edgeLabel L-LS-N2' L-LE-e">0</span></div></foreignObject></g></g><g class="edgeLabel" style="opacity: 1;" transform="translate(262.39687728881836,336)"><g transform="translate(-4.196875095367432,-13)" class="label"><rect rx="0" ry="0" width="8.393750190734863" height="26"></rect><foreignObject width="8.393750190734863" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span id="L-L-N2-r" class="edgeLabel L-LS-N2' L-LE-r">1</span></div></foreignObject></g></g><g class="edgeLabel" style="opacity: 1;" transform="translate(378.94843912124634,214)"><g transform="translate(-4.196875095367432,-13)" class="label"><rect rx="0" ry="0" width="8.393750190734863" height="26"></rect><foreignObject width="8.393750190734863" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span id="L-L-6-3" class="edgeLabel L-LS-6' L-LE-3">1</span></div></foreignObject></g></g><g class="edgeLabel" style="opacity: 1;" transform="translate(339.70312690734863,336)"><g transform="translate(-4.196875095367432,-13)" class="label"><rect rx="0" ry="0" width="8.393750190734863" height="26"></rect><foreignObject width="8.393750190734863" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span id="L-L-3-N3" class="edgeLabel L-LS-3' L-LE-N3">0</span></div></foreignObject></g></g><g class="edgeLabel" style="opacity: 1;" transform="translate(293.27343940734863,458)"><g transform="translate(-4.196875095367432,-13)" class="label"><rect rx="0" ry="0" width="8.393750190734863" height="26"></rect><foreignObject width="8.393750190734863" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span id="L-L-N3-......" class="edgeLabel L-LS-N3' L-LE-......">0</span></div></foreignObject></g></g><g class="edgeLabel" style="opacity: 1;" transform="translate(386.13281440734863,458)"><g transform="translate(-4.196875095367432,-13)" class="label"><rect rx="0" ry="0" width="8.393750190734863" height="26"></rect><foreignObject width="8.393750190734863" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span id="L-L-N3-H" class="edgeLabel L-LS-N3' L-LE-H">1</span></div></foreignObject></g></g><g class="edgeLabel" style="opacity: 1;" transform="translate(418.19375133514404,336)"><g transform="translate(-4.196875095367432,-13)" class="label"><rect rx="0" ry="0" width="8.393750190734863" height="26"></rect><foreignObject width="8.393750190734863" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span id="L-L-3-o" class="edgeLabel L-LS-3' L-LE-o">1</span></div></foreignObject></g></g></g><g class="nodes"><g class="node default" id="flowchart-3-271" transform="translate(378.94843912124634,275)" style="opacity: 1;"><rect rx="0" ry="0" x="-14.196875095367432" y="-23" width="28.393750190734863" height="46" class="label-container"></rect><g class="label" transform="translate(0,0)"><g transform="translate(-4.196875095367432,-13)"><foreignObject width="8.393750190734863" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;">3</div></foreignObject></g></g></g><g class="node default" style="opacity: 1;" id="flowchart-4-253" transform="translate(143.60781383514404,153)"><rect rx="0" ry="0" x="-14.196875095367432" y="-23" width="28.393750190734863" height="46" class="label-container"></rect><g class="label" transform="translate(0,0)"><g transform="translate(-4.196875095367432,-13)"><foreignObject width="8.393750190734863" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;">4</div></foreignObject></g></g></g><g class="node default" style="opacity: 1;" id="flowchart-6-255" transform="translate(340.6703143119812,153)"><rect rx="0" ry="0" x="-14.196875095367432" y="-23" width="28.393750190734863" height="46" class="label-container"></rect><g class="label" transform="translate(0,0)"><g transform="translate(-4.196875095367432,-13)"><foreignObject width="8.393750190734863" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;">6</div></foreignObject></g></g></g><g class="node default" style="opacity: 1;" id="flowchart-10-252" transform="translate(221.50625085830688,31)"><rect rx="0" ry="0" x="-18.390625" y="-23" width="36.78125" height="46" class="label-container"></rect><g class="label" transform="translate(0,0)"><g transform="translate(-8.390625,-13)"><foreignObject width="16.78125" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;">10</div></foreignObject></g></g></g><g class="node default" style="opacity: 1;" id="flowchart-l-257" transform="translate(301.0500020980835,275)"><rect rx="0" ry="0" x="-12.359375" y="-23" width="24.71875" height="46" class="label-container"></rect><g class="label" transform="translate(0,0)"><g transform="translate(-2.359375,-13)"><foreignObject width="4.71875" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;">l</div></foreignObject></g></g></g><g class="node default" style="opacity: 1;" id="flowchart-N1-259" transform="translate(65.45781326293945,275)"><rect rx="5" ry="5" x="-14.196875095367432" y="-23" width="28.393750190734863" height="46" class="label-container"></rect><g class="label" transform="translate(0,0)"><g transform="translate(-4.196875095367432,-13)"><foreignObject width="8.393750190734863" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;">2</div></foreignObject></g></g></g><g class="node default" style="opacity: 1;" id="flowchart-W-261" transform="translate(24.818750381469727,397)"><rect rx="0" ry="0" x="-16.81874990463257" y="-23" width="33.63749980926514" height="46" class="label-container"></rect><g class="label" transform="translate(0,0)"><g transform="translate(-6.818749904632568,-13)"><foreignObject width="13.637499809265137" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;">W</div></foreignObject></g></g></g><g class="node default" style="opacity: 1;" id="flowchart-d-263" transform="translate(106.09687614440918,397)"><rect rx="0" ry="0" x="-14.459374904632568" y="-23" width="28.918749809265137" height="46" class="label-container"></rect><g class="label" transform="translate(0,0)"><g transform="translate(-4.459374904632568,-13)"><foreignObject width="8.918749809265137" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;">d</div></foreignObject></g></g></g><g class="node default" style="opacity: 1;" id="flowchart-N2-265" transform="translate(223.6593770980835,275)"><rect rx="5" ry="5" x="-14.196875095367432" y="-23" width="28.393750190734863" height="46" class="label-container"></rect><g class="label" transform="translate(0,0)"><g transform="translate(-4.196875095367432,-13)"><foreignObject width="8.393750190734863" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;">2</div></foreignObject></g></g></g><g class="node default" style="opacity: 1;" id="flowchart-e-267" transform="translate(184.92187690734863,397)"><rect rx="0" ry="0" x="-14.365624904632568" y="-23" width="28.731249809265137" height="46" class="label-container"></rect><g class="label" transform="translate(0,0)"><g transform="translate(-4.365624904632568,-13)"><foreignObject width="8.731249809265137" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;">e</div></foreignObject></g></g></g><g class="node default" style="opacity: 1;" id="flowchart-r-269" transform="translate(262.39687728881836,397)"><rect rx="0" ry="0" x="-13.109375" y="-23" width="26.21875" height="46" class="label-container"></rect><g class="label" transform="translate(0,0)"><g transform="translate(-3.109375,-13)"><foreignObject width="6.21875" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;">r</div></foreignObject></g></g></g><g class="node default" style="opacity: 1;" id="flowchart-N3-273" transform="translate(339.70312690734863,397)"><rect rx="5" ry="5" x="-14.196875095367432" y="-23" width="28.393750190734863" height="46" class="label-container"></rect><g class="label" transform="translate(0,0)"><g transform="translate(-4.196875095367432,-13)"><foreignObject width="8.393750190734863" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;">1</div></foreignObject></g></g></g><g class="node default" style="opacity: 1;" id="flowchart-......-275" transform="translate(293.27343940734863,519)"><rect rx="0" ry="0" x="-27.625" y="-23" width="55.25" height="46" class="label-container"></rect><g class="label" transform="translate(0,0)"><g transform="translate(-17.625,-13)"><foreignObject width="35.25" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;">......</div></foreignObject></g></g></g><g class="node default" style="opacity: 1;" id="flowchart-H-277" transform="translate(386.13281440734863,519)"><rect rx="0" ry="0" x="-15.234375" y="-23" width="30.46875" height="46" class="label-container"></rect><g class="label" transform="translate(0,0)"><g transform="translate(-5.234375,-13)"><foreignObject width="10.46875" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;">H</div></foreignObject></g></g></g><g class="node default" style="opacity: 1;" id="flowchart-o-279" transform="translate(418.19375133514404,397)"><rect rx="0" ry="0" x="-14.293750286102295" y="-23" width="28.58750057220459" height="46" class="label-container"></rect><g class="label" transform="translate(0,0)"><g transform="translate(-4.293750286102295,-13)"><foreignObject width="8.58750057220459" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;">o</div></foreignObject></g></g></g></g></g></g></svg></div>
+<ul>
+<li>观察可得：</li>
+<li>
+<ol>
+<li>叶子结点为每个未编码的 ASCII 字符，非叶子结点上的数字代表的是该结点为根的子树下所有字符的频率和；</li>
+</ol>
+</li>
+<li>
+<ol start="2">
+<li>树上任何一个非叶子结点一定有左右两棵子树（这是由构造算法决定的）；</li>
+</ol>
+</li>
+<li>
+<ol start="3">
+<li>左子树的边权为0，右子树的边权为1；</li>
+</ol>
+</li>
+<li>
+<ol start="4">
+<li>根结点到叶子结点路径上的边权集合就是对应字符的编码后的比特串，比如字符 r 编码后的比特串为 011；</li>
+</ol>
+</li>
+<li>
+<ol start="5">
+<li>图中的 … 代表其他字符（总共 256 个字符集合），这棵树深度还很深，因为其它字符没有出现，所以频率都为0；</li>
+</ol>
+</li>
+</ul>
+<h4><a id="_138"></a>霍夫曼编码</h4>
+<ul>
+<li>根结点到叶子结点的树边上的路径，就是对应字符的编码值，也正是上文提到的压缩字典；</li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th>字符</th>
+<th>压缩前编码</th>
+<th>出现频次</th>
+<th>压缩后编码</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>d</td>
+<td>01100100</td>
+<td>1</td>
+<td>001</td>
+</tr>
+<tr>
+<td>e</td>
+<td>01100101</td>
+<td>1</td>
+<td>010</td>
+</tr>
+<tr>
+<td>l</td>
+<td>01101100</td>
+<td>3</td>
+<td>10</td>
+</tr>
+<tr>
+<td>o</td>
+<td>01101111</td>
+<td>2</td>
+<td>111</td>
+</tr>
+<tr>
+<td>r</td>
+<td>01110010</td>
+<td>1</td>
+<td>011</td>
+</tr>
+<tr>
+<td>H</td>
+<td>01001000</td>
+<td>1</td>
+<td>1101</td>
+</tr>
+<tr>
+<td>W</td>
+<td>01010111</td>
+<td>1</td>
+<td>000</td>
+</tr>
+<tr>
+<td>其它</td>
+<td>-</td>
+<td>0</td>
+<td>-</td>
+</tr>
+</tbody>
+</table><h4><a id="_154"></a>霍夫曼压缩</h4>
+<ul>
+<li>然后就比较好理解了，通过映射关系将每个字符替换为二进制比特串；由于计算机中存储和传输的基本单位是字节，所以替换过程是通过位运算来完成的，具体实现方式下文会详细介绍；</li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th>H</th>
+<th>e</th>
+<th>l</th>
+<th>l</th>
+<th>o</th>
+<th>W</th>
+<th>o</th>
+<th>r</th>
+<th>l</th>
+<th>d</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1101</td>
+<td>010</td>
+<td>10</td>
+<td>10</td>
+<td>111</td>
+<td>000</td>
+<td>111</td>
+<td>011</td>
+<td>10</td>
+<td>001</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>第1字节</th>
+<th>第2字节</th>
+<th>第3字节</th>
+<th>第4字节</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>11010101</td>
+<td>01011100</td>
+<td>01110111</td>
+<td>0001XXXX</td>
+</tr>
+</tbody>
+</table><h4><a id="_166"></a>不可达字符</h4>
+<ul>
+<li>然后来分析下上文提到的 XXXX，也就是最后一个字节的补齐字符；</li>
+<li>XXXX 必定是不会出现在压缩后编码集合中的字符，仔细想一下，编码集合256个字符，霍夫曼树中深度最深的那个叶子结点，它的编码长度一定是超过 8 的（想想为什么?），所以只要取这个比特串的高 8 位作为不可达字符即可；</li>
+<li>根本原因就是 前缀编码，只要是一个编码的前缀，必定不在编码集合中，它的前缀可以放心用来做 不可达字符；</li>
+</ul>
+<h4><a id="_172"></a>霍夫曼解压缩</h4>
+<ul>
+<li>
+<p>1、准备一个指向霍夫曼树根结点的指针 searchNode；</p>
+</li>
+<li>
+<p>2、遍历被压缩串的每个比特位，如果是 0 ，则将 searchNode 指向它的左子树；如果是1，则将 searchNode 指向它的右子树；判断3；</p>
+</li>
+<li>
+<p>3、当 searchNode 为叶子结点，则说明这是一个完整的字符，提取出结点上的字符（ASCII 码值）写入到解压缩缓冲区，searchNode 继续指向 霍夫曼树的根结点，重复步骤2；</p>
+</li>
+<li>
+<p>如图，待解压串 110101010…，通过下面的霍夫曼树从根结点一直往下找 1101 后遇到叶子结点，所以解出来的第一个字符为 ‘H’；然后再回到根结点，周而复始，直到整个待解压串遍历完毕就获得了完整的源字节流；</p>
+</li>
+</ul>
+<div class="mermaid sequence-diagram"><svg id="mermaid-svg-I1ApGMgSpoN80WcP" width="100%" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" height="550" style="max-width: 440.48748779296875px;" viewBox="0 0 440.48748779296875 550"><style>#mermaid-svg-I1ApGMgSpoN80WcP {font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:16px;fill:#333;}#mermaid-svg-I1ApGMgSpoN80WcP .error-icon{fill:#552222;}#mermaid-svg-I1ApGMgSpoN80WcP .error-text{fill:#552222;stroke:#552222;}#mermaid-svg-I1ApGMgSpoN80WcP .edge-thickness-normal{stroke-width:2px;}#mermaid-svg-I1ApGMgSpoN80WcP .edge-thickness-thick{stroke-width:3.5px;}#mermaid-svg-I1ApGMgSpoN80WcP .edge-pattern-solid{stroke-dasharray:0;}#mermaid-svg-I1ApGMgSpoN80WcP .edge-pattern-dashed{stroke-dasharray:3;}#mermaid-svg-I1ApGMgSpoN80WcP .edge-pattern-dotted{stroke-dasharray:2;}#mermaid-svg-I1ApGMgSpoN80WcP .marker{fill:#333333;stroke:#333333;}#mermaid-svg-I1ApGMgSpoN80WcP .marker.cross{stroke:#333333;}#mermaid-svg-I1ApGMgSpoN80WcP svg{font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:16px;}#mermaid-svg-I1ApGMgSpoN80WcP .label{font-family:"trebuchet ms",verdana,arial,sans-serif;color:#333;}#mermaid-svg-I1ApGMgSpoN80WcP .cluster-label text{fill:#333;}#mermaid-svg-I1ApGMgSpoN80WcP .cluster-label span{color:#333;}#mermaid-svg-I1ApGMgSpoN80WcP .label text,#mermaid-svg-I1ApGMgSpoN80WcP span{fill:#333;color:#333;}#mermaid-svg-I1ApGMgSpoN80WcP .node rect,#mermaid-svg-I1ApGMgSpoN80WcP .node circle,#mermaid-svg-I1ApGMgSpoN80WcP .node ellipse,#mermaid-svg-I1ApGMgSpoN80WcP .node polygon,#mermaid-svg-I1ApGMgSpoN80WcP .node path{fill:#ECECFF;stroke:#9370DB;stroke-width:1px;}#mermaid-svg-I1ApGMgSpoN80WcP .node .label{text-align:center;}#mermaid-svg-I1ApGMgSpoN80WcP .node.clickable{cursor:pointer;}#mermaid-svg-I1ApGMgSpoN80WcP .arrowheadPath{fill:#333333;}#mermaid-svg-I1ApGMgSpoN80WcP .edgePath .path{stroke:#333333;stroke-width:2.0px;}#mermaid-svg-I1ApGMgSpoN80WcP .flowchart-link{stroke:#333333;fill:none;}#mermaid-svg-I1ApGMgSpoN80WcP .edgeLabel{background-color:#e8e8e8;text-align:center;}#mermaid-svg-I1ApGMgSpoN80WcP .edgeLabel rect{opacity:0.5;background-color:#e8e8e8;fill:#e8e8e8;}#mermaid-svg-I1ApGMgSpoN80WcP .cluster rect{fill:#ffffde;stroke:#aaaa33;stroke-width:1px;}#mermaid-svg-I1ApGMgSpoN80WcP .cluster text{fill:#333;}#mermaid-svg-I1ApGMgSpoN80WcP .cluster span{color:#333;}#mermaid-svg-I1ApGMgSpoN80WcP div.mermaidTooltip{position:absolute;text-align:center;max-width:200px;padding:2px;font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:12px;background:hsl(80, 100%, 96.2745098039%);border:1px solid #aaaa33;border-radius:2px;pointer-events:none;z-index:100;}#mermaid-svg-I1ApGMgSpoN80WcP :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}</style><g><g class="output"><g class="clusters"></g><g class="edgePaths"><g class="edgePath LS-10 LE-4" id="L-10-4" style="opacity: 1;"><path class="path" d="M203.11562585830688,45.401163461937344L193.19765718777975,53.167636218281125C183.2796885172526,60.9341089746249,163.44375117619833,76.46705448731245,153.52578250567117,90.56686057698955C143.60781383514404,104.66666666666667,143.60781383514404,117.33333333333333,143.60781383514404,123.66666666666667L143.60781383514404,130" marker-end="url(#arrowhead311)" style="fill:none"></path><defs><marker id="arrowhead311" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="strokeWidth" markerWidth="8" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowheadPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker></defs></g><g class="edgePath LS-10 LE-6" style="opacity: 1;" id="L-10-6"><path class="path" d="M239.89687585830688,40.414147961110075L256.69244893391925,49.01178996759173C273.4880220095317,57.60943197407338,307.0791681607564,74.80471598703669,323.87474123636883,89.73569132685168C340.6703143119812,104.66666666666667,340.6703143119812,117.33333333333333,340.6703143119812,123.66666666666667L340.6703143119812,130" marker-end="url(#arrowhead312)" style="fill:none"></path><defs><marker id="arrowhead312" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="strokeWidth" markerWidth="8" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowheadPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker></defs></g><g class="edgePath LS-6 LE-l" style="opacity: 1;" id="L-6-l"><path class="path" d="M326.4734396934509,174.8577114449536L322.236200094223,181.38142620412796C317.9989604949951,187.9051409633024,309.5244812965393,200.95257048165118,305.2872416973114,213.80961857415892C301.0500020980835,226.66666666666666,301.0500020980835,239.33333333333334,301.0500020980835,245.66666666666666L301.0500020980835,252" marker-end="url(#arrowhead313)" style="fill:none"></path><defs><marker id="arrowhead313" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="strokeWidth" markerWidth="8" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowheadPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker></defs></g><g class="edgePath LS-4 LE-N1" style="opacity: 1;" id="L-4-N1"><path class="path" d="M129.41093921661377,164.08137358143998L118.75208489100139,172.40114465119996C108.09323056538899,180.72091572095997,86.77552191416423,197.36045786047998,76.11666758855183,212.01356226357333C65.45781326293945,226.66666666666666,65.45781326293945,239.33333333333334,65.45781326293945,245.66666666666666L65.45781326293945,252" marker-end="url(#arrowhead314)" style="fill:none"></path><defs><marker id="arrowhead314" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="strokeWidth" markerWidth="8" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowheadPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker></defs></g><g class="edgePath LS-N1 LE-W" style="opacity: 1;" id="L-N1-W"><path class="path" d="M51.26093864440918,296.3097766121281L46.8539072672526,302.92481384344006C42.44687589009603,309.53985107475205,33.632813135782875,322.769925537376,29.2257817586263,335.7182961020214C24.818750381469727,348.6666666666667,24.818750381469727,361.3333333333333,24.818750381469727,367.6666666666667L24.818750381469727,374" marker-end="url(#arrowhead315)" style="fill:none"></path><defs><marker id="arrowhead315" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="strokeWidth" markerWidth="8" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowheadPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker></defs></g><g class="edgePath LS-N1 LE-d" style="opacity: 1;" id="L-N1-d"><path class="path" d="M79.65468788146973,296.3097766121281L84.0617192586263,302.92481384344006C88.46875063578288,309.53985107475205,97.28281339009602,322.769925537376,101.68984476725261,335.7182961020214C106.09687614440918,348.6666666666667,106.09687614440918,361.3333333333333,106.09687614440918,367.6666666666667L106.09687614440918,374" marker-end="url(#arrowhead316)" style="fill:none"></path><defs><marker id="arrowhead316" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="strokeWidth" markerWidth="8" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowheadPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker></defs></g><g class="edgePath LS-4 LE-N2" style="opacity: 1;" id="L-4-N2"><path class="path" d="M157.80468845367432,163.8181441614804L168.78046989440918,172.18178680123367C179.75625133514404,180.54542944098694,201.70781421661377,197.27271472049347,212.68359565734863,211.96969069358008C223.6593770980835,226.66666666666666,223.6593770980835,239.33333333333334,223.6593770980835,245.66666666666666L223.6593770980835,252" marker-end="url(#arrowhead317)" style="fill:none"></path><defs><marker id="arrowhead317" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="strokeWidth" markerWidth="8" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowheadPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker></defs></g><g class="edgePath LS-N2 LE-e" style="opacity: 1;" id="L-N2-e"><path class="path" d="M209.46250247955322,297.3558398829638L205.37239821751913,303.7965332358031C201.28229395548502,310.2372265886425,193.10208543141684,323.1186132943213,189.01198116938272,335.8926399804939C184.92187690734863,348.6666666666667,184.92187690734863,361.3333333333333,184.92187690734863,367.6666666666667L184.92187690734863,374" marker-end="url(#arrowhead318)" style="fill:none"></path><defs><marker id="arrowhead318" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="strokeWidth" markerWidth="8" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowheadPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker></defs></g><g class="edgePath LS-N2 LE-r" style="opacity: 1;" id="L-N2-r"><path class="path" d="M237.85625171661377,297.3558398829638L241.94635597864786,303.7965332358031C246.03646024068198,310.2372265886425,254.21666876475015,323.1186132943213,258.30677302678424,335.8926399804939C262.39687728881836,348.6666666666667,262.39687728881836,361.3333333333333,262.39687728881836,367.6666666666667L262.39687728881836,374" marker-end="url(#arrowhead319)" style="fill:none"></path><defs><marker id="arrowhead319" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="strokeWidth" markerWidth="8" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowheadPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker></defs></g><g class="edgePath LS-6 LE-3" style="opacity: 1;" id="L-6-3"><path class="path" d="M354.8671889305115,175.62413208707474L358.8807306289673,182.0201100725623C362.8942723274231,188.4160880580498,370.9213557243347,201.2080440290249,374.9348974227905,213.9373553478458C378.94843912124634,226.66666666666666,378.94843912124634,239.33333333333334,378.94843912124634,245.66666666666666L378.94843912124634,252" marker-end="url(#arrowhead320)" style="fill:none"></path><defs><marker id="arrowhead320" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="strokeWidth" markerWidth="8" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowheadPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker></defs></g><g class="edgePath LS-3 LE-N3" style="opacity: 1;" id="L-3-N3"><path class="path" d="M364.75156450271606,297.0665680275483L360.57682490348816,303.5554733562903C356.40208530426025,310.0443786850322,348.05260610580444,323.0221893425161,343.87786650657654,335.8444280045914C339.70312690734863,348.6666666666667,339.70312690734863,361.3333333333333,339.70312690734863,367.6666666666667L339.70312690734863,374" marker-end="url(#arrowhead321)" style="fill:none"></path><defs><marker id="arrowhead321" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="strokeWidth" markerWidth="8" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowheadPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker></defs></g><g class="edgePath LS-N3 LE-......" style="opacity: 1;" id="L-N3-......"><path class="path" d="M325.50625228881836,415.6520607473472L320.1341168085734,422.71005062278937C314.76198132832843,429.7680404982314,304.01771036783856,443.88402024911574,298.64557488759357,457.2753434578912C293.27343940734863,470.6666666666667,293.27343940734863,483.3333333333333,293.27343940734863,489.6666666666667L293.27343940734863,496" marker-end="url(#arrowhead322)" style="fill:none"></path><defs><marker id="arrowhead322" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="strokeWidth" markerWidth="8" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowheadPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker></defs></g><g class="edgePath LS-N3 LE-H" style="opacity: 1;" id="L-N3-H"><path class="path" d="M353.9000015258789,415.6520607473472L359.27213700612384,422.71005062278937C364.64427248636883,429.7680404982314,375.3885434468587,443.88402024911574,380.7606789271037,457.2753434578912C386.13281440734863,470.6666666666667,386.13281440734863,483.3333333333333,386.13281440734863,489.6666666666667L386.13281440734863,496" marker-end="url(#arrowhead323)" style="fill:none"></path><defs><marker id="arrowhead323" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="strokeWidth" markerWidth="8" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowheadPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker></defs></g><g class="edgePath LS-3 LE-o" style="opacity: 1;" id="L-3-o"><path class="path" d="M393.1453137397766,297.0665680275483L397.3200533390045,303.5554733562903C401.4947929382324,310.0443786850322,409.84427213668823,323.0221893425161,414.01901173591614,335.8444280045914C418.19375133514404,348.6666666666667,418.19375133514404,361.3333333333333,418.19375133514404,367.6666666666667L418.19375133514404,374" marker-end="url(#arrowhead324)" style="fill:none"></path><defs><marker id="arrowhead324" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="strokeWidth" markerWidth="8" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowheadPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker></defs></g></g><g class="edgeLabels"><g class="edgeLabel" transform="" style="opacity: 1;"><g transform="translate(0,0)" class="label"><rect rx="0" ry="0" width="0" height="0"></rect><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span id="L-L-10-4" class="edgeLabel L-LS-10' L-LE-4"></span></div></foreignObject></g></g><g class="edgeLabel" style="opacity: 1;" transform="translate(340.6703143119812,92)"><g transform="translate(-4.196875095367432,-13)" class="label"><rect rx="0" ry="0" width="8.393750190734863" height="26"></rect><foreignObject width="8.393750190734863" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span id="L-L-10-6" class="edgeLabel L-LS-10' L-LE-6">1</span></div></foreignObject></g></g><g class="edgeLabel" style="opacity: 1;" transform=""><g transform="translate(0,0)" class="label"><rect rx="0" ry="0" width="0" height="0"></rect><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span id="L-L-6-l" class="edgeLabel L-LS-6' L-LE-l"></span></div></foreignObject></g></g><g class="edgeLabel" style="opacity: 1;" transform=""><g transform="translate(0,0)" class="label"><rect rx="0" ry="0" width="0" height="0"></rect><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span id="L-L-4-N1" class="edgeLabel L-LS-4' L-LE-N1"></span></div></foreignObject></g></g><g class="edgeLabel" style="opacity: 1;" transform=""><g transform="translate(0,0)" class="label"><rect rx="0" ry="0" width="0" height="0"></rect><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span id="L-L-N1-W" class="edgeLabel L-LS-N1' L-LE-W"></span></div></foreignObject></g></g><g class="edgeLabel" style="opacity: 1;" transform=""><g transform="translate(0,0)" class="label"><rect rx="0" ry="0" width="0" height="0"></rect><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span id="L-L-N1-d" class="edgeLabel L-LS-N1' L-LE-d"></span></div></foreignObject></g></g><g class="edgeLabel" style="opacity: 1;" transform=""><g transform="translate(0,0)" class="label"><rect rx="0" ry="0" width="0" height="0"></rect><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span id="L-L-4-N2" class="edgeLabel L-LS-4' L-LE-N2"></span></div></foreignObject></g></g><g class="edgeLabel" style="opacity: 1;" transform=""><g transform="translate(0,0)" class="label"><rect rx="0" ry="0" width="0" height="0"></rect><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span id="L-L-N2-e" class="edgeLabel L-LS-N2' L-LE-e"></span></div></foreignObject></g></g><g class="edgeLabel" style="opacity: 1;" transform=""><g transform="translate(0,0)" class="label"><rect rx="0" ry="0" width="0" height="0"></rect><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span id="L-L-N2-r" class="edgeLabel L-LS-N2' L-LE-r"></span></div></foreignObject></g></g><g class="edgeLabel" style="opacity: 1;" transform="translate(378.94843912124634,214)"><g transform="translate(-4.196875095367432,-13)" class="label"><rect rx="0" ry="0" width="8.393750190734863" height="26"></rect><foreignObject width="8.393750190734863" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span id="L-L-6-3" class="edgeLabel L-LS-6' L-LE-3">1</span></div></foreignObject></g></g><g class="edgeLabel" style="opacity: 1;" transform="translate(339.70312690734863,336)"><g transform="translate(-4.196875095367432,-13)" class="label"><rect rx="0" ry="0" width="8.393750190734863" height="26"></rect><foreignObject width="8.393750190734863" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span id="L-L-3-N3" class="edgeLabel L-LS-3' L-LE-N3">0</span></div></foreignObject></g></g><g class="edgeLabel" style="opacity: 1;" transform=""><g transform="translate(0,0)" class="label"><rect rx="0" ry="0" width="0" height="0"></rect><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span id="L-L-N3-......" class="edgeLabel L-LS-N3' L-LE-......"></span></div></foreignObject></g></g><g class="edgeLabel" style="opacity: 1;" transform="translate(386.13281440734863,458)"><g transform="translate(-4.196875095367432,-13)" class="label"><rect rx="0" ry="0" width="8.393750190734863" height="26"></rect><foreignObject width="8.393750190734863" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span id="L-L-N3-H" class="edgeLabel L-LS-N3' L-LE-H">1</span></div></foreignObject></g></g><g class="edgeLabel" style="opacity: 1;" transform=""><g transform="translate(0,0)" class="label"><rect rx="0" ry="0" width="0" height="0"></rect><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;"><span id="L-L-3-o" class="edgeLabel L-LS-3' L-LE-o"></span></div></foreignObject></g></g></g><g class="nodes"><g class="node default" id="flowchart-3-327" transform="translate(378.94843912124634,275)" style="opacity: 1;"><rect rx="0" ry="0" x="-14.196875095367432" y="-23" width="28.393750190734863" height="46" class="label-container"></rect><g class="label" transform="translate(0,0)"><g transform="translate(-4.196875095367432,-13)"><foreignObject width="8.393750190734863" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;">3</div></foreignObject></g></g></g><g class="node default" style="opacity: 1;" id="flowchart-4-309" transform="translate(143.60781383514404,153)"><rect rx="0" ry="0" x="-14.196875095367432" y="-23" width="28.393750190734863" height="46" class="label-container"></rect><g class="label" transform="translate(0,0)"><g transform="translate(-4.196875095367432,-13)"><foreignObject width="8.393750190734863" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;">4</div></foreignObject></g></g></g><g class="node default" style="opacity: 1;" id="flowchart-6-311" transform="translate(340.6703143119812,153)"><rect rx="0" ry="0" x="-14.196875095367432" y="-23" width="28.393750190734863" height="46" class="label-container"></rect><g class="label" transform="translate(0,0)"><g transform="translate(-4.196875095367432,-13)"><foreignObject width="8.393750190734863" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;">6</div></foreignObject></g></g></g><g class="node default" style="opacity: 1;" id="flowchart-10-308" transform="translate(221.50625085830688,31)"><rect rx="0" ry="0" x="-18.390625" y="-23" width="36.78125" height="46" class="label-container"></rect><g class="label" transform="translate(0,0)"><g transform="translate(-8.390625,-13)"><foreignObject width="16.78125" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;">10</div></foreignObject></g></g></g><g class="node default" style="opacity: 1;" id="flowchart-l-313" transform="translate(301.0500020980835,275)"><rect rx="0" ry="0" x="-12.359375" y="-23" width="24.71875" height="46" class="label-container"></rect><g class="label" transform="translate(0,0)"><g transform="translate(-2.359375,-13)"><foreignObject width="4.71875" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;">l</div></foreignObject></g></g></g><g class="node default" style="opacity: 1;" id="flowchart-N1-315" transform="translate(65.45781326293945,275)"><rect rx="5" ry="5" x="-14.196875095367432" y="-23" width="28.393750190734863" height="46" class="label-container"></rect><g class="label" transform="translate(0,0)"><g transform="translate(-4.196875095367432,-13)"><foreignObject width="8.393750190734863" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;">2</div></foreignObject></g></g></g><g class="node default" style="opacity: 1;" id="flowchart-W-317" transform="translate(24.818750381469727,397)"><rect rx="0" ry="0" x="-16.81874990463257" y="-23" width="33.63749980926514" height="46" class="label-container"></rect><g class="label" transform="translate(0,0)"><g transform="translate(-6.818749904632568,-13)"><foreignObject width="13.637499809265137" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;">W</div></foreignObject></g></g></g><g class="node default" style="opacity: 1;" id="flowchart-d-319" transform="translate(106.09687614440918,397)"><rect rx="0" ry="0" x="-14.459374904632568" y="-23" width="28.918749809265137" height="46" class="label-container"></rect><g class="label" transform="translate(0,0)"><g transform="translate(-4.459374904632568,-13)"><foreignObject width="8.918749809265137" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;">d</div></foreignObject></g></g></g><g class="node default" style="opacity: 1;" id="flowchart-N2-321" transform="translate(223.6593770980835,275)"><rect rx="5" ry="5" x="-14.196875095367432" y="-23" width="28.393750190734863" height="46" class="label-container"></rect><g class="label" transform="translate(0,0)"><g transform="translate(-4.196875095367432,-13)"><foreignObject width="8.393750190734863" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;">2</div></foreignObject></g></g></g><g class="node default" style="opacity: 1;" id="flowchart-e-323" transform="translate(184.92187690734863,397)"><rect rx="0" ry="0" x="-14.365624904632568" y="-23" width="28.731249809265137" height="46" class="label-container"></rect><g class="label" transform="translate(0,0)"><g transform="translate(-4.365624904632568,-13)"><foreignObject width="8.731249809265137" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;">e</div></foreignObject></g></g></g><g class="node default" style="opacity: 1;" id="flowchart-r-325" transform="translate(262.39687728881836,397)"><rect rx="0" ry="0" x="-13.109375" y="-23" width="26.21875" height="46" class="label-container"></rect><g class="label" transform="translate(0,0)"><g transform="translate(-3.109375,-13)"><foreignObject width="6.21875" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;">r</div></foreignObject></g></g></g><g class="node default" style="opacity: 1;" id="flowchart-N3-329" transform="translate(339.70312690734863,397)"><rect rx="5" ry="5" x="-14.196875095367432" y="-23" width="28.393750190734863" height="46" class="label-container"></rect><g class="label" transform="translate(0,0)"><g transform="translate(-4.196875095367432,-13)"><foreignObject width="8.393750190734863" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;">1</div></foreignObject></g></g></g><g class="node default" style="opacity: 1;" id="flowchart-......-331" transform="translate(293.27343940734863,519)"><rect rx="0" ry="0" x="-27.625" y="-23" width="55.25" height="46" class="label-container"></rect><g class="label" transform="translate(0,0)"><g transform="translate(-17.625,-13)"><foreignObject width="35.25" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;">......</div></foreignObject></g></g></g><g class="node default" style="opacity: 1;" id="flowchart-H-333" transform="translate(386.13281440734863,519)"><rect rx="0" ry="0" x="-15.234375" y="-23" width="30.46875" height="46" class="label-container"></rect><g class="label" transform="translate(0,0)"><g transform="translate(-5.234375,-13)"><foreignObject width="10.46875" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;">H</div></foreignObject></g></g></g><g class="node default" style="opacity: 1;" id="flowchart-o-335" transform="translate(418.19375133514404,397)"><rect rx="0" ry="0" x="-14.293750286102295" y="-23" width="28.58750057220459" height="46" class="label-container"></rect><g class="label" transform="translate(0,0)"><g transform="translate(-4.293750286102295,-13)"><foreignObject width="8.58750057220459" height="26"><div xmlns="http://www.w3.org/1999/xhtml" style="display: inline-block; white-space: nowrap;">o</div></foreignObject></g></g></g></g></g></g></svg></div>
+<h2><a id="_197"></a>四、数据结构和接口设计</h2>
+<h3><a id="1_200"></a>1、压缩结构</h3>
+<pre><code class="prism language-c"><span class="token keyword">typedef</span> <span class="token keyword">struct</span> <span class="token class-name">CompressdData</span>
+<span class="token punctuation">{</span>
+	<span class="token keyword">char</span><span class="token operator">*</span> compress_result<span class="token punctuation">;</span>                 
+	<span class="token keyword">unsigned</span> <span class="token keyword">int</span> capacity<span class="token punctuation">;</span>
+	<span class="token keyword">unsigned</span> <span class="token keyword">int</span> size<span class="token punctuation">;</span>
+	<span class="token keyword">unsigned</span> <span class="token keyword">char</span> _cache_bit<span class="token punctuation">;</span>
+ 	<span class="token keyword">unsigned</span> <span class="token keyword">char</span> _cache_bit_index<span class="token punctuation">;</span>
+<span class="token punctuation">}</span> CompressdData<span class="token punctuation">;</span>
+</code></pre>
+<ul>
+<li>
+<p>i. compress_result 用于存储压缩或者解压缩的字节流，支持动态扩展；</p>
+</li>
+<li>
+<p>ii. capacity 代表了 compress_result 实际在堆上的空间；</p>
+</li>
+<li>
+<p>iii. size 代表压缩、或者解压缩的字节流的实际大小；</p>
+</li>
+<li>
+<p>iv. _cache_bit 表示某次编码（压缩）过程中，没有写入 compress_result 的剩余部分（高位）；</p>
+</li>
+<li>
+<p>v. _cache_bit_index 代表 _cache_bit 的位数；</p>
+</li>
+<li>
+<p>例如，图中 11010101 组成一个字节，这时候 _cache_bit = 010， _cache_bit_index = 3；</p>
+</li>
+</ul>
+<p>H|e|l|l<br>
+-|-|-|-|-<br>
+1101|010|10|10</p>
+<ul>
+<li>当加入一个字符o以后，_cache_bit = 010111，_cache_bit_index = 6；</li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th>H</th>
+<th>e</th>
+<th>l</th>
+<th>l</th>
+<th>o</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1101</td>
+<td>010</td>
+<td>10</td>
+<td>10</td>
+<td>111</td>
+</tr>
+</tbody>
+</table><h3><a id="2_229"></a>2、编码字典</h3>
+<pre><code class="prism language-c"><span class="token keyword">struct</span> <span class="token class-name">huffman_encoded_data</span>
+<span class="token punctuation">{</span>
+	<span class="token keyword">unsigned</span> <span class="token keyword">long</span> <span class="token keyword">long</span> value<span class="token punctuation">;</span>
+	<span class="token keyword">unsigned</span> <span class="token keyword">char</span> length<span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+<ul>
+<li>编码字典 <strong>huffman_encoded_data[256]</strong> 存储了每个字符编码后的值，以及长度；</li>
+</ul>
+<pre><code class="prism language-javascript">    比如 <span class="token constant">ASCII</span> 值为 <span class="token number">200</span> 的字符，编码以后变成 <span class="token number">17</span>，二进制表示为 <span class="token number">10001</span>；
+    那么 value 的值就是 <span class="token number">17</span>， length 的值为 <span class="token number">5</span>；
+</code></pre>
+<ul>
+<li>令当前需要编码的字符 i；</li>
+<li>编码后的值 V = huffman_encoded_data[i].value ;</li>
+<li>编码后的值 V 的长度 L = huffman_encoded_data[i].length；</li>
+<li>则需要写入 compress_result 的数据需要按照下标进行；</li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th>长度范围</th>
+<th>写入数据类型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0&lt; L &lt;=8</td>
+<td>L个Bit</td>
+</tr>
+<tr>
+<td>8&lt; L &lt;=16</td>
+<td>L-8个Bit、1个byte</td>
+</tr>
+<tr>
+<td>16&lt; L &lt;=24</td>
+<td>L-16个Bit、1个short</td>
+</tr>
+<tr>
+<td>24&lt; L &lt;=32</td>
+<td>L-24个Bit、1个char、1个short</td>
+</tr>
+<tr>
+<td>32&lt; L &lt;=40</td>
+<td>L-32个Bit、1个int</td>
+</tr>
+<tr>
+<td>40&lt; L &lt;=48</td>
+<td>L-40个Bit、1个char，1个int</td>
+</tr>
+<tr>
+<td>48&lt; L &lt;=56</td>
+<td>L-48个Bit、1个short、1个int</td>
+</tr>
+<tr>
+<td>56&lt; L &lt;=64</td>
+<td>L-56个Bit、1个char、1个short，1个int</td>
+</tr>
+</tbody>
+</table><h3><a id="3_260"></a>3、编码写入</h3>
+<h4><a id="i__Bit_262"></a>i. 写入完整 Bit</h4>
+<pre><code class="prism language-c"><span class="token keyword">void</span> <span class="token function">writeChar_Internal</span><span class="token punctuation">(</span><span class="token keyword">unsigned</span> <span class="token keyword">char</span> value<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+	<span class="token keyword">if</span> <span class="token punctuation">(</span>size <span class="token operator">+</span> <span class="token number">1</span> <span class="token operator">&gt;</span> capacity<span class="token punctuation">)</span>
+	<span class="token punctuation">{</span>
+		<span class="token function">expand</span><span class="token punctuation">(</span>capacity<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token punctuation">}</span>
+	<span class="token operator">*</span><span class="token punctuation">(</span>compress_result <span class="token operator">+</span> size<span class="token punctuation">)</span> <span class="token operator">=</span> value<span class="token punctuation">;</span>
+	size <span class="token operator">+=</span> <span class="token number">1</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<ul>
+<li>writeChar_Internal 这个接口表示写入完整的一个字节 value；</li>
+<li>并且在写入的过程中判断容量，超过容量就进行倍增；</li>
+<li>expand 函数就是在堆上分配 2*capacity 的内存，然后将 compress_result 原来的数据拷贝到新的内存，再删掉原来的内存；</li>
+</ul>
+<h4><a id="ii__Bit_279"></a>ii. 写入非完整 Bit</h4>
+<pre><code class="prism language-c"><span class="token keyword">void</span> <span class="token function">writeBit</span><span class="token punctuation">(</span><span class="token keyword">unsigned</span> <span class="token keyword">char</span> value<span class="token punctuation">,</span> <span class="token keyword">int</span> fromBit<span class="token punctuation">,</span> <span class="token keyword">int</span> bitSize<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+	<span class="token keyword">int</span> leftBitIndex <span class="token operator">=</span> <span class="token number">8</span> <span class="token operator">-</span> _cache_bit_index<span class="token punctuation">;</span>
+	<span class="token keyword">if</span> <span class="token punctuation">(</span>bitSize <span class="token operator">&lt;</span> leftBitIndex<span class="token punctuation">)</span>
+	<span class="token punctuation">{</span>
+		_cache_bit <span class="token operator">|=</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token keyword">unsigned</span> <span class="token keyword">char</span><span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">(</span>value <span class="token operator">&lt;&lt;</span> fromBit<span class="token punctuation">)</span> <span class="token operator">&amp;</span> _MINI_BIT_MASK<span class="token punctuation">[</span>bitSize<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">&gt;&gt;</span> _cache_bit_index<span class="token punctuation">)</span><span class="token punctuation">;</span>
+		_cache_bit_index <span class="token operator">+=</span> bitSize<span class="token punctuation">;</span>
+	<span class="token punctuation">}</span>
+	<span class="token keyword">else</span>
+	<span class="token punctuation">{</span>
+		_cache_bit <span class="token operator">|=</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token keyword">unsigned</span> <span class="token keyword">char</span><span class="token punctuation">)</span><span class="token punctuation">(</span>value <span class="token operator">&lt;&lt;</span> fromBit<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">&gt;&gt;</span> _cache_bit_index<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+		this<span class="token operator">-&gt;</span><span class="token function">writeChar_Internal</span><span class="token punctuation">(</span>_cache_bit<span class="token punctuation">)</span><span class="token punctuation">;</span>
+		fromBit <span class="token operator">+=</span> leftBitIndex<span class="token punctuation">;</span>
+		bitSize <span class="token operator">-=</span> leftBitIndex<span class="token punctuation">;</span>
+		_cache_bit_index <span class="token operator">=</span> bitSize<span class="token punctuation">;</span>
+		_cache_bit <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token keyword">unsigned</span> <span class="token keyword">char</span><span class="token punctuation">)</span><span class="token punctuation">(</span>value <span class="token operator">&lt;&lt;</span> fromBit<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">&amp;</span> _MINI_BIT_MASK<span class="token punctuation">[</span>bitSize<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<ul>
+<li>writeBit 表示写入的比特位不一定是8位，而是 bitSize 位；</li>
+<li>_MINI_BIT_MASK 是个二进制掩码，用来作 位与（&amp;），去掉低位的0，如下；</li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th>下标</th>
+<th>二进制值</th>
+<th>十进制值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>00000000</td>
+<td>0</td>
+</tr>
+<tr>
+<td>1</td>
+<td>10000000</td>
+<td>128</td>
+</tr>
+<tr>
+<td>2</td>
+<td>11000000</td>
+<td>192</td>
+</tr>
+<tr>
+<td>3</td>
+<td>11100000</td>
+<td>224</td>
+</tr>
+<tr>
+<td>4</td>
+<td>11110000</td>
+<td>240</td>
+</tr>
+<tr>
+<td>5</td>
+<td>11111000</td>
+<td>248</td>
+</tr>
+<tr>
+<td>6</td>
+<td>11111100</td>
+<td>252</td>
+</tr>
+<tr>
+<td>7</td>
+<td>11111110</td>
+<td>254</td>
+</tr>
+<tr>
+<td>8</td>
+<td>11111111</td>
+<td>255</td>
+</tr>
+</tbody>
+</table><ul>
+<li>leftBitIndex 代表本次写入还可以写多少个Bit，这里的 left 是剩余的意思，不是<code>左</code>，如果没有理解，很容易理解成<code>左</code>，那后面就更难理解了；</li>
+</ul>
+<h5><a id="_319"></a>直接写入</h5>
+<ul>
+<li>需要写入的位数 bitSize 小于 剩余位数 leftBitIndex，则直接写入 _cache_bit，并且更新 _cache_bit_index；</li>
+<li>为了更加容易理解，举个例子，某种情况下的变量值如下：</li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th>变量类型</th>
+<th>变量名</th>
+<th>值</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>成员</td>
+<td>_cache_bit_index</td>
+<td>2</td>
+<td>当前字节的2个位被占用了</td>
+</tr>
+<tr>
+<td>成员</td>
+<td>_cache_bit</td>
+<td>11000000</td>
+<td>当前字节的2个被占用的位都是1</td>
+</tr>
+<tr>
+<td>传参</td>
+<td>bitSize</td>
+<td>3</td>
+<td>写入的字节只需要3个位</td>
+</tr>
+<tr>
+<td>传参</td>
+<td>value</td>
+<td>00000101</td>
+<td>需要写入的字节的三个位是 101</td>
+</tr>
+<tr>
+<td>传参</td>
+<td>fromBit</td>
+<td>5</td>
+<td>8 减去写入的位数</td>
+</tr>
+</tbody>
+</table><ul>
+<li>那么我们的目的就是要把 value 的3个位‘101’放到_cache_bit的2个‘11’后面；</li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>值</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>a=(value &lt;&lt; fromBit)</td>
+<td>10100000</td>
+<td>将101提到高位</td>
+</tr>
+<tr>
+<td>b = a &amp; _MINI_BIT_MASK[bitSize]</td>
+<td>10100000</td>
+<td>剔除101以外的所有位</td>
+</tr>
+<tr>
+<td>c = b &gt;&gt; _cache_bit_index</td>
+<td>00101000</td>
+<td>空出两个位给_cache_bit</td>
+</tr>
+<tr>
+<td>_cache_bit = _cache_bit 位或 c</td>
+<td>11101000</td>
+<td>11和101合体</td>
+</tr>
+</tbody>
+</table><h5><a id="_341"></a>超出字节</h5>
+<ul>
+<li>需要写入的位数 bitSize 大于等于 剩余位数 leftBitIndex，则必须先写一个字节，然后再缓存 _cache_bit；</li>
+<li>还是举例说明吧；</li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th>变量类型</th>
+<th>变量名</th>
+<th>值</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>成员</td>
+<td>_cache_bit_index</td>
+<td>2</td>
+<td>当前字节的2个位被占用了</td>
+</tr>
+<tr>
+<td>成员</td>
+<td>_cache_bit</td>
+<td>11000000</td>
+<td>当前字节的2个被占用的位都是1</td>
+</tr>
+<tr>
+<td>传参</td>
+<td>bitSize</td>
+<td>7</td>
+<td>写入的字节需要7个位</td>
+</tr>
+<tr>
+<td>传参</td>
+<td>value</td>
+<td>00100101</td>
+<td>需要写入的字节的7个位是 0100101</td>
+</tr>
+<tr>
+<td>传参</td>
+<td>fromBit</td>
+<td>1</td>
+<td>8 减去写入的位数</td>
+</tr>
+</tbody>
+</table><ul>
+<li>操作完的结果是 11010010 写入压缩数据，剩下的 10000000 写入_cache_bit；</li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>值</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>a=(value &lt;&lt; fromBit)</td>
+<td>01001010</td>
+<td>将0100101提到高位</td>
+</tr>
+<tr>
+<td>b = a&gt;&gt;_cache_bit_index</td>
+<td>00010010</td>
+<td>空出两个位给_cache_bit</td>
+</tr>
+<tr>
+<td>_cache_bit = _cache_bit 位或 b</td>
+<td>11010010</td>
+<td>11和00010010合体</td>
+</tr>
+</tbody>
+</table><ul>
+<li>写入前半个字节：writeChar_Internal(_cache_bit);</li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>fromBit = fromBit + leftBitIndex</td>
+<td>7</td>
+</tr>
+<tr>
+<td>bitSize = bitSize - leftBitIndex</td>
+<td>1</td>
+</tr>
+<tr>
+<td>_cache_bit_index = bitSize</td>
+<td>1</td>
+</tr>
+<tr>
+<td>a = (value &lt;&lt; fromBit)</td>
+<td>001001010000000</td>
+</tr>
+<tr>
+<td>_cache_bit = a &amp; _MINI_BIT_MASK[bitSize]</td>
+<td>10000000</td>
+</tr>
+</tbody>
+</table><h4><a id="iii__byte_371"></a>iii. 写入 byte</h4>
+<ul>
+<li>写入 byte，其实就是写入8个位，当然，举一反三，写 short 和 int 也雷同；</li>
+</ul>
+<pre><code class="prism language-c"><span class="token keyword">void</span> <span class="token function">writeChar</span><span class="token punctuation">(</span><span class="token keyword">unsigned</span> <span class="token keyword">char</span> value<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+	<span class="token function">writeBit</span><span class="token punctuation">(</span>value<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">8</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<h4><a id="iv__short_380"></a>iv. 写入 short</h4>
+<pre><code class="prism language-c"><span class="token keyword">void</span> <span class="token function">writeShort</span><span class="token punctuation">(</span><span class="token keyword">unsigned</span> <span class="token keyword">short</span> value<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+	<span class="token keyword">unsigned</span> <span class="token keyword">char</span> hValue <span class="token operator">=</span> <span class="token punctuation">(</span>value <span class="token operator">&gt;&gt;</span> <span class="token number">8</span><span class="token punctuation">)</span> <span class="token operator">&amp;</span> <span class="token number">0xff</span><span class="token punctuation">;</span>
+	<span class="token keyword">unsigned</span> <span class="token keyword">char</span> lValue <span class="token operator">=</span> <span class="token punctuation">(</span>value<span class="token punctuation">)</span> <span class="token operator">&amp;</span> <span class="token number">0xff</span><span class="token punctuation">;</span>
+	
+	<span class="token function">writeChar</span><span class="token punctuation">(</span>hValue<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">writeChar</span><span class="token punctuation">(</span>lValue<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<h4><a id="iv__int_392"></a>iv. 写入 int</h4>
+<pre><code class="prism language-c"><span class="token keyword">void</span> <span class="token function">writeInt</span><span class="token punctuation">(</span><span class="token keyword">unsigned</span> <span class="token keyword">int</span> value<span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+	<span class="token keyword">unsigned</span> <span class="token keyword">char</span> value1 <span class="token operator">=</span> <span class="token punctuation">(</span>value <span class="token operator">&gt;&gt;</span> <span class="token number">24</span><span class="token punctuation">)</span> <span class="token operator">&amp;</span> <span class="token number">0xff</span><span class="token punctuation">;</span>
+	<span class="token keyword">unsigned</span> <span class="token keyword">char</span> value2 <span class="token operator">=</span> <span class="token punctuation">(</span>value <span class="token operator">&gt;&gt;</span> <span class="token number">16</span><span class="token punctuation">)</span> <span class="token operator">&amp;</span> <span class="token number">0xff</span><span class="token punctuation">;</span>
+	<span class="token keyword">unsigned</span> <span class="token keyword">char</span> value3 <span class="token operator">=</span> <span class="token punctuation">(</span>value <span class="token operator">&gt;&gt;</span> <span class="token number">8</span><span class="token punctuation">)</span> <span class="token operator">&amp;</span> <span class="token number">0xff</span><span class="token punctuation">;</span>
+	<span class="token keyword">unsigned</span> <span class="token keyword">char</span> value4 <span class="token operator">=</span> value <span class="token operator">&amp;</span> <span class="token number">0xff</span><span class="token punctuation">;</span>
+
+	<span class="token function">writeChar</span><span class="token punctuation">(</span>value1<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">writeChar</span><span class="token punctuation">(</span>value2<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">writeChar</span><span class="token punctuation">(</span>value3<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">writeChar</span><span class="token punctuation">(</span>value4<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div>
+</body>
+
+</html>

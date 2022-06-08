@@ -1,0 +1,114 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>《算法零基础100讲》(第84讲) 深度优先搜索(五) 暴力枚举</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__html"><p></p><div class="toc"><h3>文章目录</h3><ul><li><a href="#_3">零、写在前面</a></li><li><a href="#_8">一、概念定义</a></li><li><a href="#_12">二、题目描述</a></li><li><a href="#_18">三、算法详解</a></li><li><a href="#_23">四、源码剖析</a></li><li><a href="#_71">五、推荐专栏</a></li><li><a href="#_77">六、习题练习</a></li></ul></div><p></p>
+<h1><a id="_3"></a>零、写在前面</h1>
+<p>  这是<a href="https://blog.csdn.net/whereisherofrom/category_11426012.html">《算法零基础100讲》</a> 专栏打卡学习的第 <font color="red">84</font> 天了。如果觉得本专栏太贵无法承受，在博主主页添加博主好友，获取 <font color="red"><strong>付费专栏优惠券</strong></font>。<br>
+  每天专栏的题，做不出来没关系，因为困难的题涉及知识点较多，可能会涉及到后面的章节，所以不要着急，内容能看懂，能自己分析，能做出简单题就行。<br>
+  在刷题的过程中，总结自己遇到的坑点，写出 <strong>「 解题报告 」</strong>  供他人学习，也是一种自我学习的方式。这就是经典的帮助他人的同时，成就自己。目前， <a href="https://bbs.csdn.net/forums/hero"><strong>「 万人千题 」</strong></a> 社区 每天都会有五六篇高质量的 <strong>「 解题报告 」</strong> 被我 <strong>「 加精 」</strong>。如果觉得自己有能力的，也可以来发布你的 <strong>「 解题报告 」</strong>。千万级流量，你我共同拥有。</p>
+<h1><a id="_8"></a>一、概念定义</h1>
+<p>  一般市面上说的暴力算法，就是指根据题意做，没有任何的优化，大部分暴力算法都可以用深度优先搜索来枚举。<br>
+  其实很多暴力枚举的问题，都是基于 排列组合 的。</p>
+<h1><a id="_12"></a>二、题目描述</h1>
+<blockquote>
+<p>  给定一个仅包含数字 2-9 的字符串，返回所有它能表示的字母组合。答案可以按 任意顺序 返回。给出数字到字母的映射如下（与电话按键相同）。注意 1 不对应任何字母。<br>
+  输入：<code>digits = "23"</code><br>
+  输出：<code>["ad","ae","af","bd","be","bf","cd","ce","cf"]</code></p>
+</blockquote>
+<h1><a id="_18"></a>三、算法详解</h1>
+<p>  <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span> 首先，建立数字到字母的映射表；<br>
+  <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span></span> 然后，深度优先遍历所有的数字；<br>
+  <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(3)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">3</span><span class="mclose">)</span></span></span></span></span> 根据映射表，去扩展搜索字母，形成搜索树；</p>
+<h1><a id="_23"></a>四、源码剖析</h1>
+<pre><code class="prism language-c"><span class="token keyword">char</span> alp<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token number">5</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">{</span>
+    <span class="token string">""</span><span class="token punctuation">,</span>
+    <span class="token string">""</span><span class="token punctuation">,</span>
+    <span class="token string">"abc"</span><span class="token punctuation">,</span>
+    <span class="token string">"def"</span><span class="token punctuation">,</span>
+    <span class="token string">"ghi"</span><span class="token punctuation">,</span>
+    <span class="token string">"jkl"</span><span class="token punctuation">,</span>
+    <span class="token string">"mno"</span><span class="token punctuation">,</span>
+    <span class="token string">"pqrs"</span><span class="token punctuation">,</span>
+    <span class="token string">"tuv"</span><span class="token punctuation">,</span>
+    <span class="token string">"wxyz"</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token keyword">void</span> <span class="token function">dfs</span><span class="token punctuation">(</span><span class="token keyword">int</span> depth<span class="token punctuation">,</span> <span class="token keyword">char</span> <span class="token operator">*</span>digits<span class="token punctuation">,</span> <span class="token keyword">char</span> <span class="token operator">*</span>stk<span class="token punctuation">,</span> <span class="token keyword">char</span> <span class="token operator">*</span><span class="token operator">*</span>ret<span class="token punctuation">,</span> <span class="token keyword">int</span><span class="token operator">*</span> returnSize<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">int</span> i<span class="token punctuation">,</span> len<span class="token punctuation">;</span>
+    <span class="token keyword">char</span> c<span class="token punctuation">;</span>
+    <span class="token keyword">if</span><span class="token punctuation">(</span>digits<span class="token punctuation">[</span>depth<span class="token punctuation">]</span> <span class="token operator">==</span> <span class="token string">'\0'</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span>depth <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">return</span> <span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        stk<span class="token punctuation">[</span>depth<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token string">'\0'</span><span class="token punctuation">;</span>
+        ret<span class="token punctuation">[</span> <span class="token operator">*</span>returnSize <span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token keyword">char</span> <span class="token operator">*</span><span class="token punctuation">)</span><span class="token function">malloc</span><span class="token punctuation">(</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span><span class="token keyword">char</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">5</span> <span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token function">strcpy</span><span class="token punctuation">(</span>ret<span class="token punctuation">[</span> <span class="token operator">*</span>returnSize <span class="token punctuation">]</span><span class="token punctuation">,</span> stk<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">(</span><span class="token operator">*</span>returnSize<span class="token punctuation">)</span><span class="token operator">++</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> <span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    len <span class="token operator">=</span> <span class="token function">strlen</span><span class="token punctuation">(</span> alp<span class="token punctuation">[</span> digits<span class="token punctuation">[</span>depth<span class="token punctuation">]</span><span class="token operator">-</span><span class="token string">'0'</span> <span class="token punctuation">]</span> <span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">for</span><span class="token punctuation">(</span>i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> len<span class="token punctuation">;</span> <span class="token operator">++</span>i<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        c <span class="token operator">=</span> alp<span class="token punctuation">[</span> digits<span class="token punctuation">[</span>depth<span class="token punctuation">]</span><span class="token operator">-</span><span class="token string">'0'</span> <span class="token punctuation">]</span><span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span>
+        stk<span class="token punctuation">[</span>depth<span class="token punctuation">]</span> <span class="token operator">=</span> c<span class="token punctuation">;</span>
+        <span class="token function">dfs</span><span class="token punctuation">(</span>depth<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">,</span> digits<span class="token punctuation">,</span> stk<span class="token punctuation">,</span> ret<span class="token punctuation">,</span> returnSize<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+<span class="token punctuation">}</span>
+
+<span class="token keyword">char</span> <span class="token operator">*</span><span class="token operator">*</span> <span class="token function">letterCombinations</span><span class="token punctuation">(</span><span class="token keyword">char</span> <span class="token operator">*</span> digits<span class="token punctuation">,</span> <span class="token keyword">int</span><span class="token operator">*</span> returnSize<span class="token punctuation">)</span><span class="token punctuation">{</span>
+    <span class="token keyword">char</span> <span class="token operator">*</span><span class="token operator">*</span>ret <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token keyword">char</span> <span class="token operator">*</span><span class="token operator">*</span><span class="token punctuation">)</span><span class="token function">malloc</span><span class="token punctuation">(</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span><span class="token keyword">char</span> <span class="token operator">*</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">256</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">char</span> stk<span class="token punctuation">[</span><span class="token number">10</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token operator">*</span>returnSize <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token function">dfs</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> digits<span class="token punctuation">,</span> stk<span class="token punctuation">,</span> ret<span class="token punctuation">,</span> returnSize<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> ret<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<h1><a id="_71"></a>五、推荐专栏</h1>
+ <center> <a href="https://blog.csdn.net/whereisherofrom/category_9273531.html"><font color="886ce4"><b>💜《<u>夜深人静写算法</u>》💜</b></font></a></center>
+  
+ <center> <a href="https://blog.csdn.net/WhereIsHeroFrom/article/details/111407529"><font color="886ce4"><b>（<u>一）搜索入门</u></b></font></a></center>
+<h1><a id="_77"></a>六、习题练习</h1>
+
+<table>
+<thead>
+<tr>
+<th>序号</th>
+<th>题目链接</th>
+<th>难度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><a href="https://leetcode-cn.com/problems/minimum-sum-of-four-digit-number-after-splitting-digits/">LeetCode 2160. 拆分数位后四位数字的最小和</a></td>
+<td>★★☆☆☆</td>
+</tr>
+<tr>
+<td>2</td>
+<td><a href="https://leetcode-cn.com/problems/IDBivT/">剑指 Offer II 085. 生成匹配的括号</a></td>
+<td>★★☆☆☆</td>
+</tr>
+<tr>
+<td>3</td>
+<td><a href="https://leetcode-cn.com/problems/generate-parentheses/">LeetCode 22. 括号生成</a></td>
+<td>★★☆☆☆</td>
+</tr>
+<tr>
+<td>4</td>
+<td><a href="https://leetcode-cn.com/problems/letter-combinations-of-a-phone-number/">LeetCode 17. 电话号码的字母组合</a></td>
+<td>★★☆☆☆</td>
+</tr>
+</tbody>
+</table><center>👇🏻添加 博主 获取付费专栏优惠券👇🏻</center>
+</div>
+</body>
+
+</html>

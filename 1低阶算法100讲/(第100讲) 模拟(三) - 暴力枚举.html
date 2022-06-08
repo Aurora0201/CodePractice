@@ -1,0 +1,156 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>《算法零基础100讲》(第100讲) 模拟(三) - 暴力枚举</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__html"><p></p><div class="toc"><h3>文章目录</h3><ul><li><a href="#_4">零、写在前面</a></li><li><a href="#_9">一、概念定义</a></li><li><a href="#_13">二、题目描述</a></li><li><a href="#_22">三、算法详解</a></li><li><a href="#_28">四、源码剖析</a></li><ul><li><a href="#1_29">1、获取宫号</a></li><li><a href="#2_37">2、掩码的初始化</a></li><li><a href="#3_61">3、递归回溯的过程</a></li></ul><li><a href="#_110">五、推荐专栏</a></li><li><a href="#_115">六、习题练习</a></li></ul></div><p></p>
+<h1><a id="_4"></a>零、写在前面</h1>
+<p>  这是<a href="https://blog.csdn.net/whereisherofrom/category_11426012.html">《算法零基础100讲》</a> 专栏打卡学习的第 <font color="red">100</font> 天了。如果觉得本专栏太贵无法承受，在博主主页添加博主好友，获取 <font color="red"><strong>付费专栏优惠券</strong></font>。<br>
+  每天专栏的题，做不出来没关系，因为困难的题涉及知识点较多，可能会涉及到后面的章节，所以不要着急，内容能看懂，能自己分析，能做出简单题就行。<br>
+  在刷题的过程中，总结自己遇到的坑点，写出 <strong>「 解题报告 」</strong>  供他人学习，也是一种自我学习的方式。这就是经典的帮助他人的同时，成就自己。目前， <a href="https://bbs.csdn.net/forums/hero"><strong>「 万人千题 」</strong></a> 社区 每天都会有五六篇高质量的 <strong>「 解题报告 」</strong> 被我 <strong>「 加精 」</strong>。如果觉得自己有能力的，也可以来发布你的 <strong>「 解题报告 」</strong>。千万级流量，你我共同拥有。</p>
+<h1><a id="_9"></a>一、概念定义</h1>
+<p>  对于模拟题，就是照着题目描述的问题，自己想各种奇怪的办法，将问题进行简化，从而快速写出代码，类型多种多样。<br>
+  对于暴力枚举的问题，一般有方向类问题、数独问题、皇后问题、棋盘问题等等，很多问题需要涉及到回溯。</p>
+<h1><a id="_13"></a>二、题目描述</h1>
+<blockquote>
+<p>  编写一个程序，通过填充空格来解决数独问题。<br>
+数独的解法需 遵循如下规则：<br>
+  数字 1-9 在每一行只能出现一次。<br>
+  数字 1-9 在每一列只能出现一次。<br>
+  数字 1-9 在每一个以粗实线分隔的 3x3 宫内只能出现一次。<br>
+  数独部分空格内已填入了数字，空白格用 ‘.’ 表示。</p>
+</blockquote>
+<h1><a id="_22"></a>三、算法详解</h1>
+<p>  <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span> 首先，用 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mn>9</mn></mrow><annotation encoding="application/x-tex">9</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">9</span></span></span></span></span> 个行的掩码 <code>rowMask[i]</code>来表示第 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.65952em; vertical-align: 0em;"></span><span class="mord mathdefault">i</span></span></span></span></span> 行数字的出现情况，<span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>111111111</mn><msub><mo stretchy="false">)</mo><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">(111111111)_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mord">1</span><span class="mord">1</span><span class="mord">1</span><span class="mord">1</span><span class="mord">1</span><span class="mord">1</span><span class="mord">1</span><span class="mord">1</span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 0.301108em;"><span class="" style="top: -2.55em; margin-left: 0em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 0.15em;"><span class=""></span></span></span></span></span></span></span></span></span></span> 表示 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mn>9</mn></mrow><annotation encoding="application/x-tex">9</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">9</span></span></span></span></span> 个数字都出现了，<span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>010111111</mn><msub><mo stretchy="false">)</mo><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">(010111111)_2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">0</span><span class="mord">1</span><span class="mord">0</span><span class="mord">1</span><span class="mord">1</span><span class="mord">1</span><span class="mord">1</span><span class="mord">1</span><span class="mord">1</span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 0.301108em;"><span class="" style="top: -2.55em; margin-left: 0em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 0.15em;"><span class=""></span></span></span></span></span></span></span></span></span></span> 表示数字的 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mn>7</mn></mrow><annotation encoding="application/x-tex">7</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">7</span></span></span></span></span> 和 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mn>9</mn></mrow><annotation encoding="application/x-tex">9</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">9</span></span></span></span></span> 还没有使用过。<br>
+  <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span></span> 然后，用 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mn>9</mn></mrow><annotation encoding="application/x-tex">9</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">9</span></span></span></span></span> 个列的掩码 <code>colMask[i]</code>来表示第 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.65952em; vertical-align: 0em;"></span><span class="mord mathdefault">i</span></span></span></span></span> 列数字的出现情况，和行遵循同样的规则。<br>
+  <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(3)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">3</span><span class="mclose">)</span></span></span></span></span> 接着，再用 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mn>9</mn></mrow><annotation encoding="application/x-tex">9</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">9</span></span></span></span></span> 个 “宫” 的掩码<code>gongMasl[i]</code>来表示第 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.65952em; vertical-align: 0em;"></span><span class="mord mathdefault">i</span></span></span></span></span> 个 “宫” 里面数字的出现情况。<br>
+  <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>4</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(4)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">4</span><span class="mclose">)</span></span></span></span></span> 把所有的空格放入一个列表，枚举格子可能出现的所有数字的情况即可，回溯求解。</p>
+<h1><a id="_28"></a>四、源码剖析</h1>
+<h2><a id="1_29"></a>1、获取宫号</h2>
+<pre><code class="prism language-cpp"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name">GONG</span> <span class="token expression"><span class="token number">3</span></span></span>
+<span class="token keyword">int</span> <span class="token function">getGongIdx</span><span class="token punctuation">(</span><span class="token keyword">int</span> i<span class="token punctuation">,</span> <span class="token keyword">int</span> j<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token punctuation">(</span>i<span class="token operator">/</span>GONG<span class="token punctuation">)</span><span class="token operator">*</span>GONG <span class="token operator">+</span> j<span class="token operator">/</span>GONG<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<h2><a id="2_37"></a>2、掩码的初始化</h2>
+<pre><code class="prism language-cpp">vector<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">&gt;</span> block<span class="token punctuation">;</span>
+<span class="token keyword">int</span> blockSize <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token keyword">int</span> i<span class="token punctuation">,</span> j<span class="token punctuation">;</span>
+<span class="token function">memset</span><span class="token punctuation">(</span>rowMask<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>rowMask<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token function">memset</span><span class="token punctuation">(</span>colMask<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>colMask<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token function">memset</span><span class="token punctuation">(</span>gongMask<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>gongMask<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">for</span><span class="token punctuation">(</span>i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> <span class="token number">9</span><span class="token punctuation">;</span> <span class="token operator">++</span>i<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">for</span><span class="token punctuation">(</span>j <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> j <span class="token operator">&lt;</span> <span class="token number">9</span><span class="token punctuation">;</span> <span class="token operator">++</span>j<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span>board<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">[</span>j<span class="token punctuation">]</span> <span class="token operator">==</span> <span class="token char">'.'</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            block<span class="token punctuation">.</span><span class="token function">push_back</span><span class="token punctuation">(</span> i <span class="token operator">*</span> <span class="token number">9</span> <span class="token operator">+</span> j <span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span><span class="token keyword">else</span> <span class="token punctuation">{</span>
+            <span class="token keyword">int</span> nowMask <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token number">1</span><span class="token operator">&lt;&lt;</span><span class="token punctuation">(</span>board<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">[</span>j<span class="token punctuation">]</span> <span class="token operator">-</span> <span class="token char">'1'</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            rowMask<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">|=</span> nowMask<span class="token punctuation">;</span>
+            colMask<span class="token punctuation">[</span>j<span class="token punctuation">]</span> <span class="token operator">|=</span> nowMask<span class="token punctuation">;</span>
+            gongMask<span class="token punctuation">[</span> <span class="token function">getGongIdx</span><span class="token punctuation">(</span>i<span class="token punctuation">,</span>j<span class="token punctuation">)</span> <span class="token punctuation">]</span> <span class="token operator">|=</span> nowMask<span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+blockSize <span class="token operator">=</span> block<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<h2><a id="3_61"></a>3、递归回溯的过程</h2>
+<pre><code class="prism language-cpp"><span class="token keyword">bool</span> <span class="token function">dfs</span><span class="token punctuation">(</span>vector<span class="token operator">&lt;</span>vector<span class="token operator">&lt;</span><span class="token keyword">char</span><span class="token operator">&gt;&gt;</span><span class="token operator">&amp;</span> board<span class="token punctuation">,</span> <span class="token keyword">const</span> vector<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">&gt;</span><span class="token operator">&amp;</span> block<span class="token punctuation">,</span> <span class="token keyword">int</span> nBlock<span class="token punctuation">,</span> <span class="token keyword">int</span> totBlock<span class="token punctuation">,</span> <span class="token keyword">int</span> rowMask<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token keyword">int</span> colMask<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token keyword">int</span> gongMask<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">if</span><span class="token punctuation">(</span>nBlock <span class="token operator">==</span> totBlock<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">int</span> pos <span class="token operator">=</span> block<span class="token punctuation">[</span>nBlock<span class="token punctuation">]</span><span class="token punctuation">;</span>              <span class="token comment">// (1)</span>
+    <span class="token keyword">int</span> row <span class="token operator">=</span> pos <span class="token operator">/</span> <span class="token number">9</span><span class="token punctuation">;</span>
+    <span class="token keyword">int</span> col <span class="token operator">=</span> pos <span class="token operator">%</span> <span class="token number">9</span><span class="token punctuation">;</span>
+    <span class="token keyword">int</span> gong <span class="token operator">=</span> <span class="token function">getGongIdx</span><span class="token punctuation">(</span>row<span class="token punctuation">,</span> col<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span> i <span class="token operator">&lt;=</span> <span class="token number">9</span><span class="token punctuation">;</span> <span class="token operator">++</span>i<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">int</span> nowMask <span class="token operator">=</span> <span class="token punctuation">(</span> <span class="token number">1</span><span class="token operator">&lt;&lt;</span><span class="token punctuation">(</span>i<span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span> <span class="token punctuation">)</span><span class="token punctuation">;</span>       <span class="token comment">// (2)            </span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span> rowMask<span class="token punctuation">[</span>row<span class="token punctuation">]</span> <span class="token operator">&amp;</span> nowMask <span class="token punctuation">)</span> <span class="token punctuation">{</span>    <span class="token comment">// (3.1)</span>
+            <span class="token keyword">continue</span><span class="token punctuation">;</span> 
+        <span class="token punctuation">}</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span> colMask<span class="token punctuation">[</span>col<span class="token punctuation">]</span> <span class="token operator">&amp;</span> nowMask <span class="token punctuation">)</span> <span class="token punctuation">{</span>    <span class="token comment">// (3.2)</span>
+            <span class="token keyword">continue</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span>gongMask<span class="token punctuation">[</span>gong<span class="token punctuation">]</span> <span class="token operator">&amp;</span> nowMask<span class="token punctuation">)</span> <span class="token punctuation">{</span>    <span class="token comment">// (3.3)</span>
+            <span class="token keyword">continue</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+
+        rowMask<span class="token punctuation">[</span>row<span class="token punctuation">]</span> <span class="token operator">^=</span> nowMask<span class="token punctuation">;</span>          <span class="token comment">// (4.1)</span>
+        colMask<span class="token punctuation">[</span>col<span class="token punctuation">]</span> <span class="token operator">^=</span> nowMask<span class="token punctuation">;</span>          <span class="token comment">// (4.2)</span>
+        gongMask<span class="token punctuation">[</span>gong<span class="token punctuation">]</span> <span class="token operator">^=</span> nowMask<span class="token punctuation">;</span>        <span class="token comment">// (4.3)</span>
+        board<span class="token punctuation">[</span>row<span class="token punctuation">]</span><span class="token punctuation">[</span>col<span class="token punctuation">]</span> <span class="token operator">=</span> i <span class="token operator">+</span> <span class="token char">'0'</span><span class="token punctuation">;</span>        <span class="token comment">// (5)</span>
+        
+        <span class="token keyword">if</span><span class="token punctuation">(</span> <span class="token function">dfs</span><span class="token punctuation">(</span>board<span class="token punctuation">,</span> block<span class="token punctuation">,</span> nBlock<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">,</span> totBlock<span class="token punctuation">,</span> rowMask<span class="token punctuation">,</span> colMask<span class="token punctuation">,</span> gongMask<span class="token punctuation">)</span> <span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">return</span> <span class="token boolean">true</span><span class="token punctuation">;</span>                  <span class="token comment">// (6)</span>
+        <span class="token punctuation">}</span>
+
+        board<span class="token punctuation">[</span>row<span class="token punctuation">]</span><span class="token punctuation">[</span>col<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token char">'.'</span><span class="token punctuation">;</span>            <span class="token comment">// (7.1)</span>
+        rowMask<span class="token punctuation">[</span>row<span class="token punctuation">]</span> <span class="token operator">^=</span> nowMask<span class="token punctuation">;</span>          <span class="token comment">// (7.2)</span>
+        colMask<span class="token punctuation">[</span>col<span class="token punctuation">]</span> <span class="token operator">^=</span> nowMask<span class="token punctuation">;</span>          <span class="token comment">// (7.3)</span>
+        gongMask<span class="token punctuation">[</span>gong<span class="token punctuation">]</span> <span class="token operator">^=</span> nowMask<span class="token punctuation">;</span>        <span class="token comment">// (7.4)</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">return</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<ul>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span> 对于当前的空格，计算它的行号、列号、宫号；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span></span> 计算当前枚举的数字的二进制掩码；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>3.1</mn><mo>−</mo><mn>3.3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(3.1 - 3.3)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">3</span><span class="mord">.</span><span class="mord">1</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord">3</span><span class="mord">.</span><span class="mord">3</span><span class="mclose">)</span></span></span></span></span> 判断这个数字是否字对应的行、列、宫出现过，一旦出现则不能再进行枚举；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>4.1</mn><mo>−</mo><mn>4.3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(4.1 - 4.3)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">4</span><span class="mord">.</span><span class="mord">1</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord">4</span><span class="mord">.</span><span class="mord">3</span><span class="mclose">)</span></span></span></span></span> 将对应的位置置上相应二进制掩码；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>5</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(5)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">5</span><span class="mclose">)</span></span></span></span></span> 保存路径；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>6</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(6)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">6</span><span class="mclose">)</span></span></span></span></span> 递归往下搜索，找到找到一个可行解；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>7.1</mn><mo>−</mo><mn>7.4</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(7.1 - 7.4)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">7</span><span class="mord">.</span><span class="mord">1</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord">7</span><span class="mord">.</span><span class="mord">4</span><span class="mclose">)</span></span></span></span></span> 回溯；</li>
+</ul>
+<h1><a id="_110"></a>五、推荐专栏</h1>
+ <center> <a href="https://blog.csdn.net/whereisherofrom/category_9273531.html"><font color="886ce4"><b>💜《<u>夜深人静写算法</u>》💜</b></font></a></center>
+  
+ <center> <a href="https://blog.csdn.net/WhereIsHeroFrom/article/details/111407529"><font color="886ce4"><b>（<u>一）搜索入门</u></b></font></a></center>
+<h1><a id="_115"></a>六、习题练习</h1>
+
+<table>
+<thead>
+<tr>
+<th>序号</th>
+<th>题目链接</th>
+<th>难度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><a href="https://leetcode-cn.com/problems/eight-queens-lcci/">面试题 08.12. 八皇后</a></td>
+<td>★★☆☆☆</td>
+</tr>
+<tr>
+<td>2</td>
+<td><a href="https://leetcode-cn.com/problems/n-queens/">LeetCode 51. N 皇后</a></td>
+<td>★★☆☆☆</td>
+</tr>
+<tr>
+<td>3</td>
+<td><a href="https://leetcode-cn.com/problems/n-queens-ii/">LeetCode 52. N皇后 II</a></td>
+<td>★★☆☆☆</td>
+</tr>
+<tr>
+<td>4</td>
+<td><a href="https://leetcode-cn.com/problems/valid-sudoku/">LeetCode 36. 有效的数独</a></td>
+<td>★★★☆☆</td>
+</tr>
+<tr>
+<td>5</td>
+<td><a href="https://leetcode-cn.com/problems/sudoku-solver/">LeetCode 37. 解数独</a></td>
+<td>★★★☆☆</td>
+</tr>
+</tbody>
+</table><center>👇🏻添加 博主 获取付费专栏优惠券👇🏻</center>
+</div>
+</body>
+
+</html>

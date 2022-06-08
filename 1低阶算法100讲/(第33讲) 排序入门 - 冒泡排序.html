@@ -1,0 +1,126 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>《算法零基础100讲》(第33讲) 排序入门 - 冒泡排序</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__html"><p></p><div class="toc"><h3>文章目录</h3><ul><li><a href="#_2">零、写在前面</a></li><li><a href="#_8">一、概念定义</a></li><li><a href="#_21">二、题目描述</a></li><li><a href="#_24">三、算法详解</a></li><li><a href="#_30">四、源码剖析</a></li><li><a href="#_66">五、推荐专栏</a></li><li><a href="#_71">六、习题练习</a></li></ul></div><p></p>
+<h1><a id="_2"></a>零、写在前面</h1>
+<p>  这是<a href="https://blog.csdn.net/whereisherofrom/category_11426012.html">《算法零基础100讲》</a> 专栏打卡学习的第 <font color="red">33</font> 天了。如果觉得本专栏太贵无法承受，在博主主页添加博主好友，获取 <font color="red"><strong>付费专栏优惠券</strong></font>。<br>
+  每天专栏的题，做不出来没关系，因为困难的题涉及知识点较多，可能会涉及到后面的章节，所以不要着急，内容能看懂，能自己分析，能做出简单题就行。<br>
+  在刷题的过程中，总结自己遇到的坑点，写出 <strong>「 解题报告 」</strong>  供他人学习，也是一种自我学习的方式。这就是经典的帮助他人的同时，成就自己。目前， <a href="https://bbs.csdn.net/forums/hero"><strong>「 万人千题 」</strong></a> 社区 每天都会有五六篇高质量的 <strong>「 解题报告 」</strong> 被我 <strong>「 加精 」</strong>。如果觉得自己有能力的，也可以来发布你的 <strong>「 解题报告 」</strong>。千万级流量，你我共同拥有。</p>
+<h1><a id="_8"></a>一、概念定义</h1>
+<p>  排序问题是最经典的算法问题了，一般一开始学的算法就是排序。但是由于 C/C++ 都有现成的库函数（C里是 qsort、C++里是sort），所以导致很多人就没有学排序算法本身，其实排序算法的思路非常经典，从最简单的学起，对日后学习复杂算法是非常有帮助的。这就是举一反三，粗类旁通的道理。<br>
+  从今天开始，我们来试着掌握每个排序算法的思路，今天是冒泡排序。<br>
+  冒泡排序，我们把每个元素想象成一个一个水泡，大的往上冒，直到所有水泡都按照大小有序排列，如图所示：<br>
+<img src="https://img-blog.csdnimg.cn/99f37fb95391458484b78d40005d07f5.gif#pic_center" alt=""></p>
+
+<table>
+<thead>
+<tr>
+<th>图示</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><font color="acd7e5">■ 的柱形</font></td>
+<td>代表尚未排好序的数</td>
+</tr>
+<tr>
+<td><font color="007f00">■ 的柱形</font></td>
+<td>代表正在执行比较的两个数</td>
+</tr>
+<tr>
+<td><font color="fea400">■ 的柱形</font></td>
+<td>代表已经排好序的数</td>
+</tr>
+</tbody>
+</table><blockquote>
+<p>  我们看到，首先需要将 <font color="138a19"><b>「第一个元素」</b></font> 和 <font color="138a19"><b>「第二个元素」</b></font> 进行 <font color="dC141C"><b>「比较」</b></font>，如果 <strong>前者</strong> 大于 <strong>后者</strong>，则进行 <font color="0070D9"><b>「交换」</b></font>，然后再比较 <font color="138a19"><b>「第二个元素」</b></font> 和 <font color="138a19"><b>「第三个元素」</b></font> ，以此类推，直到 <font color="FEa500"><b>「最大的那个元素」</b></font> 被移动到 <font color="FEa500"><b>「最后的位置」</b></font> 。<br>  然后，进行第二轮<font color="dC141C"><b>「比较」</b></font>，直到 <font color="FEa500"><b>「次大的那个元素」</b></font> 被移动到 <font color="FEa500"><b>「倒数第二的位置」</b></font> 。<br>  最后，经过一定轮次的<font color="dC141C"><b>「比较」</b></font> 和 <font color="0070D9"><b>「交换」</b></font>之后，一定可以保证所有元素都是 <font color="f7803b"><b> 「升序」</b></font> 排列的。</p>
+</blockquote>
+<h1><a id="_21"></a>二、题目描述</h1>
+<blockquote>
+<p>  给定一个包含红色、白色和蓝色，一共 n 个元素的数组，原地对它们进行排序，使得相同颜色的元素相邻，并按照红色、白色、蓝色顺序排列。此题中，我们使用整数 0、 1 和 2 分别表示红色、白色和蓝色。</p>
+</blockquote>
+<h1><a id="_24"></a>三、算法详解</h1>
+<p>整个算法的执行过程分以下几步：<br>
+  <strong>1）</strong> 定义是否还需要进行交换的标记变量<code>swapped</code>，当前需要将最大的元素放置到的位置<code>last</code>；<br>
+  <strong>2）</strong> <code>swapped</code>置为<code>fasle</code>，迭代计算相邻元素，循环执行比较 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>a</mi><mo stretchy="false">[</mo><mi>i</mi><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">a[i]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathdefault">a</span><span class="mopen">[</span><span class="mord mathdefault">i</span><span class="mclose">]</span></span></span></span></span> 和 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>a</mi><mo stretchy="false">[</mo><mi>i</mi><mo>+</mo><mn>1</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">a[i+1]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathdefault">a</span><span class="mopen">[</span><span class="mord mathdefault">i</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord">1</span><span class="mclose">]</span></span></span></span></span>，如果产生 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>a</mi><mo stretchy="false">[</mo><mi>i</mi><mo stretchy="false">]</mo><mo>&gt;</mo><mi>a</mi><mo stretchy="false">[</mo><mi>i</mi><mo>+</mo><mn>1</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">a[i] \gt a[i+1]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathdefault">a</span><span class="mopen">[</span><span class="mord mathdefault">i</span><span class="mclose">]</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">&gt;</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathdefault">a</span><span class="mopen">[</span><span class="mord mathdefault">i</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord">1</span><span class="mclose">]</span></span></span></span></span> 则交换两者的值，并且对<code>swapped</code>置为<code>true</code>。<br>
+  <strong>3）</strong> 如果一次循环迭代完，<code>swapped</code>还是<code>false</code>则算法结束，否则继续执行 <strong>2）</strong>。</p>
+<h1><a id="_30"></a>四、源码剖析</h1>
+<pre><code class="prism language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name">Type</span> <span class="token expression"><span class="token keyword">int</span></span></span>
+<span class="token keyword">void</span> <span class="token function">Swap</span><span class="token punctuation">(</span>Type<span class="token operator">*</span> a<span class="token punctuation">,</span> Type<span class="token operator">*</span> b<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    Type tmp <span class="token operator">=</span> <span class="token operator">*</span>a<span class="token punctuation">;</span>
+    <span class="token operator">*</span>a <span class="token operator">=</span> <span class="token operator">*</span>b<span class="token punctuation">;</span>
+    <span class="token operator">*</span>b <span class="token operator">=</span> tmp<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">void</span> <span class="token function">BubbleSort</span><span class="token punctuation">(</span><span class="token keyword">int</span> n<span class="token punctuation">,</span> Type <span class="token operator">*</span>a<span class="token punctuation">)</span> <span class="token punctuation">{</span>            <span class="token comment">// (1)</span>
+    bool swapped<span class="token punctuation">;</span>
+    <span class="token keyword">int</span> last <span class="token operator">=</span> n<span class="token punctuation">;</span>
+    <span class="token keyword">do</span> <span class="token punctuation">{</span>
+        swapped <span class="token operator">=</span> false<span class="token punctuation">;</span>                     <span class="token comment">// (2)</span>
+        <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> last <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">;</span> <span class="token operator">++</span>i<span class="token punctuation">)</span> <span class="token punctuation">{</span>  <span class="token comment">// (3)</span>
+            <span class="token keyword">if</span><span class="token punctuation">(</span>a<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">&gt;</span> a<span class="token punctuation">[</span>i<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>              <span class="token comment">// (4)</span>
+                <span class="token function">Swap</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>a<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token operator">&amp;</span>a<span class="token punctuation">[</span>i<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token comment">// (5)</span>
+                swapped <span class="token operator">=</span> true<span class="token punctuation">;</span>              <span class="token comment">// (6)</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+        <span class="token operator">--</span>last<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span class="token keyword">while</span> <span class="token punctuation">(</span>swapped<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span> 
+
+<span class="token keyword">void</span> <span class="token function">sortColors</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token operator">*</span> nums<span class="token punctuation">,</span> <span class="token keyword">int</span> numsSize<span class="token punctuation">)</span><span class="token punctuation">{</span>    <span class="token comment">// (7)</span>
+    <span class="token function">BubbleSort</span><span class="token punctuation">(</span>numsSize<span class="token punctuation">,</span> nums<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<ul>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span> <code>void BubbleSort(int n, int *a)</code>为冒泡排序的实现，代表对<code>a[]</code>数组进行升序排序。</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span></span> <code>swapped</code>标记本轮迭代下来，是否有元素产生了交换。</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(3)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">3</span><span class="mclose">)</span></span></span></span></span> 每次冒泡的结果，会执行<code>last</code>的自减，所以待排序的元素会越来越少。</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>4</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(4)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">4</span><span class="mclose">)</span></span></span></span></span> 如果发现两个相邻元素产生逆序，则将它们进行交换。保证右边的元素一定不比左边的小。</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>5</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(5)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">5</span><span class="mclose">)</span></span></span></span></span> <code>Swap</code>实现了元素的交换，这里需要用<code>&amp;</code>转换成地址作为传参。关于数据交换的更多内容，可以参考：<a href="https://blog.csdn.net/WhereIsHeroFrom/article/details/121155355">《算法零基础100讲》(第16讲) 变量交换算法</a>。</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>6</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(6)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">6</span><span class="mclose">)</span></span></span></span></span> 标记更新。一旦标记更新，则代表进行了交换，所以下次迭代必须继续。</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>7</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(7)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">7</span><span class="mclose">)</span></span></span></span></span> 题目要求实现的函数，我们直接调用冒泡排序的接口就能完成我们的功能。</li>
+</ul>
+<h1><a id="_66"></a>五、推荐专栏</h1>
+<center> <a href="https://blog.csdn.net/whereisherofrom/category_11227297.html"><font color="13ae01"><b>🌳《<u>画解数据结构</u>》🌳 </b></font></a> </center><br>
+<center> <a href="https://blog.csdn.net/WhereIsHeroFrom/article/details/118990111"><font color="13ae01"><b> 冒泡排序 </b></font></a> </center><br>
+<h1><a id="_71"></a>六、习题练习</h1>
+
+<table>
+<thead>
+<tr>
+<th>序号</th>
+<th>题目链接</th>
+<th>难度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><a href="https://leetcode-cn.com/problems/sort-colors/">颜色分类</a></td>
+<td>★☆☆☆☆</td>
+</tr>
+<tr>
+<td>2</td>
+<td><a href="https://leetcode-cn.com/problems/median-of-two-sorted-arrays/">寻找两个正序数组的中位数</a></td>
+<td>★☆☆☆☆</td>
+</tr>
+<tr>
+<td>3</td>
+<td><a href="https://leetcode-cn.com/problems/largest-number-at-least-twice-of-others/">至少是其他数字两倍的最大数</a></td>
+<td>★☆☆☆☆</td>
+</tr>
+</tbody>
+</table><center>👇🏻添加 博主 获取付费专栏优惠券👇🏻</center>
+</div>
+</body>
+
+</html>

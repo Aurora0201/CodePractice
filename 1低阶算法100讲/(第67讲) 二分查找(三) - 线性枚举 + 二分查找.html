@@ -1,0 +1,148 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>《算法零基础100讲》(第67讲) 二分查找(三) - 线性枚举 + 二分查找</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__html"><p></p><div class="toc"><h3>文章目录</h3><ul><li><a href="#_3">零、写在前面</a></li><li><a href="#_8">一、概念定义</a></li><li><a href="#_14">二、题目描述</a></li><li><a href="#_28">三、算法详解</a></li><li><a href="#_33">四、源码剖析</a></li><li><a href="#_84">五、推荐专栏</a></li><li><a href="#_91">六、习题练习</a></li></ul></div><p></p>
+<h1><a id="_3"></a>零、写在前面</h1>
+<p>  这是<a href="https://blog.csdn.net/whereisherofrom/category_11426012.html">《算法零基础100讲》</a> 专栏打卡学习的第 <font color="red">67</font> 天了。如果觉得本专栏太贵无法承受，在博主主页添加博主好友，获取 <font color="red"><strong>付费专栏优惠券</strong></font>。<br>
+  每天专栏的题，做不出来没关系，因为困难的题涉及知识点较多，可能会涉及到后面的章节，所以不要着急，内容能看懂，能自己分析，能做出简单题就行。<br>
+  在刷题的过程中，总结自己遇到的坑点，写出 <strong>「 解题报告 」</strong>  供他人学习，也是一种自我学习的方式。这就是经典的帮助他人的同时，成就自己。目前， <a href="https://bbs.csdn.net/forums/hero"><strong>「 万人千题 」</strong></a> 社区 每天都会有五六篇高质量的 <strong>「 解题报告 」</strong> 被我 <strong>「 加精 」</strong>。如果觉得自己有能力的，也可以来发布你的 <strong>「 解题报告 」</strong>。千万级流量，你我共同拥有。</p>
+<h1><a id="_8"></a>一、概念定义</h1>
+<p>  一般二分的问题是建立在单调函数上的，那么对于有极值的函数怎么办呢？<br>
+  考虑一个有极大值的函数（比如抛物线，即二次函数），如何在函数上找到一个给定值的下标呢？<br>
+<img src="https://img-blog.csdnimg.cn/d2d9b6db2f9c49d79aee7e6f248d2d1d.png#pic_center" alt=""><br>
+  对于这样一个问题，它的斜率一定是先为正数，再为负数，也就是满足单调递减。于是，可以二分斜率找到极大值点，然后在左边和右边分别进行二分查找。</p>
+<h1><a id="_14"></a>二、题目描述</h1>
+<blockquote>
+<p>  给你一个 山脉数组 <code>mountainArr</code>，请你返回能够使得 <code>mountainArr.get(index)</code>等于 <code>target</code>最小的下标<code>index</code>值。如果不存在这样的下标 <code>index</code>，就请返回 <code>-1</code>。<br>
+  何为山脉数组？如果数组 A 是一个山脉数组的话，那它满足如下条件：<br>
+  首先，<code>A.length &gt;= 3</code><br>
+  其次，在 <code>0 &lt; i &lt; A.length - 1</code>条件下，存在 <code>i</code>使得：<br>
+  <code>A[0] &lt; A[1] &lt; ... A[i-1] &lt; A[i]</code><br>
+  <code>A[i] &gt; A[i+1] &gt; ... &gt; A[A.length - 1]</code><br>
+你将 不能直接访问该山脉数组，必须通过 <code>MountainArray</code>接口来获取数据：<br>
+  <code>MountainArray.get(k)</code>- 会返回数组中索引为 <code>k</code>的元素（下标从 0 开始）<br>
+  <code>MountainArray.length()</code>- 会返回该数组的长度<br>
+注意：<br>
+  对 <code>MountainArray.get</code>发起超过 <code>100</code>次调用的提交将被视为错误答案。此外，任何试图规避判题系统的解决方案都将会导致比赛资格被取消。</p>
+</blockquote>
+<h1><a id="_28"></a>三、算法详解</h1>
+<p>  <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span> 二分斜率，找出极值点；<br>
+  <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span></span> 在极值点左侧找，如果找到，直接返回下标；<br>
+  <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(3)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">3</span><span class="mclose">)</span></span></span></span></span> 如果找不到，则在极值点右侧找，并且返回；</p>
+<h1><a id="_33"></a>四、源码剖析</h1>
+<pre><code class="prism language-c"><span class="token keyword">int</span> <span class="token function">getXieLv</span><span class="token punctuation">(</span>MountainArray<span class="token operator">*</span> mountainArr<span class="token punctuation">,</span> <span class="token keyword">int</span> x<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token function">get</span><span class="token punctuation">(</span>mountainArr<span class="token punctuation">,</span> x<span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token function">get</span><span class="token punctuation">(</span>mountainArr<span class="token punctuation">,</span> x<span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token comment">// (1)</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">int</span> <span class="token function">findHaoHighO</span><span class="token punctuation">(</span>MountainArray<span class="token operator">*</span> mountainArr<span class="token punctuation">)</span> <span class="token punctuation">{</span>             <span class="token comment">// (2)</span>
+    <span class="token keyword">int</span> l <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">,</span> r <span class="token operator">=</span> <span class="token function">length</span><span class="token punctuation">(</span>mountainArr<span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">;</span>
+    <span class="token keyword">int</span> ans <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token keyword">while</span><span class="token punctuation">(</span>l <span class="token operator">&lt;=</span> r<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">int</span> mid <span class="token operator">=</span> <span class="token punctuation">(</span>l <span class="token operator">+</span> r<span class="token punctuation">)</span> <span class="token operator">&gt;&gt;</span> <span class="token number">1</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token function">getXieLv</span><span class="token punctuation">(</span>mountainArr<span class="token punctuation">,</span> mid<span class="token punctuation">)</span> <span class="token operator">&gt;=</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            ans <span class="token operator">=</span> mid<span class="token punctuation">;</span>
+            l <span class="token operator">=</span> mid <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span><span class="token keyword">else</span> <span class="token punctuation">{</span>
+            r <span class="token operator">=</span> mid <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">return</span> ans<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">int</span> <span class="token function">binaryFind</span><span class="token punctuation">(</span>MountainArray<span class="token operator">*</span> mountainArr<span class="token punctuation">,</span> <span class="token keyword">int</span> l<span class="token punctuation">,</span> <span class="token keyword">int</span> r<span class="token punctuation">,</span> <span class="token keyword">int</span> target<span class="token punctuation">,</span> <span class="token keyword">int</span> flag<span class="token punctuation">)</span> <span class="token punctuation">{</span>                                                    <span class="token comment">// (3)</span>
+    <span class="token keyword">while</span><span class="token punctuation">(</span>l <span class="token operator">&lt;=</span> r<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">int</span> mid <span class="token operator">=</span> <span class="token punctuation">(</span>l <span class="token operator">+</span> r<span class="token punctuation">)</span> <span class="token operator">&gt;&gt;</span> <span class="token number">1</span><span class="token punctuation">;</span>
+        <span class="token keyword">int</span> now <span class="token operator">=</span> <span class="token function">get</span><span class="token punctuation">(</span>mountainArr<span class="token punctuation">,</span> mid<span class="token punctuation">)</span> <span class="token operator">*</span> flag<span class="token punctuation">;</span>
+        <span class="token keyword">int</span> tar <span class="token operator">=</span> target <span class="token operator">*</span> flag<span class="token punctuation">;</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span> now <span class="token operator">&lt;</span> tar <span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            l <span class="token operator">=</span> mid <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span><span class="token keyword">else</span> <span class="token keyword">if</span><span class="token punctuation">(</span>now <span class="token operator">&gt;</span> tar<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            r <span class="token operator">=</span> mid <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span><span class="token keyword">else</span> <span class="token punctuation">{</span>
+            <span class="token keyword">return</span> mid<span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">int</span> <span class="token function">findInMountainArray</span><span class="token punctuation">(</span><span class="token keyword">int</span> target<span class="token punctuation">,</span> MountainArray<span class="token operator">*</span> mountainArr<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">int</span> haoHighO <span class="token operator">=</span> <span class="token function">findHaoHighO</span><span class="token punctuation">(</span>mountainArr<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">int</span> leftFind <span class="token operator">=</span> <span class="token function">binaryFind</span><span class="token punctuation">(</span>mountainArr<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> haoHighO<span class="token punctuation">,</span> target<span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">return</span> leftFind <span class="token operator">!=</span> <span class="token operator">-</span><span class="token number">1</span> <span class="token operator">?</span> leftFind <span class="token operator">:</span> <span class="token function">binaryFind</span><span class="token punctuation">(</span>mountainArr<span class="token punctuation">,</span> haoHighO<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token function">length</span><span class="token punctuation">(</span>mountainArr<span class="token punctuation">)</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">,</span> target<span class="token punctuation">,</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+</code></pre>
+<ul>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span> 求两点之间的斜率；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span></span> 寻找极值点；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(3)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">3</span><span class="mclose">)</span></span></span></span></span> 二分查找给定的 <code>target</code>，需要注意的是，左侧是单调递增的，右侧是单调递减的，所以可以利用一个参数将函数进行变换，全部转换成单调递增问题来求解。</li>
+</ul>
+<h1><a id="_84"></a>五、推荐专栏</h1>
+<center> <a href="https://blog.csdn.net/whereisherofrom/category_11227297.html"><font color="13ae01"><b>🧶《<u>画解数据结构</u>》🧶 </b></font></a> </center><br>
+<center> <a href="https://blog.csdn.net/WhereIsHeroFrom/article/details/118979494"><font color="13ae01"><b><u>画解顺序表</u></b></font></a> </center><br>
+<h1><a id="_91"></a>六、习题练习</h1>
+
+<table>
+<thead>
+<tr>
+<th>序号</th>
+<th>题目链接</th>
+<th>难度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><a href="https://blog.csdn.net/WhereIsHeroFrom/article/details/118738233">LeetCode 1. 两数之和</a></td>
+<td>★★☆☆☆</td>
+</tr>
+<tr>
+<td>2</td>
+<td><a href="https://blog.csdn.net/WhereIsHeroFrom/article/details/118507985">LeetCode 167. 两数之和 II - 输入有序数组</a></td>
+<td>★★☆☆☆</td>
+</tr>
+<tr>
+<td>3</td>
+<td><a href="https://blog.csdn.net/WhereIsHeroFrom/article/details/118507985">剑指 Offer 57. 和为s的两个数字</a></td>
+<td>★★☆☆☆</td>
+</tr>
+<tr>
+<td>4</td>
+<td><a href="https://blog.csdn.net/WhereIsHeroFrom/article/details/118507985">剑指 Offer II 006. 排序数组中两个数字之和</a></td>
+<td>★★☆☆☆</td>
+</tr>
+<tr>
+<td>5</td>
+<td><a href="https://leetcode-cn.com/problems/4xy4Wx/">LCP 28. 采购方案</a></td>
+<td>★★★☆☆</td>
+</tr>
+<tr>
+<td>6</td>
+<td><a href="https://leetcode-cn.com/problems/2vYnGI/">LCP 18. 早餐组合</a></td>
+<td>★★★☆☆</td>
+</tr>
+<tr>
+<td>7</td>
+<td><a href="https://leetcode-cn.com/problems/find-peak-element/">LeetCode 162. 寻找峰值</a></td>
+<td>★★★☆☆</td>
+</tr>
+<tr>
+<td>8</td>
+<td><a href="https://leetcode-cn.com/problems/find-in-mountain-array/">LeetCode 1095. 山脉数组中查找目标值</a></td>
+<td>★★★★☆</td>
+</tr>
+</tbody>
+</table><center>👇🏻添加 博主 获取付费专栏优惠券👇🏻</center>
+</div>
+</body>
+
+</html>

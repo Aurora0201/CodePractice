@@ -4100,6 +4100,108 @@ public:
 
 ---
 
+### 10.双指针
+
+#### LC.475 供暖器 
+
+1.二分查找，对每个房子查找最近的供暖器，然后选出一个最远的距离，这个距离就是每个供暖器的最小半径
+
+```c++
+class Solution {
+  int bsearch(int val,vector<int>& A){
+    int l=0,r=A.size();
+    int cnt=(1<<30);
+    while(l<r){
+      int m=l+(r-l)/2;
+      if(A[m]==val)return 0;
+      if(A[m]>val)cnt=min(cnt,abs(A[m]-val)),r=m;
+      else cnt=min(cnt,abs(A[m]-val)),l=m+1;
+   }
+  return cnt;
+ }
+public:
+  int findRadius(vector<int>& houses, vector<int>& heaters) {   
+    sort(heaters.begin(),heaters.end());
+    int ans=-1;
+    for(auto i:houses){
+      int cnt=bsearch(i,heaters);
+      ans=max(ans,cnt);
+   }
+    return ans;
+ }
+};
+```
+
+2.双指针
+
+这是一道很好的贪心+双指针的应用题。
+
+我们需要保证每个房屋至少在一个加热器的供暖范围内，那为了让加热半径最小，我们只需要保证每个房屋最近的加热器的距离小于加热半径。
+那全局最低的加热半径；自然也就等于所有房屋到最近加热器的距离中的最大值。 这是一个min(max)的问题。
+
+怎么求呢？
+
+![img](https://images.weserv.nl/?url=https://cdn.jsdelivr.net/gh/Aurora0201/ImageStore@main/img/image-20220607222202590.png)
+
+
+如果我们的房屋和加热器都是按照横坐标排序的；那显然，我们只需要顺次对每个房子找和他相邻的前后两个加热器即可。
+用两个指针分别标记房屋和加热器；不断移动加热器，直至加热器的横坐标大于房屋横坐标。 则当前加热器指针 cur 和 cur-1 就是房屋左边的加热器和右边的加热器。
+我们求两者到房屋距离中的较小值，就是该房屋最近的加热器到房屋的距离。
+
+遍历所有的房屋，取最大值即可。
+这里稍微注意一个trick；由于最左边的加热器和最右边的加热器，可能就是比第一个房屋大或者比最后一个房屋小的，那cur-1或者cur很可能为-1或者n，这样有一些越界的问题需要处理。
+我们可以直接在左边和右边分别放置一个最远的加热器，它不会成为到房屋最近的加热器，但是让我们不再需要处理边界条件了
+
+AC代码：
+
+```c
+class Solution {
+public:
+  int findRadius(vector<int>& houses, vector<int>& heaters) {
+    sort(houses.begin(),houses.end());
+    sort(heaters.begin(),heaters.end());
+    int INF=INT_MAX;//INT_MAX就是int型的最大值,INT_MIN就是最小值
+    heaters.insert(heaters.begin(),-INF);
+    heaters.push_back(INF);
+    int j=1,ans=-1;
+    for(auto i:houses){
+      while(j<heaters.size()&&heaters[j]<i)j++;
+      int cnt=min((long long)heaters[j]-i,(long long)i-heaters[j-1]);//这里要处理溢出的问题，所以要先转化为longlong
+      ans=max(ans,cnt);
+   }
+    return ans;
+ }
+};
+```
+
+---
+
+#### LC.16.06 最小差
+
+这题可以复用上一题的二分代码，但是因为要注意溢出问题，所以转变为long long 类型就可以解决
+
+AC代码：
+
+```c++
+class Solution {
+public:
+    int findRadius(vector<int>& houses, vector<int>& heaters) {
+        sort(houses.begin(),houses.end());
+        sort(heaters.begin(),heaters.end());
+        int INF=INT_MAX;
+        heaters.insert(heaters.begin(),-INF);
+        heaters.push_back(INF);
+        int j=1,ans=-1;
+        for(auto i:houses){
+            while(j<heaters.size()&&heaters[j]<i)j++;
+            int cnt=min((long long)heaters[j]-i,(long long)i-heaters[j-1]);
+            ans=max(ans,cnt);
+        }
+        return ans;
+    }
+};
+```
+
 
 
 ---

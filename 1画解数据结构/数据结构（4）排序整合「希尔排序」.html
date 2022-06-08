@@ -1,0 +1,218 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>《画解数据结构》「希尔排序」算法教程</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__html"><center>本文已收录于专栏</center><center> <a href="https://blog.csdn.net/whereisherofrom/category_11227297.html"><font color="13ae01"><b>🌳《<u>画解数据结构</u>》🌳 </b></font></a> </center><br>
+<p></p><div class="toc"><h3>文章目录</h3><ul><li><a href="#font_color767676bbfont_4"><font color="767676"><b>零、📃前言</b></font></a></li><li><a href="#font_colordC141Cbbfont_25"><font color="dC141C"><b>一、🎯简单释义</b></font></a></li><li><a href="#font_colorf7803bbbfont_36"><font color="f7803b"><b>二、🧡核心思想</b></font></a></li><li><a href="#font_colorFFe100bbfont_41"><font color="FFe100"><b>三、🔆动图演示</b></font></a></li><li><a href="#font_color13ba19bbfont_73"><font color="13ba19"><b>四、🌳算法前置</b></font></a></li><li><a href="#font_color138a19bbfont_80"><font color="138a19"><b>五、🥦算法描述</b></font></a></li><li><a href="#font_color007029bbfont_91"><font color="007029"><b>六、🧶算法分析</b></font></a></li><li><a href="#font_color0070a9bbfont_98"><font color="0070a9"><b>七、🧢优化方案</b></font></a></li><li><a href="#font_color0070f9bbfont_102"><font color="0070f9"><b>八、💙源码详解</b></font></a></li><li><a href="#font_colorf70f9bbfont_159"><font color="f70f9"><b>九、💗代码验证</b></font></a></li></ul></div><p></p>
+<h1><a id="font_color767676bbfont_4"></a><font color="767676"><b>零、📃前言</b></font></h1>
+<p>  <font color="13ae01"><b>「 希尔排序 」</b></font> 是一种改进版的插入排序，比<font color="13ae01"><b>「 简单插入排序 」</b></font>更加高效。在讲排序这块内容时，我会尽量做到<font color="2290ff"><b>「 深入浅出 」</b></font>，让 <strong>90%</strong> 的 <font color="FFD700"><b>「 零基础小白 」</b></font> 也都能理解，真正做到 <font color="fe00ff"><b>「让天下没有难学的算法」</b></font> 。我知道这很难，但是我愿意尝试！我会尽量把文章写得有趣，一气呵成，不浪费读者的宝贵时间。毕竟，<font color="FFa700"><b>「 时间就是金钱 」</b></font>。</p>
+<blockquote>
+<center><font color="f7630c"><b>🔥让天下没有难学的算法🔥</b></font></center><br>
+<center><font color="FFD700">C语言免费动漫教程，和我一起打卡！</font></center>
+<center> <a href="https://blog.csdn.net/whereisherofrom/category_11131373.html"><font color="FFD700"><b>🌞《<u>光天化日学C语言</u>》🌞</b></font></a></center><br>
+<center><font color="FF4500">入门级C语言真题汇总</font></center>
+<center> <a href="https://blog.csdn.net/whereisherofrom/category_11158834.html"><font color="FF4500"><b>🧡《<u>C语言入门100例</u>》🧡</b></font></a></center><br>
+<center><font color="13ae01">几张动图学会一种数据结构</font></center>
+<center> <a href="https://blog.csdn.net/whereisherofrom/category_11227297.html"><font color="13ae01"><b>🌳《<u>画解数据结构</u>》🌳 </b></font></a> </center><br>
+<center><font color="2290ff">组团学习，抱团生长</font></center>
+<center> <a href="https://docs.qq.com/mind/DU01SVGpab2tWdlNj"><font color="2290ff"><b>🌌《<u>算法入门指引</u>》🌌</b></font></a></center><br>
+<center><font color="886ce4">竞赛选手金典图文教程</font></center>
+<center> <a href="https://blog.csdn.net/whereisherofrom/category_9273531.html"><font color="886ce4"><b>💜《<u>夜深人静写算法</u>》💜</b></font></a></center>
+</blockquote>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/c9943242d1afe7775f9e809d5816eeba.gif#pic_center" alt=""></p>
+<blockquote>
+<p>那么，我的教程和别人的教程有什么不同的地方呢？<br>  <strong>「第一步」简单释义</strong>： 我会简单解释一下这个算法的目的、思想、以及为什么叫这个名字以帮助记忆。<br>  <strong>「第二步」核心思想</strong>： 我会大致介绍一下这个算法的核心思想。<br>  <strong>「第三步」动图演示</strong>： 我会引入一个动图，并且用一个切实的例子展示一下算法执行的全过程。<br>  <strong>「第四步」算法前置</strong>： 在学习这个算法之前，我们需要学习的前置内容有哪些？这些内容是需要事先去攻克的。<br>  <strong>「第五步」算法描述</strong>： 细致的讲解整个算法的执行流程。<br>  <strong>「第六步」算法分析</strong>：  对算法的时间复杂度和空间复杂度进行一个详细的分析。<br>  <strong>「第七步」优化方案</strong>：  介绍一些可以优化的点。<br>  <strong>「第八步」代码实践</strong>：  用 C/C++ 来实现上述算法。<br>  <strong>「第九步」代码验证</strong>：  最后，我会推荐一些比较好用的在线评测系统来验证我们实现的算法的正确性。</p>
+</blockquote>
+<h1><a id="font_colordC141Cbbfont_25"></a><font color="dC141C"><b>一、🎯简单释义</b></font></h1>
+<p><font size="5"><b>1、算法目的</b></font></p>
+<blockquote>
+<p>  将原本乱序的数组变成有序，可以是<font color="f7803b"><b> 「升序」</b></font> 或者 <font color="ee10D9"><b>「降序」</b></font> （为了描述统一，本文一律只讨论 <font color="f7803b"><b>「 升序」</b></font> 的情况）。</p>
+</blockquote>
+<p><font size="5"><b>2、算法思想</b></font></p>
+<blockquote>
+<p>  <font color="13ae01"><b>「 希尔排序 」</b></font>是把数据按下标的一定<font color="0070D8"><b>「 增量 」</b></font>进行分组，对每组使用<font color="13ae01"><b>「 简单插入排序 」</b></font>算法进行排序；随着<font color="0070D8"><b>「 增量 」</b></font>逐渐减少，每组包含的数据越来越多，当<font color="0070D8"><b>「 增量 」</b></font>减至 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mn>1</mn></mrow><annotation encoding="application/x-tex">1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">1</span></span></span></span></span> 时，所有数据恰被分成一组，最后执行一次<font color="13ae01"><b>「 简单插入排序 」</b></font>后，算法终止。</p>
+</blockquote>
+<p><font size="5"><b>3、命名由来</b></font></p>
+<blockquote>
+<p>  该算法是希尔（Donald Shell）于1959年提出的一种排序算法，故此命名 <font color="13ae01"><b>「 希尔排序 」</b></font> 。</p>
+</blockquote>
+<h1><a id="font_colorf7803bbbfont_36"></a><font color="f7803b"><b>二、🧡核心思想</b></font></h1>
+<ul>
+<li><font color="000000"><b> 「增量」</b></font>：这里说的增量是数组下标的增量。</li>
+<li><font color="000000"><b> 「插入」</b></font>：从后往前，寻找一个合适位置进行插入。</li>
+<li><font color="000000"><b> 「分组」</b></font>：按照不同起点对待排序数据进行分组。</li>
+</ul>
+<h1><a id="font_colorFFe100bbfont_41"></a><font color="FFe100"><b>三、🔆动图演示</b></font></h1>
+<p><font size="5"><b>1、样例</b></font></p>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>8</td>
+<td>5</td>
+<td>6</td>
+<td>4</td>
+<td>3</td>
+<td>7</td>
+<td>10</td>
+<td>2</td>
+</tr>
+</tbody>
+</table><ul>
+<li>初始情况下的数据如 <strong>图二-1-1</strong> 所示，基本属于乱序，纯随机出来的数据。</li>
+</ul>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/fa15ea6233abbcde2958355c0555c77a.png#pic_center" alt="在这里插入图片描述"></p><center><strong>图二-1-1</strong></center><p></p>
+<p><font size="5"><b>2、算法演示</b></font></p>
+<p>  接下来，我们来看下排序过程的动画演示，总共分为三趟。如 <strong>图二-2-1</strong> 所示：</p>
+<p><img src="https://img-blog.csdnimg.cn/9c7f663f5b68487492cbde507799c909.gif#pic_center" alt=""></p><center><strong>图二-2-1</strong></center><br>
+  一下子看完不是很理解，没有关系，我们把这几个过程分拆开来。<p></p>
+<p><font size="5"><b>3、动图分解</b></font></p>
+<p>  第一趟分解后，如 <strong>图二-2-2</strong> 所示：<br><br>
+<img src="https://img-blog.csdnimg.cn/1025f2ce90484614aaf4a807f84d45da.gif#pic_center" alt=""></p><center><strong>图二-2-2</strong></center><br>
+  增量为 4，所有元素总共分为 4 组，分别为 <font color="ec1c24"><b>[8, 3]</b></font>、<font color="f17f28"><b>[5, 7]</b></font>、<font color="fef100"><b>[6, 10]</b></font>、<font color="22b04c"><b>[4, 2]</b></font>，同组内部分别执行插入排序，得到 <font color="ec1c24"><b>[3, 8]</b></font>、<font color="f17f28"><b>[5, 7]</b></font>、<font color="fef100"><b>[6, 10]</b></font>、<font color="22b04c"><b>[2, 4]</b></font>（由于每组只有两个元素，所以升序的情况位置不变，降序的情况执行组内元素位置交换，抖动一下代表保持原顺序不变，有一种 “我不换 ~~ 我不换” 的意思在里面 ）。<p></p>
+<p>  第二趟分解后，如 <strong>图二-2-3</strong> 所示：<br><br>
+<img src="https://img-blog.csdnimg.cn/87de99e1b07e40a793e9fdd0b60a3c3d.gif#pic_center" alt="在这里插入图片描述"></p><center><strong>图二-2-3</strong></center><br>
+  增量为 2，所有元素总共分为 2 组，分别为 <font color="ec1c24"><b>[3, 6, 8, 10]</b></font>、<font color="00a2e7"><b>[5, 2, 7, 4]</b></font>，同组内部分别执行插入排序，<font color="ec1c24"><b>[3, 6, 8, 10]</b></font>已经升序，保持原样；<font color="00a2e7"><b>[5, 2, 7, 4]</b></font> 执行三次插入排序后变成 <font color="00a2e7"><b>[2, 4, 5, 7]</b></font>。<br>
+  第三趟分解后，如 <strong>图二-2-4</strong> 所示：<br><br>
+<img src="https://img-blog.csdnimg.cn/be7ec3e112634d97ad5d9a1dac5383b3.gif#pic_center" alt=""><center><strong>图二-2-4</strong></center><br>
+  增量为 1，所有元素归为 1 组，为 <font color="22b14c"><b>[3, 2, 6, 4, 8, 5, 10, 7]</b></font>。对它执行简单插入排序，执行完毕后，必然可以保证所有元素有序。<p></p>
+<h1><a id="font_color13ba19bbfont_73"></a><font color="13ba19"><b>四、🌳算法前置</b></font></h1>
+<p><font size="5"><b>1、插入排序的实现</b></font></p>
+<ul>
+<li>有关插入排序的实现原理，请参考：<a href="https://blog.csdn.net/WhereIsHeroFrom/article/details/118988519">《画解数据结构》（4 - 3）- 插入排序</a>。</li>
+</ul>
+<p><font size="5"><b>2、增量的实现</b></font><br>
+  这里的增量指的是下标增量，即下标满足一个等差数列关系。假设数据元素存储在数组 <code>a[0 ... n-1]</code>中，增量用变量 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>g</mi><mi>a</mi><mi>p</mi></mrow><annotation encoding="application/x-tex">gap</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.625em; vertical-align: -0.19444em;"></span><span class="mord mathdefault" style="margin-right: 0.03588em;">g</span><span class="mord mathdefault">a</span><span class="mord mathdefault">p</span></span></span></span></span> 来表示，那么 <code>a[i], a[i + gap], a[i + gap * 2], ... , a[i + gap * k]</code>会被分到同一组。每次组内排序就是在这个增量数组中执行插入排序。</p>
+<h1><a id="font_color138a19bbfont_80"></a><font color="138a19"><b>五、🥦算法描述</b></font></h1>
+<p><font size="5"><b>1、问题描述</b></font></p>
+<blockquote>
+<p>  给定一个 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathdefault">n</span></span></span></span></span> 个元素的整型数组，数组下标从 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mn>0</mn></mrow><annotation encoding="application/x-tex">0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">0</span></span></span></span></span> 开始，采用<font color="13ae01"><b>「 希尔排序 」</b></font>将数组按照<font color="f7803b"><b> 「升序」</b></font>排列。</p>
+</blockquote>
+<p><font size="5"><b>2、算法过程</b></font></p>
+<blockquote>
+<p>整个算法的执行过程分以下几步：<br>
+  <strong>1）</strong> 定义增量 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>g</mi><mi>a</mi><mi>p</mi><mo>=</mo><mi>n</mi><mi mathvariant="normal">/</mi><mn>2</mn><mi mathvariant="normal">，</mi><mi>n</mi><mi mathvariant="normal">/</mi><mn>4</mn><mi mathvariant="normal">，</mi><mi>n</mi><mi mathvariant="normal">/</mi><mn>8</mn><mi mathvariant="normal">，</mi><mi mathvariant="normal">.</mi><mi mathvariant="normal">.</mi><mi mathvariant="normal">.</mi><mi mathvariant="normal">，</mi><mn>1</mn></mrow><annotation encoding="application/x-tex">gap = n/2，n/4，n/8，...，1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.625em; vertical-align: -0.19444em;"></span><span class="mord mathdefault" style="margin-right: 0.03588em;">g</span><span class="mord mathdefault">a</span><span class="mord mathdefault">p</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathdefault">n</span><span class="mord">/</span><span class="mord">2</span><span class="mord cjk_fallback">，</span><span class="mord mathdefault">n</span><span class="mord">/</span><span class="mord">4</span><span class="mord cjk_fallback">，</span><span class="mord mathdefault">n</span><span class="mord">/</span><span class="mord">8</span><span class="mord cjk_fallback">，</span><span class="mord">.</span><span class="mord">.</span><span class="mord">.</span><span class="mord cjk_fallback">，</span><span class="mord">1</span></span></span></span></span>；<br>  <strong>2）</strong> 令 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>i</mi><mo>∈</mo><mo stretchy="false">[</mo><mi>g</mi><mi>a</mi><mi>p</mi><mo separator="true">,</mo><mi>n</mi><mo>−</mo><mn>1</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">i \in [gap, n-1]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.69862em; vertical-align: -0.0391em;"></span><span class="mord mathdefault">i</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">[</span><span class="mord mathdefault" style="margin-right: 0.03588em;">g</span><span class="mord mathdefault">a</span><span class="mord mathdefault">p</span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mord mathdefault">n</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord">1</span><span class="mclose">]</span></span></span></span></span>，且需要执行插入的数 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>x</mi><mo>=</mo><mi>a</mi><mo stretchy="false">[</mo><mi>i</mi><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">x = a[i]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathdefault">x</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathdefault">a</span><span class="mopen">[</span><span class="mord mathdefault">i</span><span class="mclose">]</span></span></span></span></span>；<br>  <strong>3）</strong> 令 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>j</mi><mo>∈</mo><mo stretchy="false">[</mo><mi>i</mi><mo separator="true">,</mo><mi>g</mi><mi>a</mi><mi>p</mi><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">j \in [i, gap]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.85396em; vertical-align: -0.19444em;"></span><span class="mord mathdefault" style="margin-right: 0.05724em;">j</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">[</span><span class="mord mathdefault">i</span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mord mathdefault" style="margin-right: 0.03588em;">g</span><span class="mord mathdefault">a</span><span class="mord mathdefault">p</span><span class="mclose">]</span></span></span></span></span>，执行步长为 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>g</mi><mi>a</mi><mi>p</mi></mrow><annotation encoding="application/x-tex">gap</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.625em; vertical-align: -0.19444em;"></span><span class="mord mathdefault" style="margin-right: 0.03588em;">g</span><span class="mord mathdefault">a</span><span class="mord mathdefault">p</span></span></span></span></span>，将 <code>a[i]</code>插入到增量有序数组 <code>a[i-k*gap], ...., a[i-2*gap], a[i-gap]</code>中，注意原地算法需要逆序进行。</p>
+</blockquote>
+<hr>
+<h1><a id="font_color007029bbfont_91"></a><font color="007029"><b>六、🧶算法分析</b></font></h1>
+<p><font size="5"><b>1、时间复杂度</b></font></p>
+<ul>
+<li><font color="13ae01"><b>「 希尔排序 」</b></font>的时间复杂度是 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><msup><mi>n</mi><mrow><mn>1.3</mn><mo>−</mo><mn>2</mn></mrow></msup><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(n^{1.3-2})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1.06411em; vertical-align: -0.25em;"></span><span class="mord mathdefault" style="margin-right: 0.02778em;">O</span><span class="mopen">(</span><span class="mord"><span class="mord mathdefault">n</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height: 0.814108em;"><span class="" style="top: -3.063em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">1</span><span class="mord mtight">.</span><span class="mord mtight">3</span><span class="mbin mtight">−</span><span class="mord mtight">2</span></span></span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span></span>。时间复杂度为 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>n</mi><mi>l</mi><mi>o</mi><msub><mi>g</mi><mn>2</mn></msub><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(n log_2n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathdefault" style="margin-right: 0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mord mathdefault" style="margin-right: 0.01968em;">l</span><span class="mord mathdefault">o</span><span class="mord"><span class="mord mathdefault" style="margin-right: 0.03588em;">g</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 0.301108em;"><span class="" style="top: -2.55em; margin-left: -0.03588em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 0.15em;"><span class=""></span></span></span></span></span></span><span class="mord mathdefault">n</span><span class="mclose">)</span></span></span></span></span> 的快速排序算法快 ，因此对中等大小规模表现良好，但对规模非常大的数据排序并不是最优选择。</li>
+<li>想要弄清数据比较次数和移动次数与增量选择之间的关系，并给出完整的数学分析，至今仍然是数学难题，所以我比较有自知之明，这块我就不瞎分析了。</li>
+</ul>
+<p><font size="5"><b>2、空间复杂度</b></font></p>
+<ul>
+<li>由于不需要借助任何辅助数组，所以空间复杂度为 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathdefault" style="margin-right: 0.02778em;">O</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span>。</li>
+</ul>
+<h1><a id="font_color0070a9bbfont_98"></a><font color="0070a9"><b>七、🧢优化方案</b></font></h1>
+<blockquote>
+<p>  <font color="13ae01"><b>「 希尔排序 」</b></font> 执行时间也依赖于增量序列。在<font color="13ae01"><b>「 希尔排序 」</b></font>开始时增量较大，分组较多，每组的记录数目少，故各组内直接插入较快，后来随着增量逐渐缩小，分组数据逐渐减少，而各组的数据逐渐增多，但是由于之前几次排序，使数据较接近于有序状态，所以新的一趟排序过程也较快。<br>
+  所以，<font color="13ae01"><b>「 希尔排序 」</b></font>的核心在于增量的选择，建议读者生成不同的增量序列来对各种海量数据进行排序尝试。</p>
+</blockquote>
+<h1><a id="font_color0070f9bbfont_102"></a><font color="0070f9"><b>八、💙源码详解</b></font></h1>
+<pre><code class="prism language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;stdio.h&gt;</span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;malloc.h&gt;</span></span>
+ 
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name">maxn</span> <span class="token expression"><span class="token number">1000001</span></span></span>
+
+<span class="token keyword">int</span> a<span class="token punctuation">[</span>maxn<span class="token punctuation">]</span><span class="token punctuation">;</span>
+
+<span class="token keyword">void</span> <span class="token function">Input</span><span class="token punctuation">(</span><span class="token keyword">int</span> n<span class="token punctuation">,</span> <span class="token keyword">int</span> <span class="token operator">*</span>a<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> n<span class="token punctuation">;</span> <span class="token operator">++</span>i<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token function">scanf</span><span class="token punctuation">(</span><span class="token string">"%d"</span><span class="token punctuation">,</span> <span class="token operator">&amp;</span>a<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">void</span> <span class="token function">Output</span><span class="token punctuation">(</span><span class="token keyword">int</span> n<span class="token punctuation">,</span> <span class="token keyword">int</span> <span class="token operator">*</span>a<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> n<span class="token punctuation">;</span> <span class="token operator">++</span>i<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span>
+            <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">" "</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"%d"</span><span class="token punctuation">,</span> a<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token function">puts</span><span class="token punctuation">(</span><span class="token string">""</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">void</span> <span class="token function">ShellSort</span><span class="token punctuation">(</span><span class="token keyword">int</span> n<span class="token punctuation">,</span> <span class="token keyword">int</span> a<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+    <span class="token keyword">int</span> i<span class="token punctuation">,</span> j<span class="token punctuation">,</span> tmp<span class="token punctuation">,</span> gap<span class="token punctuation">;</span>
+    <span class="token keyword">for</span><span class="token punctuation">(</span>gap <span class="token operator">=</span> n <span class="token operator">/</span> <span class="token number">2</span><span class="token punctuation">;</span> gap <span class="token operator">&gt;</span> <span class="token number">0</span><span class="token punctuation">;</span> gap <span class="token operator">/=</span> <span class="token number">2</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>      <span class="token comment">// (1)   </span>
+        <span class="token keyword">for</span><span class="token punctuation">(</span>i <span class="token operator">=</span> gap<span class="token punctuation">;</span> i <span class="token operator">&lt;</span> n<span class="token punctuation">;</span> <span class="token operator">++</span>i<span class="token punctuation">)</span> <span class="token punctuation">{</span>             <span class="token comment">// (2)   </span>
+            tmp <span class="token operator">=</span> a<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span>
+            <span class="token keyword">for</span><span class="token punctuation">(</span>j <span class="token operator">=</span> i<span class="token punctuation">;</span> j <span class="token operator">&gt;=</span> gap<span class="token punctuation">;</span> j <span class="token operator">-=</span> gap<span class="token punctuation">)</span> <span class="token punctuation">{</span>   <span class="token comment">// (3)   </span>
+                <span class="token keyword">if</span><span class="token punctuation">(</span>tmp <span class="token operator">&lt;</span> a<span class="token punctuation">[</span>j <span class="token operator">-</span> gap<span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>         <span class="token comment">// (4)    </span>
+                    a<span class="token punctuation">[</span>j<span class="token punctuation">]</span> <span class="token operator">=</span> a<span class="token punctuation">[</span>j <span class="token operator">-</span> gap<span class="token punctuation">]</span><span class="token punctuation">;</span>
+                <span class="token punctuation">}</span><span class="token keyword">else</span> <span class="token punctuation">{</span>
+                    <span class="token keyword">break</span><span class="token punctuation">;</span>                     <span class="token comment">// (5)  </span>
+                <span class="token punctuation">}</span>
+            <span class="token punctuation">}</span>
+            a<span class="token punctuation">[</span>j<span class="token punctuation">]</span> <span class="token operator">=</span> tmp<span class="token punctuation">;</span>                        <span class="token comment">// (6)  </span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">int</span> n<span class="token punctuation">;</span>
+    <span class="token keyword">while</span><span class="token punctuation">(</span><span class="token function">scanf</span><span class="token punctuation">(</span><span class="token string">"%d"</span><span class="token punctuation">,</span> <span class="token operator">&amp;</span>n<span class="token punctuation">)</span> <span class="token operator">!=</span> <span class="token constant">EOF</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token function">Input</span><span class="token punctuation">(</span>n<span class="token punctuation">,</span> a<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token function">ShellSort</span><span class="token punctuation">(</span>n<span class="token punctuation">,</span> a<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token function">Output</span><span class="token punctuation">(</span>n<span class="token punctuation">,</span> a<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span> 
+</code></pre>
+<ul>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span> 每隔<code>gap</code>个数作为一组，<code>gap = n/2, n/4, n/8, ..., 1</code>；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span></span> 从第<code>gap</code>个数开始遍历；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo><mo>−</mo><mo stretchy="false">(</mo><mn>5</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(3)-(5)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">3</span><span class="mclose">)</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">5</span><span class="mclose">)</span></span></span></span></span> 找到一个需要插入的位置，并且跳出循环；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>6</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(6)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">6</span><span class="mclose">)</span></span></span></span></span>  第 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>j</mi></mrow><annotation encoding="application/x-tex">j</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.85396em; vertical-align: -0.19444em;"></span><span class="mord mathdefault" style="margin-right: 0.05724em;">j</span></span></span></span></span>  个位置就是这个数需要插入的位置 ；</li>
+</ul>
+<h1><a id="font_colorf70f9bbfont_159"></a><font color="f70f9"><b>九、💗代码验证</b></font></h1>
+<ul>
+<li>比如，你可以在百度上搜索 <strong>代码在线提交</strong>、<strong>OnlineJudge</strong>、<strong>LeetCode</strong>、<strong>洛谷</strong>、<strong>HDOJ</strong>、<strong>POJ</strong> 等等的关键词，然后去找对应的题目提交验证你的代码的正确性。</li>
+</ul>
+<hr>
+<ul>
+<li>关于 <font color="eb3f41"><b>「 希尔排序 」</b></font> 的内容到这里就结束了。</li>
+<li>如果还有不懂的问题，可以通过 <font color="ffbf00"><b>「 作者主页 」（电脑版）</b></font>找到作者的<font color="2290ff"><b>「  联系方式 」 </b></font>  进行在线咨询。</li>
+</ul>
+<hr>
+<ul>
+<li>有关<a href="https://blog.csdn.net/whereisherofrom/category_11227297.html"><font color="13ae01"><b>🌳《<u>画解数据结构</u>》🌳 </b></font></a>的源码均开源，链接如下：<a href="https://github.com/WhereIsHeroFrom/Code_Templates/tree/master/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E7%94%BB%E8%A7%A3%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84">《画解数据结构》</a></li>
+</ul>
+<hr>
+<p><img src="https://img-blog.csdnimg.cn/20210719231917561.gif#pic_center" alt=""></p>
+<blockquote>
+<center><font color="f7630c"><b>🔥让天下没有难学的算法🔥</b></font></center><br>
+<center><font color="FFD700">C语言免费动漫教程，和我一起打卡！</font></center>
+<center> <a href="https://blog.csdn.net/whereisherofrom/category_11131373.html"><font color="FFD700"><b>🌞《<u>光天化日学C语言</u>》🌞</b></font></a></center><br>
+<center><font color="FF4500">入门级C语言真题汇总</font></center>
+<center> <a href="https://blog.csdn.net/whereisherofrom/category_11158834.html"><font color="FF4500"><b>🧡《<u>C语言入门100例</u>》🧡</b></font></a></center><br>
+<center><font color="13ae01">几张动图学会一种数据结构</font></center>
+<center> <a href="https://blog.csdn.net/whereisherofrom/category_11227297.html"><font color="13ae01"><b>🌳《<u>画解数据结构</u>》🌳 </b></font></a> </center><br>
+<center><font color="2290ff">组团学习，抱团生长</font></center>
+<center> <a href="https://docs.qq.com/mind/DU01SVGpab2tWdlNj"><font color="2290ff"><b>🌌《<u>算法入门指引</u>》🌌</b></font></a></center><br>
+<center><font color="886ce4">竞赛选手金典图文教程</font></center>
+<center> <a href="https://blog.csdn.net/whereisherofrom/category_9273531.html"><font color="886ce4"><b>💜《<u>夜深人静写算法</u>》💜</b></font></a></center>
+</blockquote>
+</div>
+</body>
+
+</html>

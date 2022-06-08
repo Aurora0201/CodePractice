@@ -1,0 +1,42 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>《画解数据结构》（0 - 5）- 物理结构</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__html"><p></p><div class="toc"><h3>文章目录</h3><ul><li><a href="#_1">前言</a></li><li><a href="#_3">一、概念</a></li><ul><li><a href="#1_4">1、定义</a></li><li><a href="#2_7">2、分类</a></li></ul><li><a href="#_9">二、顺序存储</a></li><ul><li><a href="#1_10">1、定义</a></li><li><a href="#2_12">2、画解</a></li></ul><li><a href="#_17">三、链式存储</a></li><ul><li><a href="#1_18">1、定义</a></li><li><a href="#2_21">2、画解</a></li></ul></ul></div><p></p>
+<h1><a id="_1"></a>前言</h1>
+<blockquote>
+<p>  数据结构分为 <strong>逻辑结构</strong> 和 <strong>物理结构</strong>。本章节就来具体讲一下什么是 <strong>物理结构</strong>，以及存在哪些物理结构。</p>
+</blockquote>
+<h1><a id="_3"></a>一、概念</h1>
+<h2><a id="1_4"></a>1、定义</h2>
+<p>  物理结构又叫存储结构，是指数据的逻辑结构在计算机中的存储形式。<br>
+  这里的存储形式主要针对内存而言，对于硬盘来说，主要通过文件结构来描述。</p>
+<h2><a id="2_7"></a>2、分类</h2>
+<p>  物理结构主要分为两类：顺序存储 和 链式存储。</p>
+<h1><a id="_9"></a>二、顺序存储</h1>
+<h2><a id="1_10"></a>1、定义</h2>
+<p>  顺序存储是把数据元素存放在地址 <strong>连续</strong> 的存储单元中，它的数据间的逻辑关系和物理关系是完全一致的。</p>
+<h2><a id="2_12"></a>2、画解</h2>
+<p>  顺序存储的最大特点就是所有数据元素的地址都是连续的。<br>
+  以C语言中的整型数组来举例，它就是一个典型的顺序存储的数据结构，每个整型假设占 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mn>4</mn></mrow><annotation encoding="application/x-tex">4</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">4</span></span></span></span></span> 个字节，第 0 个元素存储的位置为 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>b</mi><mi>a</mi><mi>s</mi><mi>e</mi></mrow><annotation encoding="application/x-tex">base</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.69444em; vertical-align: 0em;"></span><span class="mord mathdefault">b</span><span class="mord mathdefault">a</span><span class="mord mathdefault">s</span><span class="mord mathdefault">e</span></span></span></span></span>，则第 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.65952em; vertical-align: 0em;"></span><span class="mord mathdefault">i</span></span></span></span></span> 个元素的存储位置为 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>b</mi><mi>a</mi><mi>s</mi><mi>e</mi><mo>+</mo><mn>4</mn><mi>i</mi></mrow><annotation encoding="application/x-tex">base + 4i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.77777em; vertical-align: -0.08333em;"></span><span class="mord mathdefault">b</span><span class="mord mathdefault">a</span><span class="mord mathdefault">s</span><span class="mord mathdefault">e</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 0.65952em; vertical-align: 0em;"></span><span class="mord">4</span><span class="mord mathdefault">i</span></span></span></span></span>。<br>
+<img src="https://img-blog.csdnimg.cn/4ac9e216da664288b473d88b8e1b58c8.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA6Iux6ZuE5ZOq6YeM5Ye65p2l,size_16,color_FFFFFF,t_70,g_se,x_16#pic_center" alt=""></p>
+<h1><a id="_17"></a>三、链式存储</h1>
+<h2><a id="1_18"></a>1、定义</h2>
+<p>  链式存储是把数据元素存放在地址 <strong>任意</strong> 的存储单元中。<br>
+  链式存储中，物理结构和逻辑结构完全没有关系，所以需要一个指针来存放数据元素的地址。</p>
+<h2><a id="2_21"></a>2、画解</h2>
+<p>  链式存储的最大特点就是除了 <strong>数据域</strong>，还需要有 <strong>指针域</strong>。<br>
+  以二叉树为例，每个数据元素除了本身的值以外，还需要两个指针，分别指向它的左孩子结点和右孩子结点。而这些结点在内存上可以是连续的，也可以是完全不连续的内存地址。如下图所示：<br>
+<img src="https://img-blog.csdnimg.cn/290c54fd5a6444b2ae406e9fd7d4a3d7.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA6Iux6ZuE5ZOq6YeM5Ye65p2l,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt=""></p>
+<center>👇🏻添加 博主 获取付费专栏优惠券👇🏻</center>
+</div>
+</body>
+
+</html>

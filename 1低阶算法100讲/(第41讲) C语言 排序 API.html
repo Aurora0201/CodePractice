@@ -1,0 +1,210 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>《算法零基础100讲》(第41讲) C语言 排序 API</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__html"><p></p><div class="toc"><h3>文章目录</h3><ul><li><a href="#_2">零、写在前面</a></li><li><a href="#_9">一、概念定义</a></li><ul><li><a href="#1qsort__10">1、qsort 简介</a></li><li><a href="#2qsort__23">2、qsort 调用</a></li><li><a href="#3_38">3、比较函数</a></li><ul><li><a href="#1_39">1）函数原型</a></li><li><a href="#2_48">2）函数定义</a></li><li><a href="#3_67">3）简化写法</a></li></ul><li><a href="#4_74">4、更多比较函数</a></li></ul><li><a href="#_90">二、题目描述</a></li><li><a href="#_92">三、算法详解</a></li><li><a href="#_94">四、源码剖析</a></li><li><a href="#_120">五、推荐专栏</a></li><li><a href="#_127">六、习题练习</a></li></ul></div><p></p>
+<h1><a id="_2"></a>零、写在前面</h1>
+<p>  这是<a href="https://blog.csdn.net/whereisherofrom/category_11426012.html">《算法零基础100讲》</a> 专栏打卡学习的第 <font color="red">41</font> 天了。如果觉得本专栏太贵无法承受，在博主主页添加博主好友，获取 <font color="red"><strong>付费专栏优惠券</strong></font>。<br>
+  每天专栏的题，做不出来没关系，因为困难的题涉及知识点较多，可能会涉及到后面的章节，所以不要着急，内容能看懂，能自己分析，能做出简单题就行。<br>
+  在刷题的过程中，总结自己遇到的坑点，写出 <strong>「 解题报告 」</strong>  供他人学习，也是一种自我学习的方式。这就是经典的帮助他人的同时，成就自己。目前， <a href="https://bbs.csdn.net/forums/hero"><strong>「 万人千题 」</strong></a> 社区 每天都会有五六篇高质量的 <strong>「 解题报告 」</strong> 被我 <strong>「 加精 」</strong>。如果觉得自己有能力的，也可以来发布你的 <strong>「 解题报告 」</strong>。千万级流量，你我共同拥有。</p>
+<h1><a id="_9"></a>一、概念定义</h1>
+<h2><a id="1qsort__10"></a>1、qsort 简介</h2>
+<p>  排序 API 的作用就是传入一个数组，并且对数组按照给定的规则进行就地排序。</p>
+<pre><code class="prism language-c"><span class="token keyword">void</span> <span class="token function">qsort</span><span class="token punctuation">(</span><span class="token keyword">void</span> <span class="token operator">*</span>base<span class="token punctuation">,</span> <span class="token class-name">size_t</span> nitems<span class="token punctuation">,</span> <span class="token class-name">size_t</span> size<span class="token punctuation">,</span> <span class="token keyword">int</span> <span class="token punctuation">(</span><span class="token operator">*</span>compar<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token keyword">const</span> <span class="token keyword">void</span> <span class="token operator">*</span><span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">void</span><span class="token operator">*</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>base</td>
+<td>指向要排序的数组的第一个元素的指针</td>
+</tr>
+<tr>
+<td>nitems</td>
+<td>由 base 指向的数组中元素的个数</td>
+</tr>
+<tr>
+<td>size</td>
+<td>数组中每个元素的大小，以字节为单位。</td>
+</tr>
+<tr>
+<td>compar</td>
+<td>用来比较两个元素的函数，即函数指针（比较算法的回调函数）</td>
+</tr>
+</tbody>
+</table><h2><a id="2qsort__23"></a>2、qsort 调用</h2>
+<p>  例如，我们对如下无序数组调用排序 API：</p>
+<pre><code class="prism language-c"><span class="token keyword">int</span> a<span class="token punctuation">[</span><span class="token number">5</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+<p>  就可以这么写：</p>
+<pre><code class="prism language-c"><span class="token function">qsort</span><span class="token punctuation">(</span>a<span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">)</span><span class="token punctuation">,</span> cmp<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>  这样，<code>a</code>数组的值就会变成：</p>
+<pre><code class="prism language-c"><span class="token punctuation">{</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+<p>  其中<code>sizeof(int)</code>就代表了单个数组元素的字节数，<code>5</code>则代表了数组的大小，总的字节数就是两者的乘积。而<code>cmp</code>是一个比较函数，是需要我们自己实现的，它决定了数组是递增排序 还是 递减排序，还是其它的排序方式（比如奇数排前面，偶数排后面，等等）。接下来，我们来看看<code>cmp</code>函数的实现方式。</p>
+<h2><a id="3_38"></a>3、比较函数</h2>
+<h3><a id="1_39"></a>1）函数原型</h3>
+<p>  对于 比较函数 的原型，如下所示：</p>
+<pre><code class="prism language-c"><span class="token keyword">int</span> <span class="token function">compar</span><span class="token punctuation">(</span><span class="token keyword">const</span> <span class="token keyword">void</span> <span class="token operator">*</span>p1<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">void</span> <span class="token operator">*</span>p2<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>如果<code>compar</code>返回值小于0，则<code>p1</code>所指向元素会被排在<code>p2</code>所指向元素的左面；<br>
+如果<code>compar</code>返回值等于0，则<code>p1</code>所指向元素与<code>p2</code>所指向元素的顺序不确定；<br>
+如果<code>compar</code>返回值大于0，则<code>p1</code>所指向元素会被排在<code>p2</code>所指向元素的右面。</p>
+<h3><a id="2_48"></a>2）函数定义</h3>
+<p>  如果，我们要写一个递增排序，那么可以这么写：</p>
+<pre><code class="prism language-c"><span class="token keyword">int</span> <span class="token function">cmp</span><span class="token punctuation">(</span><span class="token keyword">const</span> <span class="token keyword">void</span><span class="token operator">*</span>p1<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">void</span> <span class="token operator">*</span>p2<span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token comment">// (1)</span>
+    <span class="token keyword">int</span> v1 <span class="token operator">=</span> <span class="token operator">*</span><span class="token punctuation">(</span><span class="token keyword">int</span> <span class="token operator">*</span><span class="token punctuation">)</span>p1<span class="token punctuation">;</span>                 <span class="token comment">// (2)</span>
+    <span class="token keyword">int</span> v2 <span class="token operator">=</span> <span class="token operator">*</span><span class="token punctuation">(</span><span class="token keyword">int</span> <span class="token operator">*</span><span class="token punctuation">)</span>p2<span class="token punctuation">;</span>                 <span class="token comment">// (3)</span>
+    <span class="token keyword">if</span><span class="token punctuation">(</span>v1 <span class="token operator">&lt;</span> v2<span class="token punctuation">)</span> <span class="token punctuation">{</span>                        <span class="token comment">// (4)    </span>
+        <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span class="token keyword">else</span> <span class="token keyword">if</span><span class="token punctuation">(</span>v1 <span class="token operator">&gt;</span> v2<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> <span class="token number">1</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span> 需要和系统给定的函数原型保持一致，由于需要适配任何类型，所以用空指针<code>void *</code>做为参数类型；<br>
+<span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span></span> <code>p1</code>强制转换成数组元素的指针类型，然后再解引用 变成数组元素的值；<br>
+<span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(3)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">3</span><span class="mclose">)</span></span></span></span></span> <code>p2</code>强制转换成数组元素的指针类型，然后再解引用 变成数组元素的值；<br>
+<span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>4</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(4)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">4</span><span class="mclose">)</span></span></span></span></span> 根据上面的规则进行实际的函数返回，有关解引用相关的内容可以参考： <a href="https://blog.csdn.net/WhereIsHeroFrom/article/details/121551694">《LeetCode零基础指南》(第五讲) 指针</a>。</p>
+<h3><a id="3_67"></a>3）简化写法</h3>
+<p>  当然，如果你确保数组的数据相减不会超过32位整型，那你可以这么写：</p>
+<pre><code class="prism language-c"><span class="token keyword">int</span> <span class="token function">cmp</span><span class="token punctuation">(</span><span class="token keyword">const</span> <span class="token keyword">void</span> <span class="token operator">*</span>p1<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">void</span> <span class="token operator">*</span>p2<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token punctuation">(</span><span class="token operator">*</span><span class="token punctuation">(</span><span class="token keyword">int</span> <span class="token operator">*</span><span class="token punctuation">)</span>p1<span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token punctuation">(</span><span class="token operator">*</span><span class="token punctuation">(</span><span class="token keyword">int</span> <span class="token operator">*</span><span class="token punctuation">)</span>p2<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<h2><a id="4_74"></a>4、更多比较函数</h2>
+<p>  当然，我们也可以实现递减的比较函数，如下（可以直接交换<code>p1</code>和<code>p2</code>的位置即可，自行思考）：</p>
+<pre><code class="prism language-c"><span class="token keyword">int</span> <span class="token function">cmp</span><span class="token punctuation">(</span><span class="token keyword">const</span> <span class="token keyword">void</span> <span class="token operator">*</span>p1<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">void</span> <span class="token operator">*</span>p2<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token punctuation">(</span><span class="token operator">*</span><span class="token punctuation">(</span><span class="token keyword">int</span> <span class="token operator">*</span><span class="token punctuation">)</span>p2<span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token punctuation">(</span><span class="token operator">*</span><span class="token punctuation">(</span><span class="token keyword">int</span> <span class="token operator">*</span><span class="token punctuation">)</span>p1<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>  如果要求偶数排前面，奇数排后面，可以这么写：</p>
+<pre><code class="prism language-c"><span class="token keyword">int</span> <span class="token function">Qua</span><span class="token punctuation">(</span><span class="token keyword">int</span> x<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> x <span class="token operator">%</span> <span class="token number">2</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">int</span> <span class="token function">cmp</span><span class="token punctuation">(</span><span class="token keyword">const</span> <span class="token keyword">void</span> <span class="token operator">*</span>p1<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">void</span> <span class="token operator">*</span>p2<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token function">Qua</span><span class="token punctuation">(</span><span class="token operator">*</span><span class="token punctuation">(</span><span class="token keyword">int</span> <span class="token operator">*</span><span class="token punctuation">)</span>p1<span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token function">Qua</span><span class="token punctuation">(</span><span class="token operator">*</span><span class="token punctuation">(</span><span class="token keyword">int</span> <span class="token operator">*</span><span class="token punctuation">)</span>p2<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<h1><a id="_90"></a>二、题目描述</h1>
+<blockquote>
+<p>  给定一个非负整数数组<code>A</code>，返回一个数组，在该数组中， <code>A</code>的所有偶数元素之后跟着所有奇数元素。你可以返回满足此条件的任何数组作为答案。</p>
+</blockquote>
+<h1><a id="_92"></a>三、算法详解</h1>
+<p>  </p>
+<h1><a id="_94"></a>四、源码剖析</h1>
+<pre><code class="prism language-c"><span class="token keyword">int</span> <span class="token function">Qua</span><span class="token punctuation">(</span><span class="token keyword">int</span> x<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> x <span class="token operator">&amp;</span> <span class="token number">1</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">int</span> <span class="token function">cmp</span><span class="token punctuation">(</span><span class="token keyword">const</span> <span class="token keyword">void</span> <span class="token operator">*</span>a<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">void</span> <span class="token operator">*</span>b<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token function">Qua</span><span class="token punctuation">(</span><span class="token operator">*</span><span class="token punctuation">(</span><span class="token keyword">int</span> <span class="token operator">*</span><span class="token punctuation">)</span>a<span class="token punctuation">)</span> <span class="token operator">-</span> <span class="token function">Qua</span><span class="token punctuation">(</span><span class="token operator">*</span><span class="token punctuation">(</span><span class="token keyword">int</span> <span class="token operator">*</span><span class="token punctuation">)</span>b<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">int</span><span class="token operator">*</span> <span class="token function">sortArrayByParity</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token operator">*</span> nums<span class="token punctuation">,</span> <span class="token keyword">int</span> numsSize<span class="token punctuation">,</span> <span class="token keyword">int</span><span class="token operator">*</span> returnSize<span class="token punctuation">)</span><span class="token punctuation">{</span>
+    <span class="token keyword">int</span> i<span class="token punctuation">;</span>
+    <span class="token keyword">int</span> <span class="token operator">*</span>ret <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token keyword">int</span> <span class="token operator">*</span><span class="token punctuation">)</span><span class="token function">malloc</span><span class="token punctuation">(</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">)</span> <span class="token operator">*</span> numsSize <span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// (1)</span>
+    <span class="token keyword">for</span><span class="token punctuation">(</span>i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> numsSize<span class="token punctuation">;</span> <span class="token operator">++</span>i<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        ret<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">=</span> nums<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span>                                <span class="token comment">// (2)</span>
+    <span class="token punctuation">}</span>
+    <span class="token function">qsort</span><span class="token punctuation">(</span>ret<span class="token punctuation">,</span> numsSize<span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">)</span><span class="token punctuation">,</span> cmp<span class="token punctuation">)</span><span class="token punctuation">;</span>              <span class="token comment">// (3)</span>
+    <span class="token operator">*</span>returnSize <span class="token operator">=</span> numsSize<span class="token punctuation">;</span>                              <span class="token comment">// (4)</span>
+    <span class="token keyword">return</span> ret<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<ul>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span> 由于需要返回一个新的数组，所以这里需要申请一块额外的内存空间；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span></span> 将内存拷贝到申请的数组中；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(3)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">3</span><span class="mclose">)</span></span></span></span></span> 按照偶数在前，奇数在后进行排序，主要看<code>cmp</code>函数的实现；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>4</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(4)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">4</span><span class="mclose">)</span></span></span></span></span> 告诉调用方，排序后数组的大小；</li>
+</ul>
+<h1><a id="_120"></a>五、推荐专栏</h1>
+<center> <a href="https://blog.csdn.net/whereisherofrom/category_11227297.html"><font color="13ae01"><b>🌳《<u>画解数据结构</u>》🌳 </b></font></a> </center><br>
+<center> <a href="https://blog.csdn.net/WhereIsHeroFrom/article/details/119838427"><font color="13ae01"><b> 哈希表 </b></font></a> </center><br>
+<h1><a id="_127"></a>六、习题练习</h1>
+
+<table>
+<thead>
+<tr>
+<th>序号</th>
+<th>题目链接</th>
+<th>难度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><a href="https://leetcode-cn.com/problems/sort-an-array/">排序数组</a></td>
+<td>★☆☆☆☆</td>
+</tr>
+<tr>
+<td>2</td>
+<td><a href="https://leetcode-cn.com/problems/majority-element/">多数元素</a></td>
+<td>★☆☆☆☆</td>
+</tr>
+<tr>
+<td>3</td>
+<td><a href="https://leetcode-cn.com/problems/contains-duplicate/">存在重复元素</a></td>
+<td>★☆☆☆☆</td>
+</tr>
+<tr>
+<td>4</td>
+<td><a href="https://leetcode-cn.com/problems/maximum-gap/">最大间距</a></td>
+<td>★☆☆☆☆</td>
+</tr>
+<tr>
+<td>5</td>
+<td><a href="https://leetcode-cn.com/problems/sort-array-by-parity/">按奇偶排序数组</a></td>
+<td>★☆☆☆☆</td>
+</tr>
+<tr>
+<td>6</td>
+<td><a href="https://leetcode-cn.com/problems/single-number-ii/">只出现一次的数字 II</a></td>
+<td>★★☆☆☆</td>
+</tr>
+<tr>
+<td>7</td>
+<td><a href="https://leetcode-cn.com/problems/0H97ZC/">数组相对排序</a></td>
+<td>★★☆☆☆</td>
+</tr>
+<tr>
+<td>8</td>
+<td><a href="https://leetcode-cn.com/problems/minimum-time-difference/">最小时间差</a></td>
+<td>★★☆☆☆</td>
+</tr>
+<tr>
+<td>9</td>
+<td><a href="https://leetcode-cn.com/problems/largest-perimeter-triangle/">三角形的最大周长</a></td>
+<td>★★☆☆☆</td>
+</tr>
+<tr>
+<td>10</td>
+<td><a href="https://leetcode-cn.com/problems/boats-to-save-people/">救生艇</a></td>
+<td>★★☆☆☆</td>
+</tr>
+<tr>
+<td>11</td>
+<td><a href="https://leetcode-cn.com/problems/group-anagrams-lcci/">变位词组</a></td>
+<td>★★★☆☆</td>
+</tr>
+</tbody>
+</table><center>👇🏻添加 博主 获取付费专栏优惠券👇🏻</center>
+</div>
+</body>
+
+</html>

@@ -1,0 +1,101 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>《算法零基础100讲》(第52讲) 区间问题(一) 区间定义</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__html"><p></p><div class="toc"><h3>文章目录</h3><ul><li><a href="#_2">零、写在前面</a></li><li><a href="#_8">一、概念定义</a></li><li><a href="#_28">二、题目描述</a></li><li><a href="#_30">三、算法详解</a></li><li><a href="#_32">四、源码剖析</a></li><li><a href="#_59">五、推荐专栏</a></li><li><a href="#_65">六、习题练习</a></li></ul></div><p></p>
+<h1><a id="_2"></a>零、写在前面</h1>
+<p>  这是<a href="https://blog.csdn.net/whereisherofrom/category_11426012.html">《算法零基础100讲》</a> 专栏打卡学习的第 <font color="red">52</font> 天了。如果觉得本专栏太贵无法承受，在博主主页添加博主好友，获取 <font color="red"><strong>付费专栏优惠券</strong></font>。<br>
+  每天专栏的题，做不出来没关系，因为困难的题涉及知识点较多，可能会涉及到后面的章节，所以不要着急，内容能看懂，能自己分析，能做出简单题就行。<br>
+  在刷题的过程中，总结自己遇到的坑点，写出 <strong>「 解题报告 」</strong>  供他人学习，也是一种自我学习的方式。这就是经典的帮助他人的同时，成就自己。目前， <a href="https://bbs.csdn.net/forums/hero"><strong>「 万人千题 」</strong></a> 社区 每天都会有五六篇高质量的 <strong>「 解题报告 」</strong> 被我 <strong>「 加精 」</strong>。如果觉得自己有能力的，也可以来发布你的 <strong>「 解题报告 」</strong>。千万级流量，你我共同拥有。</p>
+<h1><a id="_8"></a>一、概念定义</h1>
+<p>  区间一般有一个 <strong>左端点</strong> 和一个 <strong>右端点</strong>，所以我们可以用一个 <strong>拥有两个成员变量</strong> 的 <strong>结构体</strong> 来表示，如下：</p>
+<pre><code class="prism language-c"><span class="token keyword">struct</span> <span class="token class-name">Interval</span> <span class="token punctuation">{</span>
+    <span class="token keyword">int</span> left<span class="token punctuation">,</span> right<span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+<p>  由于区间也可以描述成 <strong>起始端点</strong> 和 <strong>结束端点</strong>，所以也可以命名成：</p>
+<pre><code class="prism language-c"><span class="token keyword">struct</span> <span class="token class-name">Interval</span> <span class="token punctuation">{</span>
+    <span class="token keyword">int</span> start<span class="token punctuation">,</span> end<span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+<p>  可以简单写一个函数来判断一个数字在不在区间内，如下：</p>
+<pre><code class="prism language-c">bool <span class="token function">inInterval</span> <span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Interval</span> I<span class="token punctuation">,</span> <span class="token keyword">int</span> val<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> I<span class="token punctuation">.</span>start <span class="token operator">&lt;=</span> val <span class="token operator">&amp;&amp;</span> val <span class="token operator">&lt;=</span> I<span class="token punctuation">.</span>end<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<h1><a id="_28"></a>二、题目描述</h1>
+<blockquote>
+<p>  给定两个整数数组 <code>startTime</code>（开始时间）和 <code>endTime</code>（结束时间），并指定一个整数 <code>queryTime</code>作为查询时间。已知，第 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.65952em; vertical-align: 0em;"></span><span class="mord mathdefault">i</span></span></span></span></span> 名学生在 <code>startTime[i]</code>时开始写作业并于 <code>endTime[i]</code>时完成作业。请返回在查询时间 <code>queryTime</code>时正在做作业的学生人数。</p>
+</blockquote>
+<h1><a id="_30"></a>三、算法详解</h1>
+<p>  直接抽象出区间后，利用是否在区间内的接口，统计即可。</p>
+<h1><a id="_32"></a>四、源码剖析</h1>
+<pre><code class="prism language-c"><span class="token keyword">struct</span> <span class="token class-name">Interval</span> <span class="token punctuation">{</span>
+    <span class="token keyword">int</span> start<span class="token punctuation">,</span> end<span class="token punctuation">;</span>                                    <span class="token comment">// (1)</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+bool <span class="token function">inInterval</span> <span class="token punctuation">(</span><span class="token keyword">struct</span> <span class="token class-name">Interval</span> I<span class="token punctuation">,</span> <span class="token keyword">int</span> val<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> I<span class="token punctuation">.</span>start <span class="token operator">&lt;=</span> val <span class="token operator">&amp;&amp;</span> val <span class="token operator">&lt;=</span> I<span class="token punctuation">.</span>end<span class="token punctuation">;</span>             <span class="token comment">// (2)</span>
+<span class="token punctuation">}</span> 
+<span class="token keyword">int</span> <span class="token function">busyStudent</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token operator">*</span> startTime<span class="token punctuation">,</span> <span class="token keyword">int</span> startTimeSize<span class="token punctuation">,</span> <span class="token keyword">int</span><span class="token operator">*</span> endTime<span class="token punctuation">,</span> <span class="token keyword">int</span> endTimeSize<span class="token punctuation">,</span> <span class="token keyword">int</span> queryTime<span class="token punctuation">)</span><span class="token punctuation">{</span>
+    <span class="token keyword">struct</span> <span class="token class-name">Interval</span> I<span class="token punctuation">[</span><span class="token number">110</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token keyword">int</span> i<span class="token punctuation">;</span>
+    <span class="token keyword">int</span> cnt <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token keyword">for</span><span class="token punctuation">(</span>i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> startTimeSize<span class="token punctuation">;</span> <span class="token operator">++</span>i<span class="token punctuation">)</span> <span class="token punctuation">{</span>               <span class="token comment">// (3)</span>
+        I<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">.</span>start <span class="token operator">=</span> startTime<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span>
+        I<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">.</span>end <span class="token operator">=</span> endTime<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">for</span><span class="token punctuation">(</span>i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> startTimeSize<span class="token punctuation">;</span> <span class="token operator">++</span>i<span class="token punctuation">)</span> <span class="token punctuation">{</span>               
+        cnt <span class="token operator">+=</span> <span class="token function">inInterval</span><span class="token punctuation">(</span>I<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">,</span> queryTime<span class="token punctuation">)</span> <span class="token operator">?</span> <span class="token number">1</span> <span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">;</span>    <span class="token comment">// (4)</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">return</span> cnt<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<ul>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span> 定义区间；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span></span> 定义是否在区间内；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(3)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">3</span><span class="mclose">)</span></span></span></span></span> 抽象成区间；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>4</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(4)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">4</span><span class="mclose">)</span></span></span></span></span> 判断是否在区间内，是则累加 1；</li>
+</ul>
+<h1><a id="_59"></a>五、推荐专栏</h1>
+<center> <center> <a href="https://blog.csdn.net/whereisherofrom/category_11426012.html"><font color="2290ff"><b>🌌《<u>算法零基础100讲</u>》🌌</b></font></a></center><br>
+</center><center> <a href="https://blog.csdn.net/WhereIsHeroFrom/article/details/120875708"><font color="2290ff"><b><u>(第18讲) 统计法</u></b></font></a></center>
+<h1><a id="_65"></a>六、习题练习</h1>
+
+<table>
+<thead>
+<tr>
+<th>序号</th>
+<th>题目链接</th>
+<th>难度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><a href="https://leetcode-cn.com/problems/number-of-students-doing-homework-at-a-given-time/">在既定时间做作业的学生人数</a></td>
+<td>★☆☆☆☆</td>
+</tr>
+<tr>
+<td>2</td>
+<td><a href="https://leetcode-cn.com/problems/count-odd-numbers-in-an-interval-range/">在区间范围内统计奇数数目</a></td>
+<td>★☆☆☆☆</td>
+</tr>
+<tr>
+<td>3</td>
+<td><a href="https://leetcode-cn.com/problems/summary-ranges/">汇总区间</a></td>
+<td>★★☆☆☆</td>
+</tr>
+</tbody>
+</table><center>👇🏻添加 博主 获取付费专栏优惠券👇🏻</center>
+</div>
+</body>
+
+</html>

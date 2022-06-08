@@ -1,0 +1,1007 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>夜深人静写算法（十）- 广度优先搜索</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__html"><p></p><div class="toc"><h3>文章目录</h3><ul><li><a href="#_2">一、前言</a></li><li><a href="#_7">二、单向广搜简介</a></li><li><a href="#_17">三、先进先出队列</a></li><ul><li><a href="#1_21">1、队列的基础结构</a></li><li><a href="#2_61">2、队列的数据元素</a></li><li><a href="#3_97">3、队列的接口</a></li><ul><li><a href="#1_113">1）清空队列</a></li><li><a href="#2_123">2）压入数据</a></li><li><a href="#3_132">3）弹出数据</a></li><li><a href="#4_140">4）队列判空</a></li></ul><li><a href="#4_148">4、队列的容错机制</a></li><ul><li><a href="#1_154">1）循环队列</a></li><li><a href="#2_174">2）动态扩容</a></li></ul></ul><li><a href="#_182">四、单向广搜的原理</a></li><ul><li><a href="#1_184">1、状态的概念</a></li><ul><li><a href="#1_185">1）状态</a></li><li><a href="#2_187">2）状态转移</a></li><li><a href="#3___194">3）初始状态 和 结束状态</a></li><li><a href="#4_198">4）状态哈希</a></li></ul><li><a href="#2_201">2、状态的程序描述</a></li><ul><li><a href="#1_202">1）结构体定义</a></li><li><a href="#2_221">2）接口定义</a></li></ul><li><a href="#3_263">3、状态的降维</a></li><li><a href="#4_295">4、单向广搜的实现</a></li><ul><li><a href="#1_297">1）广搜算法描述</a></li><li><a href="#2_300">2）广搜算法框架</a></li><li><a href="#3_333">3）广搜算法初始化</a></li><li><a href="#4_350">4）广搜算法的状态扩展</a></li></ul></ul><li><a href="#_397">五、单向广搜的应用场景</a></li><ul><li><a href="#1_398">1、迷宫问题</a></li><ul><li><a href="#1_399">1）双人迷宫</a></li><li><a href="#2_418">2）推箱子</a></li><li><a href="#3_444">3）右转迷宫</a></li><li><a href="#4_462">4）收集物品</a></li><li><a href="#5_474">5）贪吃蛇</a></li></ul><li><a href="#2_496">2、同余搜索</a></li><li><a href="#3_501">3、预处理</a></li></ul><li><a href="#_517">六、单向广搜题集整理</a></li></ul></div><p></p>
+<h1><a id="_2"></a>一、前言</h1>
+<blockquote>
+<p>  目前本专栏正在进行优惠活动，在博主主页添加博主好友，可以获取 <font color="red"><strong>付费专栏优惠券</strong></font>。<br>
+  掌握了广搜就意味着至少可以拿一块省赛银牌，这或许是一句玩笑话，但是我觉得还是有几分道理的，广搜的涉及面很广，而且可以辅助你更好得理解动态规划，因为两者都有状态的概念，而且广搜的状态更加容易构造，不学广搜就无法理解 A*、SPFA、差分约束、稳定婚姻、最大流 等等其它的图论算法。<br>  回想自己十几年前刚开始学习搜索的时候，总是分不清楚什么时候应该用广搜，什么时候应该用深搜，所以，我把之前遇到的问题做了一个总结，发现最重要的还是那两个字：状态。今天这篇文章会围绕这两个字进行一个非常详细的讲解。<br>  当然，任何事情都有一个循序渐进的过程，我不会把所有关于广搜的内容一次性讲完，看完这篇文章，你至少应该可以自己手写一个单向广搜的代码。后面的章节会对 最短路、A* 、双向广搜 逐一进行讲解。<img src="https://img-blog.csdnimg.cn/20210703122654382.gif#pic_center" alt=""></p>
+</blockquote>
+<h1><a id="_7"></a>二、单向广搜简介</h1>
+<ul>
+<li>单向广搜就是最简化情况下的广度优先搜索（Breadth First Search），以下简称为广搜。游戏开发过程中用到的比较广泛的 A* 寻路，就是广搜的加强版。</li>
+<li>那么，我们通过一个例子来初步了解下广搜的搜索过程。</li>
+</ul>
+<blockquote>
+<p>【例题1】公主被关在一个 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>n</mi><mo>×</mo><mi>m</mi><mo stretchy="false">(</mo><mi>n</mi><mo separator="true">,</mo><mi>m</mi><mo>≤</mo><mn>500</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">n \times m(n,m \le 500)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.66666em; vertical-align: -0.08333em;"></span><span class="mord mathdefault">n</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathdefault">m</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mord mathdefault">m</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">≤</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord">5</span><span class="mord">0</span><span class="mord">0</span><span class="mclose">)</span></span></span></span></span> 的迷宫里，主公想在最快的时间内救出公主。但是迷宫太大，而且有各种墙阻挡，主公每次只能在 上、下、左、右 四个方向内选择周围的非墙体格子前进一格，并且花费 1 单位时间，问主公救出公主的最少时间。<img src="https://img-blog.csdnimg.cn/20210124144351509.png#pic_center" alt=""></p><center>图二-1</center><center>（图中 ♂ 代表主公，♀代表公主，□ 代表墙体不能通行）</center><p></p>
+</blockquote>
+<ul>
+<li>这个问题就是经典的用广度优先搜索来解决的问题。</li>
+<li>我们通过一个动图来对广搜有一个初步的印象，如图二-2所示：<br>
+<img src="https://img-blog.csdnimg.cn/20210124145611779.gif#pic_center" alt=""><center>图二-2</center><center></center></li>
+<li>从图中可以看出，广搜的本质还是暴力枚举。即对于每个当前位置，枚举四个相邻可以行走的方向进行不断尝试，直到找到目的地。有点像洪水爆发，从一个源头开始逐渐蔓延开来，直到所有可达的区域都被洪水灌溉，所以我们也把这种算法称为 FloodFill。</li>
+<li>那么，如何把它描述成程序的语言呢？这里需要用到一种数据结构 —— 队列。本文接下来会对这种数据结构进行一个详细的讲解，如果读者对队列已经耳熟能详，那么可以跳过第三节，直接进入第四节。</li>
+</ul>
+<h1><a id="_17"></a>三、先进先出队列</h1>
+<ul>
+<li>常见的队列有：先进先出队列、优先队列、单调队列  等等。本章将主要介绍 先进先出队列。</li>
+<li>数据结构中的先进先出队列就好比我们日常工作中去食堂排队吃饭，排在前面的先取到饭。而 “先进先出” 就是 “先到先得” ，“近水楼台先得月” 的意思。读者可以从任何一本数据结构的书籍上看到这么一个词汇 FIFO，它就是先进先出（First Input First Output）的简称。</li>
+<li>为了方便读者阅读，接下来一律将 先进先出队列 简称为 队列。</li>
+</ul>
+<h2><a id="1_21"></a>1、队列的基础结构</h2>
+<ul>
+<li>队列的基础结构是一种线性表，所以实现方式主要有两种：链表 和 数组。并且需要两个指针，分别指向队列头 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>f</mi><mi>r</mi><mi>o</mi><mi>n</mi><mi>t</mi></mrow><annotation encoding="application/x-tex">front</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.88888em; vertical-align: -0.19444em;"></span><span class="mord mathdefault" style="margin-right: 0.10764em;">f</span><span class="mord mathdefault" style="margin-right: 0.02778em;">r</span><span class="mord mathdefault">o</span><span class="mord mathdefault">n</span><span class="mord mathdefault">t</span></span></span></span></span> 和队列尾 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>r</mi><mi>e</mi><mi>a</mi><mi>r</mi></mrow><annotation encoding="application/x-tex">rear</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathdefault" style="margin-right: 0.02778em;">r</span><span class="mord mathdefault">e</span><span class="mord mathdefault">a</span><span class="mord mathdefault" style="margin-right: 0.02778em;">r</span></span></span></span></span>。</li>
+<li>链表结构的队列如下：<br>
+<img src="https://img-blog.csdnimg.cn/20210124152952983.png#pic_center" alt=""><center>图三-1-1</center></li>
+<li>数组结构的队列如下：<br>
+<img src="https://img-blog.csdnimg.cn/20210124153545331.png#pic_center" alt=""><center>图三-1-2</center></li>
+<li>那么接下来，请忘记链表。</li>
+<li>作者将介绍一种用数组的方式来实现的队列，结构定义如下：</li>
+</ul>
+<pre><code class="prism language-cpp"><span class="token keyword">class</span> <span class="token class-name">Queue</span> <span class="token punctuation">{</span>
+<span class="token keyword">public</span><span class="token operator">:</span>
+    <span class="token function">Queue</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">virtual</span> <span class="token operator">~</span><span class="token function">Queue</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">public</span><span class="token operator">:</span>
+    <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+<span class="token keyword">private</span><span class="token operator">:</span>
+    QueueData <span class="token operator">*</span>data_<span class="token punctuation">;</span>
+    <span class="token keyword">int</span> front_<span class="token punctuation">,</span> rear_<span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+<ul>
+<li>1）<code>QueueData *data_</code>：虽然是个指针，但是它不是链表，这个指针指向的是队列数据的内存首地址，由于队列数组较大，所以采用堆内存，在队列类的构造函数里进行内存申请，析构函数里进行内存释放，代码如下：</li>
+</ul>
+<pre><code class="prism language-cpp"><span class="token keyword">const</span> <span class="token keyword">int</span> MAXQUEUE <span class="token operator">=</span> <span class="token number">1000000</span><span class="token punctuation">;</span>
+
+<span class="token class-name">Queue</span><span class="token operator">::</span><span class="token function">Queue</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">:</span> <span class="token function">data_</span><span class="token punctuation">(</span><span class="token constant">NULL</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    data_ <span class="token operator">=</span> <span class="token keyword">new</span> QueueData<span class="token punctuation">[</span>MAXQUEUE<span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token class-name">Queue</span><span class="token operator">::</span><span class="token operator">~</span><span class="token function">Queue</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>data_<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">delete</span><span class="token punctuation">[</span><span class="token punctuation">]</span> data_<span class="token punctuation">;</span>
+        data_ <span class="token operator">=</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<ul>
+<li>2）<code>front_</code>代表了队列头数据的索引，是一个数组下标，所以是整数类型，当队列不为空的时候，<code>data_[front_]</code>获取到的就是队首元素；</li>
+<li>3）<code>rear_</code>代表了队列尾，也是一个数组下标，和队列首不同，它指向的是一个无用位置（空结点），当队列不为空的时候，队列尾部最后一个可用数据为<code>data_[rear_-1]</code>，如图三-1-3所示：</li>
+</ul>
+<p><img src="https://img-blog.csdnimg.cn/20210124153545331.png#pic_center" alt=""></p><center>图三-1-3</center><p></p>
+<ul>
+<li>图中深灰色代表已经弹出的数据，蓝色代表队列内的数据，浅灰色代表尚未使用的数据；</li>
+</ul>
+<h2><a id="2_61"></a>2、队列的数据元素</h2>
+<ul>
+<li>队列的数据元素一般是一个结构体（或者类），即上文提到的<code>QueueData</code>，这样就可以根据不同需求定义不同的数据类型。</li>
+<li>这个结构体的成员变量可以只有一个整数，代表 身高、年龄；</li>
+</ul>
+<pre><code class="prism language-cpp"><span class="token keyword">struct</span> <span class="token class-name">QueueData</span> <span class="token punctuation">{</span>
+    <span class="token keyword">int</span> height<span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+<pre><code class="prism language-cpp"><span class="token keyword">struct</span> <span class="token class-name">QueueData</span> <span class="token punctuation">{</span>
+    <span class="token keyword">int</span> age<span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+<ul>
+<li>也可以是两个整数，代表 二维空间的坐标位置、一个矩形的宽和高 等等；</li>
+</ul>
+<pre><code class="prism language-cpp"><span class="token keyword">struct</span> <span class="token class-name">QueueData</span> <span class="token punctuation">{</span>
+    <span class="token keyword">int</span> x<span class="token punctuation">,</span> y<span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+<pre><code class="prism language-cpp"><span class="token keyword">struct</span> <span class="token class-name">QueueData</span> <span class="token punctuation">{</span>
+    <span class="token keyword">int</span> width<span class="token punctuation">,</span> height<span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+<ul>
+<li>也可以是三个整数，代表 三维空间的位置、亦或是二维空间的位置加上方向等等。</li>
+</ul>
+<pre><code class="prism language-cpp"><span class="token keyword">struct</span> <span class="token class-name">QueueData</span> <span class="token punctuation">{</span>
+    <span class="token keyword">int</span> x<span class="token punctuation">,</span> y<span class="token punctuation">,</span> z<span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+<pre><code class="prism language-cpp"><span class="token keyword">struct</span> <span class="token class-name">QueueData</span> <span class="token punctuation">{</span>
+    <span class="token keyword">int</span> x<span class="token punctuation">,</span> y<span class="token punctuation">,</span> dir<span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+<h2><a id="3_97"></a>3、队列的接口</h2>
+<ul>
+<li>队列的操作接口一共有三种：清空队列、压入数据、弹出数据；</li>
+<li>队列的判定接口只有一个：判空；</li>
+</ul>
+<pre><code class="prism language-cpp"><span class="token keyword">class</span> <span class="token class-name">Queue</span> <span class="token punctuation">{</span>
+    <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+<span class="token keyword">public</span><span class="token operator">:</span>
+    <span class="token keyword">void</span> <span class="token function">clear</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>                    <span class="token comment">// 1）清空队列</span>
+    <span class="token keyword">void</span> <span class="token function">push</span><span class="token punctuation">(</span><span class="token keyword">const</span> QueueData<span class="token operator">&amp;</span> bs<span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 2）压入数据</span>
+    QueueData<span class="token operator">&amp;</span> <span class="token function">pop</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>                <span class="token comment">// 3）弹出数据</span>
+<span class="token keyword">public</span><span class="token operator">:</span>
+    <span class="token keyword">bool</span> <span class="token function">empty</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">const</span><span class="token punctuation">;</span>              <span class="token comment">// 4）队列是否为空</span>
+<span class="token keyword">private</span><span class="token operator">:</span>
+    <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+<h3><a id="1_113"></a>1）清空队列</h3>
+<ul>
+<li>清空队列不实际进行内存释放，而只是将队列头和队列尾下标索引置零，如下：</li>
+</ul>
+<pre><code class="prism language-cpp"><span class="token keyword">void</span> <span class="token class-name">Queue</span><span class="token operator">::</span><span class="token function">clear</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    front_ <span class="token operator">=</span> rear_ <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/6dca54b420f0ab648abdad8f46fc6dde.png#pic_center" alt="在这里插入图片描述"></p>
+<center>图三-3-1</center>
+<h3><a id="2_123"></a>2）压入数据</h3>
+<ul>
+<li>压入数据的过程是将传入的数据结构体拷贝到队列尾指向的内存上，然后再将队列尾指针下标自增 1，时间复杂度 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathdefault" style="margin-right: 0.02778em;">O</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span>。</li>
+</ul>
+<pre><code class="prism language-cpp"><span class="token keyword">void</span> <span class="token class-name">Queue</span><span class="token operator">::</span><span class="token function">push</span><span class="token punctuation">(</span><span class="token keyword">const</span> QueueData<span class="token operator">&amp;</span> bs<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    data_<span class="token punctuation">[</span>rear_<span class="token operator">++</span><span class="token punctuation">]</span> <span class="token operator">=</span> bs<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/ed836b9cfe822415dde4b12cab639e0a.png#pic_center" alt=""></p><center>图三-3-2</center><p></p>
+<h3><a id="3_132"></a>3）弹出数据</h3>
+<ul>
+<li>弹出数据的过程是将队列头的数据的结构体引用直接返回给调用方，然后队列头指针下标自增 1，时间复杂度 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathdefault" style="margin-right: 0.02778em;">O</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span>。</li>
+</ul>
+<pre><code class="prism language-cpp">QueueData<span class="token operator">&amp;</span> <span class="token class-name">Queue</span><span class="token operator">::</span><span class="token function">pop</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+    <span class="token keyword">return</span> data_<span class="token punctuation">[</span>front_<span class="token operator">++</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/e4e600105185596ce4cee655367a83e0.png#pic_center" alt="在这里插入图片描述"></p><center>图三-3-3</center><p></p>
+<h3><a id="4_140"></a>4）队列判空</h3>
+<ul>
+<li>队列的判定接口只有一个：判空；</li>
+<li>只需要判断 队列头索引 和 队列尾索引 是否相同即可；</li>
+</ul>
+<pre><code class="prism language-cpp"><span class="token keyword">bool</span> <span class="token class-name">Queue</span><span class="token operator">::</span><span class="token function">empty</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">const</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> front_ <span class="token operator">==</span> rear_<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<h2><a id="4_148"></a>4、队列的容错机制</h2>
+<ul>
+<li>上文在实现队列的时候，为了尽量简化代码，做了一些偷懒，所以是存在问题的，主要有两个：</li>
+<li>1）队列为空的时候，进行弹出数据操作，得到的是一个未知的元素，是上一次残留的缓存数据，所以调用方在使用队列接口的时候需要进行先判空，再弹出的操作；</li>
+<li>2）当队列数据超出了给定最大元素<code>MAXQUEUE</code>时，压入数据会导致数组下标越界，有两个解决方案：</li>
+<li>
+<ul>
+<li>a. 循环队列；</li>
+</ul>
+</li>
+<li>
+<ul>
+<li>b. 动态扩容；</li>
+</ul>
+</li>
+</ul>
+<h3><a id="1_154"></a>1）循环队列</h3>
+<ul>
+<li>我们发现，当弹出数据后，<code>data_[0, front_ - 1]</code>这块内存的数据再也没有被用到，所以是可以被重复利用的，具体做法是：</li>
+<li>a）当压入数据后，使得队列尾指针等于<code>MAXQUEUE</code>时，则队列尾指针置0；修改后的 <code>push</code>接口，代码实现如下：</li>
+</ul>
+<pre><code class="prism language-cpp"><span class="token keyword">void</span> <span class="token class-name">Queue</span><span class="token operator">::</span><span class="token function">push</span><span class="token punctuation">(</span><span class="token keyword">const</span> QueueData<span class="token operator">&amp;</span> bs<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    data_<span class="token punctuation">[</span>rear_<span class="token operator">++</span><span class="token punctuation">]</span> <span class="token operator">=</span> bs<span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>rear_ <span class="token operator">==</span> MAXQUEUE<span class="token punctuation">)</span> rear_ <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<ul>
+<li>b）当弹出数据后，使得队列头指针等于<code>MAXQUEUE</code>时，则队列头指针置0；修改后的 <code>pop</code>接口，代码实现如下：</li>
+</ul>
+<pre><code class="prism language-cpp">QueueData<span class="token operator">&amp;</span> <span class="token class-name">Queue</span><span class="token operator">::</span><span class="token function">pop</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">++</span>front_ <span class="token operator">==</span> MAXQUEUE<span class="token punctuation">)</span> front_ <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>front_ <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span>
+        <span class="token keyword">return</span> data_<span class="token punctuation">[</span>MAXQUEUE <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token keyword">else</span>
+        <span class="token keyword">return</span> data_<span class="token punctuation">[</span>front_ <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<ul>
+<li>但是，这样做存在一个问题，一旦压入数据的速度大于弹出数据的速度，并且队列中有效数据的个数大于 <code>MAXQUEUE</code>时，原有的数据会被下一次压入的数据覆盖掉，破坏原有内存结构，这个时候，循环队列已经不能解决问题，需要进行动态扩容了；</li>
+</ul>
+<h3><a id="2_174"></a>2）动态扩容</h3>
+<ul>
+<li>试想一下，对于一个循环队列，当 <code>rear_ + 1 == front_</code>时，再压入一个元素，就会导致<code>rear_ == front_</code>，队列就会变成空（参考上文的判空），这样就不能进行数据的弹出，导致队列不能正常运作，即使再压入数据，此时弹出的数据也不再是正确的，所以当队列剩余容量小于一定阈值的时候，我们需要把队列进行扩容处理；</li>
+<li>队列剩余容量 T 的计算分两种情况：</li>
+<li>当 <code>front_ &lt;= rear_</code>时，<code>T = MAXQUEUE - (rear_ - front_);</code></li>
+<li>当 <code>front_ &gt; rear_</code>时，<code>T = front_ - rear_;</code></li>
+<li>那么我们可以考虑，当 <code>T &lt; MAXQUEUE * 0.1</code>时，开辟一块新的内存，内存大小为<code>MAXQUEUE*2</code>，将原有内存拷贝过去，并且修改 <code>front_</code>和<code>rear_</code>的值，然后再释放原有内存空间。</li>
+<li>由于实际应用中，队列被用在网络消息的生产消费，基于多线程问题考虑，一般是需要加锁的，以上实现的是一个多线程不安全队列，关于加锁的内容不在本文讨论范围内。</li>
+<li>以上就是有关队列的所有内容。</li>
+</ul>
+<h1><a id="_182"></a>四、单向广搜的原理</h1>
+<ul>
+<li>为了更好的理解广搜的运作过程，我们需要先理解状态的概念。</li>
+</ul>
+<h2><a id="1_184"></a>1、状态的概念</h2>
+<h3><a id="1_185"></a>1）状态</h3>
+<ul>
+<li>如果是计算机专业的同学，勉强上过几天编译原理的课，那么应该会对 有限状态自动机 这个词有点印象，没错，我们要说的状态就是它了。当然，为了照顾好逃课的同学，作者不会把书上的概念直接抄过来讲，毕竟那个太过于抽象，继续往下看，相信读者会对状态这个词有一个更加深入的理解。</li>
+</ul>
+<h3><a id="2_187"></a>2）状态转移</h3>
+<ul>
+<li>从一个状态到达另一个状态，这种转换的过程被称为状态转移。</li>
+</ul>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/ea18f1d311fdb465023b101e4619087c.png#pic_center" alt=""></p><center>图四-1-1</center><p></p>
+<ul>
+<li>举个具体的例子，你现在的位置是 (1,3)，经过一步到达 (1, 4)，我们可以把  (1,3) 这个位置编号为 0，(1, 4) 这个位置编号为 1，那么可以称为你从 状态 0 到达了 状态 1，表示成 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo separator="true">,</mo><mn>3</mn><mo stretchy="false">)</mo><mo>→</mo><mo stretchy="false">(</mo><mn>1</mn><mo separator="true">,</mo><mn>4</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(1, 3) \to (1, 4)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mord">3</span><span class="mclose">)</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">→</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mord">4</span><span class="mclose">)</span></span></span></span></span> 或者 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mn>0</mn><mo>→</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">0 \to 1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">0</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">→</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">1</span></span></span></span></span>。</li>
+<li>状态不仅仅可以表示位置，比如现在你的位置在 (1, 3) ，方向为向左，经过一次右转，位置不变但是方向变成了向上，这也是一种状态转移，即  <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo separator="true">,</mo><mn>3</mn><mo separator="true">,</mo><mi>l</mi><mi>e</mi><mi>f</mi><mi>t</mi><mo stretchy="false">)</mo><mo>→</mo><mo stretchy="false">(</mo><mn>1</mn><mo separator="true">,</mo><mn>4</mn><mo separator="true">,</mo><mi>u</mi><mi>p</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(1, 3, left) \to (1, 4, up)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mord">3</span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mord mathdefault" style="margin-right: 0.01968em;">l</span><span class="mord mathdefault">e</span><span class="mord mathdefault" style="margin-right: 0.10764em;">f</span><span class="mord mathdefault">t</span><span class="mclose">)</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">→</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mord">4</span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mord mathdefault">u</span><span class="mord mathdefault">p</span><span class="mclose">)</span></span></span></span></span>。</li>
+<li>从一个状态到达另一个状态的时候会有消耗，可以是 时间、精力、步数 等等。</li>
+</ul>
+<h3><a id="3___194"></a>3）初始状态 和 结束状态</h3>
+<ul>
+<li>单向广搜的过程就是从 初始状态 通过穷举所有情况 最终到达  结束状态 的过程。而我们一般需要求的就是从 初始状态 到达  结束状态的最少时间（步数）。如图四-1-2描述的就是一个从初始状态经过一些中间状态，到达结束状态的过程。</li>
+</ul>
+<p><img src="https://img-blog.csdnimg.cn/img_convert/3d58d0451c98f48968aace1a52180bc2.png#pic_center" alt=""></p><center>图四-1-2</center><p></p>
+<h3><a id="4_198"></a>4）状态哈希</h3>
+<ul>
+<li>之前的章节已经学过哈希表，哈希表的目的是标记重复，这里的状态也是一样的道理。</li>
+<li>因为在广搜的图上，有可能形成环，这样就会导致本来已经搜索到过的状态，被再次访问，而再次访问同一个状态是没有意义的，所以需要对访问过的状态进行标记，这就是状态哈希。</li>
+</ul>
+<h2><a id="2_201"></a>2、状态的程序描述</h2>
+<h3><a id="1_202"></a>1）结构体定义</h3>
+<ul>
+<li>以【例题1】为例，我们需要的状态是一个二维坐标，即 主公 的位置。我们定义一个二维坐标来作为状态，于是可以把状态定义如下结构体<code>BFSState</code>：</li>
+</ul>
+<pre><code class="prism language-cpp"><span class="token keyword">struct</span> <span class="token class-name">Pos</span> <span class="token punctuation">{</span>
+    <span class="token keyword">int</span> x<span class="token punctuation">,</span> y<span class="token punctuation">;</span>
+    
+    <span class="token keyword">bool</span> <span class="token function">isInBound</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> <span class="token operator">!</span><span class="token punctuation">(</span>x <span class="token operator">&lt;</span> <span class="token number">0</span> <span class="token operator">||</span> y <span class="token operator">&lt;</span> <span class="token number">0</span> <span class="token operator">||</span> x <span class="token operator">&gt;=</span> XMAX <span class="token operator">||</span> y <span class="token operator">&gt;=</span> YMAX<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">bool</span> <span class="token function">isObstacle</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> <span class="token punctuation">(</span>Map<span class="token punctuation">[</span>x<span class="token punctuation">]</span><span class="token punctuation">[</span>y<span class="token punctuation">]</span> <span class="token operator">==</span> MAP_BLOCK<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token keyword">struct</span> <span class="token class-name">BFSState</span> <span class="token punctuation">{</span>
+    Pos p<span class="token punctuation">;</span>
+    <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+<h3><a id="2_221"></a>2）接口定义</h3>
+<ul>
+<li>状态的接口定义如下，先给出代码再进行讲解：</li>
+</ul>
+<pre><code class="prism language-cpp"><span class="token keyword">const</span> <span class="token keyword">int</span> MAXSTATE <span class="token operator">=</span> <span class="token number">1000000</span><span class="token punctuation">;</span>
+
+<span class="token keyword">struct</span> <span class="token class-name">BFSState</span> <span class="token punctuation">{</span>
+	<span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+<span class="token keyword">public</span><span class="token operator">:</span>
+    <span class="token keyword">inline</span> <span class="token keyword">bool</span> <span class="token function">isValidState</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>                   <span class="token comment">// 1）</span>
+    <span class="token keyword">inline</span> <span class="token keyword">bool</span> <span class="token function">isFinalState</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>                   <span class="token comment">// 2）</span>
+    <span class="token keyword">inline</span> <span class="token keyword">int</span> <span class="token function">getStep</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">const</span><span class="token punctuation">;</span>
+    <span class="token keyword">inline</span> <span class="token keyword">void</span> <span class="token function">setStep</span><span class="token punctuation">(</span><span class="token keyword">int</span> step<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">protected</span><span class="token operator">:</span>
+    <span class="token keyword">int</span> <span class="token function">getStateKey</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">const</span><span class="token punctuation">;</span>
+<span class="token keyword">public</span><span class="token operator">:</span>
+    <span class="token keyword">static</span> <span class="token keyword">int</span> step<span class="token punctuation">[</span>MAXSTATE<span class="token punctuation">]</span><span class="token punctuation">;</span>                   <span class="token comment">// 3）</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+<ul>
+<li>1）任何一个状态，都需要判断其合法性，比如对于迷宫来说，走出边界或者走到墙上都是非法状态，这个判定就是用 <code>isValidState</code>接口来完成的，实现可以是这样的：</li>
+</ul>
+<pre><code class="prism language-cpp"><span class="token keyword">bool</span> <span class="token class-name">BFSState</span><span class="token operator">::</span><span class="token function">isValidState</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> p<span class="token punctuation">.</span><span class="token function">isInBound</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> <span class="token operator">!</span>p<span class="token punctuation">.</span><span class="token function">isObstacle</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<ul>
+<li>当然，对于不同的问题，可以对这个接口进行重载；</li>
+<li>2）当遇到结束状态的时候，我们需要停止搜索过程，所以就需要对一个状态进行判定，比如地图上公主的位置标识为 <code>MAP_EXIT</code>，那么就判断这个状态下的位置所在的地图格子是否是<code>MAP_EXIT</code>，实现如下：</li>
+</ul>
+<pre><code class="prism language-cpp"><span class="token keyword">bool</span> <span class="token class-name">BFSState</span><span class="token operator">::</span><span class="token function">isFinalState</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token punctuation">(</span>Map<span class="token punctuation">[</span>p<span class="token punctuation">.</span>x<span class="token punctuation">]</span><span class="token punctuation">[</span>p<span class="token punctuation">.</span>y<span class="token punctuation">]</span> <span class="token operator">==</span> MAP_EXIT<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<ul>
+<li>3）<code>getStep</code>是用来获取初始状态到当前状态的最小步数，<code>setStep</code>是用来设置初始状态到当前状态的最小步数，因为实际情况的状态所对应的维数是不确定的，有的是一维，有的是二维，三维、四维、甚至更高维度的。为了将问题统一，我们需要做一层映射，即 多维状态向量 转换成 一维状态向量，这个转换的过程见下一节：状态的降维；</li>
+<li>这里只需要知道<code>getStateKey()</code>获取的就是降维以后一维的状态编号，那么我们可以定义所有状态最小步数的存储结构为一维数组，即<code>static int step[MAXSTATE];</code>，设置和获取的接口定义如下：</li>
+</ul>
+<pre><code class="prism language-cpp"><span class="token keyword">int</span> <span class="token class-name">BFSState</span><span class="token operator">::</span><span class="token function">getStep</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">const</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> step<span class="token punctuation">[</span><span class="token function">getStateKey</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">void</span> <span class="token class-name">BFSState</span><span class="token operator">::</span><span class="token function">setStep</span><span class="token punctuation">(</span><span class="token keyword">int</span> sp<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    step<span class="token punctuation">[</span><span class="token function">getStateKey</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">]</span> <span class="token operator">=</span> sp<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<h2><a id="3_263"></a>3、状态的降维</h2>
+<ul>
+<li>对于状态，最后聊一下状态的降维；</li>
+<li>1）<span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>K</mi></mrow><annotation encoding="application/x-tex">K</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathdefault" style="margin-right: 0.07153em;">K</span></span></span></span></span> 进制：取一个相对较大的数字（所有状态的所有维度下都不会遇到的数字）定义为 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>K</mi></mrow><annotation encoding="application/x-tex">K</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathdefault" style="margin-right: 0.07153em;">K</span></span></span></span></span>，然后按照一定的顺序将所有维度排列好，组织成一个 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>K</mi></mrow><annotation encoding="application/x-tex">K</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathdefault" style="margin-right: 0.07153em;">K</span></span></span></span></span> 进制数，例如对于二维的情况，降维后的状态值 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>s</mi><mi>t</mi><mi>a</mi><mi>t</mi><mi>e</mi></mrow><annotation encoding="application/x-tex">state</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.61508em; vertical-align: 0em;"></span><span class="mord mathdefault">s</span><span class="mord mathdefault">t</span><span class="mord mathdefault">a</span><span class="mord mathdefault">t</span><span class="mord mathdefault">e</span></span></span></span></span> 就是：<span class="katex--display"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>s</mi><mi>t</mi><mi>a</mi><mi>t</mi><mi>e</mi><mo>=</mo><mi>x</mi><mo>∗</mo><msup><mi>K</mi><mn>1</mn></msup><mo>+</mo><mi>y</mi><mo>∗</mo><msup><mi>K</mi><mn>0</mn></msup></mrow><annotation encoding="application/x-tex">state = x * K^1 + y * K^0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.61508em; vertical-align: 0em;"></span><span class="mord mathdefault">s</span><span class="mord mathdefault">t</span><span class="mord mathdefault">a</span><span class="mord mathdefault">t</span><span class="mord mathdefault">e</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.46528em; vertical-align: 0em;"></span><span class="mord mathdefault">x</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 0.947438em; vertical-align: -0.08333em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right: 0.07153em;">K</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height: 0.864108em;"><span class="" style="top: -3.113em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 0.65972em; vertical-align: -0.19444em;"></span><span class="mord mathdefault" style="margin-right: 0.03588em;">y</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 0.864108em; vertical-align: 0em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right: 0.07153em;">K</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height: 0.864108em;"><span class="" style="top: -3.113em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span></span></span></span></span></span></span></span></span></span></li>
+<li>对应的代码实现如下：</li>
+</ul>
+<pre><code class="prism language-cpp"><span class="token keyword">int</span> <span class="token class-name">BFSState</span><span class="token operator">::</span><span class="token function">getStateKey</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">const</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token punctuation">(</span>p<span class="token punctuation">.</span>x <span class="token operator">*</span> K<span class="token punctuation">)</span> <span class="token operator">+</span> p<span class="token punctuation">.</span>y<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<ul>
+<li>2）位运算优化：如果找到一个 K 是 2 的幂，我们就可以采用位或和左移来优化这里的乘法了，例如：<span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>K</mi><mo>=</mo><msup><mn>2</mn><mn>6</mn></msup></mrow><annotation encoding="application/x-tex">K=2^6</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathdefault" style="margin-right: 0.07153em;">K</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.814108em; vertical-align: 0em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height: 0.814108em;"><span class="" style="top: -3.063em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">6</span></span></span></span></span></span></span></span></span></span></span></span>，则：<span class="katex--display"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>s</mi><mi>t</mi><mi>a</mi><mi>t</mi><mi>e</mi><mo>=</mo><mi>x</mi><mo>&lt;</mo><mo>&lt;</mo><mn>6</mn><mi mathvariant="normal">∣</mi><mi>y</mi></mrow><annotation encoding="application/x-tex">state = x &lt;&lt; 6 | y</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.61508em; vertical-align: 0em;"></span><span class="mord mathdefault">s</span><span class="mord mathdefault">t</span><span class="mord mathdefault">a</span><span class="mord mathdefault">t</span><span class="mord mathdefault">e</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.5782em; vertical-align: -0.0391em;"></span><span class="mord mathdefault">x</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">&lt;</span></span><span class="base"><span class="strut" style="height: 0.5782em; vertical-align: -0.0391em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord">6</span><span class="mord">∣</span><span class="mord mathdefault" style="margin-right: 0.03588em;">y</span></span></span></span></span></span></li>
+<li>对应的代码实现如下：</li>
+</ul>
+<pre><code class="prism language-cpp"><span class="token keyword">int</span> <span class="token class-name">BFSState</span><span class="token operator">::</span><span class="token function">getStateKey</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">const</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> p<span class="token punctuation">.</span>x <span class="token operator">&lt;&lt;</span> <span class="token number">6</span> <span class="token operator">|</span> p<span class="token punctuation">.</span>y<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<ul>
+<li>即 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>y</mi></mrow><annotation encoding="application/x-tex">y</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.625em; vertical-align: -0.19444em;"></span><span class="mord mathdefault" style="margin-right: 0.03588em;">y</span></span></span></span></span> 占了二进制的低 6 位，<span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>x</mi></mrow><annotation encoding="application/x-tex">x</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathdefault">x</span></span></span></span></span> 占了二进制的高 6 位。</li>
+<li>3）映射预处理：当然还可以通过预处理的方式预先将所有的状态预先进行一一映射，如下代码代表的是将<code>pos2State</code>这个全局数组代表的二维状态转换成一维状态：</li>
+</ul>
+<pre><code class="prism language-cpp"><span class="token keyword">int</span> stateId <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> K<span class="token punctuation">;</span> <span class="token operator">++</span>i<span class="token punctuation">)</span>
+    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> j <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> j <span class="token operator">&lt;</span> K<span class="token punctuation">;</span> j<span class="token operator">++</span><span class="token punctuation">)</span>
+            pos2State<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">[</span>j<span class="token punctuation">]</span> <span class="token operator">=</span> stateId<span class="token operator">++</span><span class="token punctuation">;</span>
+</code></pre>
+<ul>
+<li>对应的代码实现如下：</li>
+</ul>
+<pre><code class="prism language-cpp"><span class="token keyword">int</span> <span class="token class-name">BFSState</span><span class="token operator">::</span><span class="token function">getStateKey</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">const</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> pos2State<span class="token punctuation">[</span>p<span class="token punctuation">.</span>x<span class="token punctuation">]</span><span class="token punctuation">[</span>p<span class="token punctuation">.</span>y<span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<ul>
+<li>效率上来讲：映射预处理 &gt; 位运算 &gt; 乘法 （ &gt; 代表优于）；</li>
+</ul>
+<h2><a id="4_295"></a>4、单向广搜的实现</h2>
+<ul>
+<li>如果对上面的状态相关的描述都已经理解了，那么单向广搜的内容基本也就清晰了，接下来我们来看下如何用队列来实现单向广搜。</li>
+</ul>
+<h3><a id="1_297"></a>1）广搜算法描述</h3>
+<blockquote>
+<p>单向广搜的算法大致可以描述如下：<br>  1）初始化所有状态的步数为无穷大，并且清空队列；<br>  2）将 <strong>起始状态</strong> 放进队列，标记 <strong>起始状态</strong> 对应步数为 0；<br>  3）如果队列不为空，弹出一个队列首元素，如果是 <strong>结束状态</strong>，则返回 <strong>结束状态</strong> 对应步数；否则根据这个状态扩展状态继续压入队列；<br>  4）如果队列为空，说明没有找到需要找的 <strong>结束状态</strong>，返回无穷大；</p>
+</blockquote>
+<h3><a id="2_300"></a>2）广搜算法框架</h3>
+<ul>
+<li>定义广搜图的接口如下：</li>
+</ul>
+<pre><code class="prism language-cpp"><span class="token keyword">class</span> <span class="token class-name">BFSGraph</span> <span class="token punctuation">{</span>
+<span class="token keyword">public</span><span class="token operator">:</span>
+    <span class="token keyword">int</span>  <span class="token function">bfs</span><span class="token punctuation">(</span>BFSState startState<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">private</span><span class="token operator">:</span>
+    <span class="token keyword">void</span> <span class="token function">bfs_extendstate</span><span class="token punctuation">(</span><span class="token keyword">const</span> BFSState<span class="token operator">&amp;</span> fromState<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">void</span> <span class="token function">bfs_initialize</span><span class="token punctuation">(</span>BFSState startState<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">private</span><span class="token operator">:</span>
+    Queue queue_<span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+<ul>
+<li>其中 <code>bfs</code>作为一个框架接口供外部调用，基本是不变的，实现如下：</li>
+</ul>
+<pre><code class="prism language-cpp"><span class="token keyword">const</span> <span class="token keyword">int</span> inf <span class="token operator">=</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+
+<span class="token keyword">int</span> <span class="token class-name">BFSGraph</span><span class="token operator">::</span><span class="token function">bfs</span><span class="token punctuation">(</span>BFSState startState<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token function">bfs_initialize</span><span class="token punctuation">(</span>startState<span class="token punctuation">)</span><span class="token punctuation">;</span>        <span class="token comment">// 1）</span>
+    <span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token operator">!</span>queue_<span class="token punctuation">.</span><span class="token function">empty</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        BFSState bs <span class="token operator">=</span> queue_<span class="token punctuation">.</span><span class="token function">pop</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>    
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>bs<span class="token punctuation">.</span><span class="token function">isFinalState</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>       <span class="token comment">// 2）</span>
+            <span class="token keyword">return</span> bs<span class="token punctuation">.</span><span class="token function">getStep</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        <span class="token function">bfs_extendstate</span><span class="token punctuation">(</span>bs<span class="token punctuation">)</span><span class="token punctuation">;</span>           <span class="token comment">// 3）</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">return</span> inf<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<ul>
+<li>1）初始化整个广搜的路径图，确保每个状态都是未访问状态；</li>
+<li>2）如果队列不为空，则不断弹出队列中的首元素，如果是结束状态则直接返回状态对应的步数；</li>
+<li>3）如果不是结束状态，对它进行状态扩展，扩展方式调用接口 <code>bfs_extendstate</code>，不同问题的扩展方式不同，下文会对不同问题的状态扩展进行讲解。</li>
+</ul>
+<h3><a id="3_333"></a>3）广搜算法初始化</h3>
+<ul>
+<li>对于广搜的初始化，调用<code>bfs_initialize(startState)</code>接口，主要做 4 件事情：</li>
+<li>1）初始化所有状态为未访问状态；</li>
+<li>2）清空队列；</li>
+<li>3）设置 初始状态 的 步数为 0；</li>
+<li>4）将 初始状态压入队列；</li>
+<li>代码实现如下：</li>
+</ul>
+<pre><code class="prism language-cpp"><span class="token keyword">const</span> <span class="token keyword">int</span> inf <span class="token operator">=</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+
+<span class="token keyword">void</span> <span class="token class-name">BFSGraph</span><span class="token operator">::</span><span class="token function">bfs_initialize</span><span class="token punctuation">(</span>BFSState startState<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token function">memset</span><span class="token punctuation">(</span>BFSState<span class="token operator">::</span>step<span class="token punctuation">,</span> inf<span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>BFSState<span class="token operator">::</span>step<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    queue_<span class="token punctuation">.</span><span class="token function">clear</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    startState<span class="token punctuation">.</span><span class="token function">setStep</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>                      
+    queue_<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span>startState<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<h3><a id="4_350"></a>4）广搜算法的状态扩展</h3>
+<ul>
+<li>广搜的状态扩展比较多样化，这里介绍一种四方向迷宫类的问题的扩展方式，如图四-4-1所示：</li>
+</ul>
+<p><img src="https://img-blog.csdnimg.cn/2021012418153267.png#pic_center" alt=""></p>
+<center>图四-4-1</center>
+<ul>
+<li>首先需要定义四个方向常量，如下：</li>
+</ul>
+<pre><code class="prism language-cpp"><span class="token keyword">const</span> <span class="token keyword">int</span> dir<span class="token punctuation">[</span>DIR_COUNT<span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">{</span>
+    <span class="token punctuation">{</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">0</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>  <span class="token comment">// 下</span>
+    <span class="token punctuation">{</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">1</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>  <span class="token comment">// 右</span>
+    <span class="token punctuation">{</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token operator">-</span><span class="token number">1</span> <span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token comment">// 左</span>
+    <span class="token punctuation">{</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">0</span> <span class="token punctuation">}</span>  <span class="token comment">// 上</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+<ul>
+<li>当前位置为 (5, 8)，除了一个不可行走的墙体 (4, 8) ，已经访问过的 (6, 8) 以外，其它两个格子是可以被访问的，那么将它们加入队列，则状态扩展完毕后，队列中的数据如图四-4-2所示：</li>
+</ul>
+<p><img src="https://img-blog.csdnimg.cn/20210124181843582.png#pic_center" alt=""></p><center>图四-4-2</center><p></p>
+<ul>
+<li>(5, 8) 是当前位置，已经弹出队列，(5, 9) 和 (5, 7) 按照枚举方向的顺序，加入队列中；</li>
+<li>对于四方向迷宫类问题的状态扩展的代码实现如下：</li>
+</ul>
+<pre><code class="prism language-cpp"><span class="token keyword">void</span> <span class="token class-name">BFSGraph</span><span class="token operator">::</span><span class="token function">bfs_extendstate</span><span class="token punctuation">(</span><span class="token keyword">const</span> BFSState<span class="token operator">&amp;</span> fromState<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">int</span> stp <span class="token operator">=</span> fromState<span class="token punctuation">.</span><span class="token function">getStep</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">;</span>            <span class="token comment">// 1）</span>
+    BFSState toState<span class="token punctuation">;</span>
+    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> DIR_COUNT<span class="token punctuation">;</span> <span class="token operator">++</span>i<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        toState<span class="token punctuation">.</span>p <span class="token operator">=</span> fromState<span class="token punctuation">.</span>p<span class="token punctuation">.</span><span class="token function">move</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span><span class="token punctuation">;</span>          <span class="token comment">// 2）</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>toState<span class="token punctuation">.</span><span class="token function">isValidState</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">||</span> toState<span class="token punctuation">.</span><span class="token function">getStep</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">!=</span> inf<span class="token punctuation">)</span> <span class="token punctuation">{</span>            
+            <span class="token keyword">continue</span><span class="token punctuation">;</span>                             <span class="token comment">// 3）</span>
+        <span class="token punctuation">}</span>
+        toState<span class="token punctuation">.</span><span class="token function">setStep</span><span class="token punctuation">(</span>stp<span class="token punctuation">)</span><span class="token punctuation">;</span>                     <span class="token comment">// 4）</span>
+        queue_<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span>toState<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<ul>
+<li>1）本文介绍的广搜都是任意两个状态之间权值相同的情况，权值不同的情况需要用到 SPFA 算法来求最短路，会在后续的章节中继续展开，所以这种问题下两个状态之间的步数为 1（即权值）。</li>
+<li>2）扩展状态的时候，从前一个状态经过某个方向走了一步，用 <code>move</code>来实现，我们可以对 <code>Pos</code>结构体进行一个扩展，如下：</li>
+</ul>
+<pre><code class="prism language-cpp"><span class="token keyword">struct</span> <span class="token class-name">Pos</span> <span class="token punctuation">{</span>
+    <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> 
+    Pos <span class="token function">move</span><span class="token punctuation">(</span><span class="token keyword">int</span> dirIndex<span class="token punctuation">)</span> <span class="token keyword">const</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> <span class="token function">Pos</span><span class="token punctuation">(</span>x <span class="token operator">+</span> dir<span class="token punctuation">[</span>dirIndex<span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">,</span> y <span class="token operator">+</span> dir<span class="token punctuation">[</span>dirIndex<span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+<ul>
+<li>其中<code>dir[][]</code>代表的是一个方向向量，用于实现<code>move</code>接口的向量相加；</li>
+<li>3）当判断到达的状态是一个非法状态（图四-4-1中的红色方块）、或者曾经已经访问过（图四-4-1中的绿色方块）的话，则不进行压队操作，继续下一个方向的扩展；</li>
+<li>4）否则，表明当前扩展状态是合法状态（图四-4-1中的白色方块），标记访问步数，将扩展的状态压入队列；</li>
+</ul>
+<h1><a id="_397"></a>五、单向广搜的应用场景</h1>
+<h2><a id="1_398"></a>1、迷宫问题</h2>
+<h3><a id="1_399"></a>1）双人迷宫</h3>
+<blockquote>
+<p>【例题2】给定一个 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>n</mi><mo>×</mo><mi>m</mi><mo stretchy="false">(</mo><mi>n</mi><mo separator="true">,</mo><mi>m</mi><mo>≤</mo><mn>20</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">n \times m (n,m \le 20)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.66666em; vertical-align: -0.08333em;"></span><span class="mord mathdefault">n</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathdefault">m</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mord mathdefault">m</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">≤</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord">2</span><span class="mord">0</span><span class="mclose">)</span></span></span></span></span> 的迷宫，有些格子是墙体不能进入，迷宫中有一个 主公 和 一位 公主，主公每次可以选择上、下、左、右四个方向进行移动，每次主公移动的同时，公主可以按照相反方向移动一格（如果没有墙体遮挡的话）。当主公和公主相邻或者进入同一个格子则算游戏结束，问至少多少步能让游戏结束。</p>
+</blockquote>
+<ul>
+<li>这个问题和【例题1】的区别就是公主变成了动态的，而且是跟随主公的脚步进行移动，所以在设计状态的时候需要考虑公主的状态。所有动态的对象都应该被设计到状态里，所以这个问题的状态就是 主公 和 公主 两个人的位置。</li>
+<li>设计状态如下：</li>
+</ul>
+<pre><code class="prism language-cpp"><span class="token keyword">struct</span> <span class="token class-name">BFSState</span> <span class="token punctuation">{</span>
+    Pos p<span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+<ul>
+<li>其中 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>p</mi><mo stretchy="false">[</mo><mn>0</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">p[0]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathdefault">p</span><span class="mopen">[</span><span class="mord">0</span><span class="mclose">]</span></span></span></span></span> 代表主公的位置，<span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>p</mi><mo stretchy="false">[</mo><mn>1</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">p[1]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathdefault">p</span><span class="mopen">[</span><span class="mord">1</span><span class="mclose">]</span></span></span></span></span> 代表公主的位置。结束状态是两个人坐标的曼哈顿距离小于等于 1，即：</li>
+</ul>
+<pre><code class="prism language-cpp"><span class="token keyword">bool</span> <span class="token class-name">BFSState</span><span class="token operator">::</span><span class="token function">isFinalState</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token function">abs</span><span class="token punctuation">(</span>p<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">.</span>x <span class="token operator">-</span> p<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">.</span>x<span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token function">abs</span><span class="token punctuation">(</span>p<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">.</span>y <span class="token operator">-</span> p<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">.</span>y<span class="token punctuation">)</span> <span class="token operator">&lt;=</span> <span class="token number">1</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<ul>
+<li>然后只需要枚举主公的四方向进行广搜就行了。</li>
+</ul>
+<h3><a id="2_418"></a>2）推箱子</h3>
+<blockquote>
+<p>【例题3】给定一个 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>n</mi><mo>×</mo><mi>m</mi><mo stretchy="false">(</mo><mi>n</mi><mo separator="true">,</mo><mi>m</mi><mo>≤</mo><mn>8</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">n \times m (n,m \le 8)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.66666em; vertical-align: -0.08333em;"></span><span class="mord mathdefault">n</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathdefault">m</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mord mathdefault">m</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">≤</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord">8</span><span class="mclose">)</span></span></span></span></span> 的迷宫，上面有 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>x</mi><mo stretchy="false">(</mo><mi>x</mi><mo>≤</mo><mn>4</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">x(x \le 4)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathdefault">x</span><span class="mopen">(</span><span class="mord mathdefault">x</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">≤</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord">4</span><span class="mclose">)</span></span></span></span></span> 个箱子 和 1个人，以及一些障碍和箱子需要放置的最终位置，求一种方案，用最少步数将所有的箱子推到指定位置。<img src="https://img-blog.csdnimg.cn/20210124184954947.png#pic_center" alt=""></p><center>图五-1-1</center><p></p>
+</blockquote>
+<ul>
+<li>图五-1-2 是我们最重要实现的效果：<br>
+<img src="https://img-blog.csdnimg.cn/20210124185528433.gif#pic_center" alt=""><center>图五-1-2</center></li>
+<li>算法的焦点一定在这个 “小人” 身上，但是光用 “小人” 的位置来表示状态肯定是不够的；</li>
+<li>如图五-1-3所示，两个地图关卡的小人的位置是相同的，但是不能作为同一种情况来考虑，因为箱子的位置不同，所以最终状态表示也不同。根据【例题2】的经验，所有动态的对象都应该被设计到状态里。<br>
+<img src="https://img-blog.csdnimg.cn/20201222183552600.PNG#pic_center" alt="在这里插入图片描述"><center>图五-1-3</center></li>
+<li>所以应该拿 小人 和 四个箱子 的位置来作为状态，设计如下：</li>
+</ul>
+<pre><code class="prism language-cpp"><span class="token keyword">struct</span> <span class="token class-name">BFSState</span> <span class="token punctuation">{</span>
+    Pos man<span class="token punctuation">,</span> box<span class="token punctuation">[</span><span class="token number">4</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+<ul>
+<li>然后针对这个问题需要考虑几个点：</li>
+<li>1）状态数太大：每个坐标的最大值为7，需要用 8 进制表示状态，总共 10 位，即 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><msup><mn>8</mn><mn>10</mn></msup><mo>=</mo><mn>1073741824</mn></mrow><annotation encoding="application/x-tex">8^{10} = 1073741824</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.814108em; vertical-align: 0em;"></span><span class="mord"><span class="mord">8</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height: 0.814108em;"><span class="" style="top: -3.063em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">1</span><span class="mord mtight">0</span></span></span></span></span></span></span></span></span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">1</span><span class="mord">0</span><span class="mord">7</span><span class="mord">3</span><span class="mord">7</span><span class="mord">4</span><span class="mord">1</span><span class="mord">8</span><span class="mord">2</span><span class="mord">4</span></span></span></span></span>。</li>
+<li>2）箱子的无差别性：由于四个箱子被认为是一样的，所以对于两组箱子的状态，位置重排后一一对应的应该被认为是同样的状态，例如： <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">[</mo><mo stretchy="false">(</mo><mn>1</mn><mo separator="true">,</mo><mn>1</mn><mo stretchy="false">)</mo><mo separator="true">,</mo><mo stretchy="false">(</mo><mn>1</mn><mo separator="true">,</mo><mn>2</mn><mo stretchy="false">)</mo><mo separator="true">,</mo><mo stretchy="false">(</mo><mn>2</mn><mo separator="true">,</mo><mn>4</mn><mo stretchy="false">)</mo><mo separator="true">,</mo><mo stretchy="false">(</mo><mn>4</mn><mo separator="true">,</mo><mn>5</mn><mo stretchy="false">)</mo><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[(1,1), (1,2), (2,4), (4,5)]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">[</span><span class="mopen">(</span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mord">1</span><span class="mclose">)</span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mord">2</span><span class="mclose">)</span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mopen">(</span><span class="mord">2</span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mord">4</span><span class="mclose">)</span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mopen">(</span><span class="mord">4</span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mord">5</span><span class="mclose">)</span><span class="mclose">]</span></span></span></span></span> 和 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">[</mo><mo stretchy="false">(</mo><mn>4</mn><mo separator="true">,</mo><mn>5</mn><mo stretchy="false">)</mo><mo separator="true">,</mo><mo stretchy="false">(</mo><mn>1</mn><mo separator="true">,</mo><mn>1</mn><mo stretchy="false">)</mo><mo separator="true">,</mo><mo stretchy="false">(</mo><mn>1</mn><mo separator="true">,</mo><mn>2</mn><mo stretchy="false">)</mo><mo separator="true">,</mo><mo stretchy="false">(</mo><mn>2</mn><mo separator="true">,</mo><mn>4</mn><mo stretchy="false">)</mo><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[(4,5), (1,1), (1,2), (2,4)]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">[</span><span class="mopen">(</span><span class="mord">4</span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mord">5</span><span class="mclose">)</span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mord">1</span><span class="mclose">)</span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mord">2</span><span class="mclose">)</span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mopen">(</span><span class="mord">2</span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mord">4</span><span class="mclose">)</span><span class="mclose">]</span></span></span></span></span> 是同一个状态。</li>
+<li>3）非法状态：所有墙体的位置都应该被计算为非法状态。</li>
+<li>基于以上三点，我们可以对状态进行压缩，减少状态空间，首先用 小人 做一次连通性搜索，标记所有能够到达的点，然后进行编号，如图五-1-4所示：<br>
+<img src="https://img-blog.csdnimg.cn/img_convert/1ab70cc888d5f5f623c4370324934643.png#pic_center" alt=""><center>图五-1-4</center></li>
+<li>这样一来每个坐标只需要用一个 小于 24 的数来表示，也就是 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mn>2</mn><msup><mn>4</mn><mn>5</mn></msup><mo>=</mo><mn>7962624</mn></mrow><annotation encoding="application/x-tex">24^5 = 7962624</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.814108em; vertical-align: 0em;"></span><span class="mord">2</span><span class="mord"><span class="mord">4</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height: 0.814108em;"><span class="" style="top: -3.063em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">5</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">7</span><span class="mord">9</span><span class="mord">6</span><span class="mord">2</span><span class="mord">6</span><span class="mord">2</span><span class="mord">4</span></span></span></span></span>，即最大的状态编号。</li>
+<li>然而实际上，基于四个箱子的无差异性，这是一个组合问题，不是排列问题，并且由于箱子和人都不能重叠，对于这个关卡来说，23 个空位置，选出 4 个位置放箱子，再从 19 个位置选择 1 个放小人，所以总的状态数是：<br>
+<span class="katex--display"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><msubsup><mi>C</mi><mn>23</mn><mn>4</mn></msubsup><msubsup><mi>C</mi><mn>19</mn><mn>1</mn></msubsup><mo>=</mo><mn>4037880</mn></mrow><annotation encoding="application/x-tex">C_{23}^4C_{19}^1 = 4037880</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1.11111em; vertical-align: -0.247em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right: 0.07153em;">C</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 0.864108em;"><span class="" style="top: -2.453em; margin-left: -0.07153em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">2</span><span class="mord mtight">3</span></span></span></span><span class="" style="top: -3.113em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">4</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 0.247em;"><span class=""></span></span></span></span></span></span><span class="mord"><span class="mord mathdefault" style="margin-right: 0.07153em;">C</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 0.864108em;"><span class="" style="top: -2.453em; margin-left: -0.07153em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">1</span><span class="mord mtight">9</span></span></span></span><span class="" style="top: -3.113em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 0.247em;"><span class=""></span></span></span></span></span></span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">4</span><span class="mord">0</span><span class="mord">3</span><span class="mord">7</span><span class="mord">8</span><span class="mord">8</span><span class="mord">0</span></span></span></span></span></span></li>
+<li>由于实际状态数会明显少很多（比如当某个箱子被推到墙角以后就无法再扩展状态），所以对于得到的状态编号我们可以进行一层散列哈希，用一个更小的数组来进行标记节省内存。</li>
+<li>最后，结束状态 就是 所有箱子都到指定位置，当然，这个问题中结束状态有多个，因为箱子虽然归位了，小人的位置是可以任意选择的。</li>
+</ul>
+<h3><a id="3_444"></a>3）右转迷宫</h3>
+<blockquote>
+<p>【例题4】给定一个 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>n</mi><mo>×</mo><mi>m</mi><mo stretchy="false">(</mo><mi>n</mi><mo separator="true">,</mo><mi>m</mi><mo>≤</mo><mn>500</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">n \times m (n,m \le 500)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.66666em; vertical-align: -0.08333em;"></span><span class="mord mathdefault">n</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathdefault">m</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mord mathdefault">m</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">≤</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord">5</span><span class="mord">0</span><span class="mord">0</span><span class="mclose">)</span></span></span></span></span> 的迷宫，一个入口一个出口。走迷宫的规则是优先选择右边的方向走，如果右边有墙就往前走，如果还有墙就往左，如果还有就掉头，问从入口到出口，以及出口到入口，能否将整个迷宫的区域走遍。如图5就是一种可行方案。<img src="https://img-blog.csdnimg.cn/img_convert/0ac38a42026e5e8492ae3c8418f2ea73.png#pic_center" alt="在这里插入图片描述"></p><center>图五-1-5</center><p></p>
+</blockquote>
+<ul>
+<li>这个问题的动态对象只有一个，但是光用一个人的位置来表示状态肯定是不够，考虑 图五-1-6 的这种情况：<br>
+<img src="https://img-blog.csdnimg.cn/20210125063759612.gif#pic_center" alt=""><center>图五-1-6</center></li>
+<li>如果只用位置来标记状态，那么遇到一个三面都是墙的位置就要回头，但是回头的时候发现状态已经被标记过了，所以就不会继续扩展状态，导致搜索提前结束。</li>
+<li>那么这里的改善方式就是在状态中加入一个方向的维度，即：</li>
+</ul>
+<pre><code class="prism language-cpp"><span class="token keyword">struct</span> <span class="token class-name">BFSState</span> <span class="token punctuation">{</span>
+    Pos p<span class="token punctuation">;</span>
+    <span class="token keyword">char</span> dir<span class="token punctuation">;</span>
+    <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+<ul>
+<li>这样一来，对于同一个格子的 前进 和 回头 就不是同一个状态了。</li>
+</ul>
+<h3><a id="4_462"></a>4）收集物品</h3>
+<blockquote>
+<p>【例题5】给定一个 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>n</mi><mo>×</mo><mi>m</mi><mo stretchy="false">(</mo><mi>n</mi><mo separator="true">,</mo><mi>m</mi><mo>≤</mo><mn>20</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">n \times m (n,m \le 20)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.66666em; vertical-align: -0.08333em;"></span><span class="mord mathdefault">n</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathdefault">m</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mord mathdefault">m</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">≤</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord">2</span><span class="mord">0</span><span class="mclose">)</span></span></span></span></span> 的迷宫，一个入口一个出口。并且有 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>x</mi><mo stretchy="false">(</mo><mi>x</mi><mo>≤</mo><mn>10</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">x( x \le 10 )</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathdefault">x</span><span class="mopen">(</span><span class="mord mathdefault">x</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">≤</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord">1</span><span class="mord">0</span><span class="mclose">)</span></span></span></span></span> 个金币，问从入口到出口并且收集到所有 x 的最少时间。<img src="https://img-blog.csdnimg.cn/2021012507081652.gif#pic_center" alt=""></p><center>图五-1-7</center><p></p>
+</blockquote>
+<ul>
+<li>在每个位置上，没有拿到金币和拿到金币的状态是不一样的（从图五-1-7中可以看出，黄色、金黄色、橙色 的三种路径分别表示没有取得金币，取得一个金币，取得两个金币的情况）。那么将所有金币组合一下，总共有 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><msup><mn>2</mn><mi>x</mi></msup></mrow><annotation encoding="application/x-tex">2^{x}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.664392em; vertical-align: 0em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height: 0.664392em;"><span class="" style="top: -3.063em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathdefault mtight">x</span></span></span></span></span></span></span></span></span></span></span></span></span> 种状态，所以状态就是坐标和金币的组合态，即：</li>
+</ul>
+<pre><code class="prism language-cpp"><span class="token keyword">struct</span> <span class="token class-name">BFSState</span> <span class="token punctuation">{</span>
+    Pos p<span class="token punctuation">;</span>
+    <span class="token keyword">int</span> coinMask<span class="token punctuation">;</span>
+    <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+<ul>
+<li>其中 coinMask 是一个二进制数，它的第 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>k</mi><mo stretchy="false">(</mo><mn>0</mn><mo>≤</mo><mi>k</mi><mo>&lt;</mo><mi>x</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">k(0 \le k &lt; x)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathdefault" style="margin-right: 0.03148em;">k</span><span class="mopen">(</span><span class="mord">0</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">≤</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.73354em; vertical-align: -0.0391em;"></span><span class="mord mathdefault" style="margin-right: 0.03148em;">k</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathdefault">x</span><span class="mclose">)</span></span></span></span></span> 位 代表第 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>k</mi></mrow><annotation encoding="application/x-tex">k</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.69444em; vertical-align: 0em;"></span><span class="mord mathdefault" style="margin-right: 0.03148em;">k</span></span></span></span></span> 个金币有没有获得，那么结束状态就是坐标等于出口，并且 coinMask 为 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><msup><mn>2</mn><mi>x</mi></msup><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">2^x-1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.747722em; vertical-align: -0.08333em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height: 0.664392em;"><span class="" style="top: -3.063em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">x</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">1</span></span></span></span></span>。</li>
+</ul>
+<h3><a id="5_474"></a>5）贪吃蛇</h3>
+<blockquote>
+<p>【例题6】一个 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>n</mi><mo>×</mo><mi>m</mi><mo stretchy="false">(</mo><mi>n</mi><mo separator="true">,</mo><mi>m</mi><mo>≤</mo><mn>20</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">n \times m (n,m \le 20)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.66666em; vertical-align: -0.08333em;"></span><span class="mord mathdefault">n</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathdefault">m</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mord mathdefault">m</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">≤</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord">2</span><span class="mord">0</span><span class="mclose">)</span></span></span></span></span> 的迷宫，左上角 (0, 0) 为出口，一条蛇在迷宫中，蛇的身体长度为 L，最多占用 8 个格子，有上下左右四个方向可以走，蛇走的时候不能碰到自己的身体，问最少需要多少步才能走到出口。<br>
+<img src="https://img-blog.csdnimg.cn/20210125072725303.png#pic_center" alt=""></p><center>图五-1-8</center><p></p>
+</blockquote>
+<ul>
+<li>首先蛇的身体长度为 8，也就是如果把所有身体占用的格子作为状态，就是 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mn>40</mn><msup><mn>0</mn><mn>8</mn></msup></mrow><annotation encoding="application/x-tex">400^8</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.814108em; vertical-align: 0em;"></span><span class="mord">4</span><span class="mord">0</span><span class="mord"><span class="mord">0</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height: 0.814108em;"><span class="" style="top: -3.063em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">8</span></span></span></span></span></span></span></span></span></span></span></span>，这样就很恐怖了。</li>
+<li>但是仔细分析一下，因为身体是连在一起的，所以只要头部确定，第二节身体格子的方向最多4种，后面每个身体格子的方向最多3种，所以总的状态数是 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mn>20</mn><mo>∗</mo><mn>20</mn><mo>∗</mo><mn>4</mn><mo>∗</mo><msup><mn>3</mn><mn>6</mn></msup><mo>=</mo><mn>1166400</mn></mrow><annotation encoding="application/x-tex">20 * 20 * 4 * 3^6 = 1166400</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">2</span><span class="mord">0</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">2</span><span class="mord">0</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">4</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 0.814108em; vertical-align: 0em;"></span><span class="mord"><span class="mord">3</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height: 0.814108em;"><span class="" style="top: -3.063em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">6</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">1</span><span class="mord">1</span><span class="mord">6</span><span class="mord">6</span><span class="mord">4</span><span class="mord">0</span><span class="mord">0</span></span></span></span></span>，状态表示如下：</li>
+</ul>
+<pre><code class="prism language-cpp"><span class="token keyword">struct</span> <span class="token class-name">BFSState</span> <span class="token punctuation">{</span>
+    Pos p<span class="token punctuation">;</span>
+    <span class="token keyword">int</span> dir<span class="token punctuation">[</span><span class="token number">7</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+<ul>
+<li>由于方向数目为四个，所以我们可以把每个身体的方向用一个四进制的数来表示，<span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><msup><mn>4</mn><mn>7</mn></msup><mo>=</mo><msup><mn>2</mn><mn>14</mn></msup></mrow><annotation encoding="application/x-tex">4^7 = 2^{14}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.814108em; vertical-align: 0em;"></span><span class="mord"><span class="mord">4</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height: 0.814108em;"><span class="" style="top: -3.063em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">7</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.814108em; vertical-align: 0em;"></span><span class="mord"><span class="mord">2</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height: 0.814108em;"><span class="" style="top: -3.063em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">1</span><span class="mord mtight">4</span></span></span></span></span></span></span></span></span></span></span></span></span> 在 32 位整数范围内，所以状态表示可以变成：</li>
+</ul>
+<pre><code class="prism language-cpp"><span class="token keyword">struct</span> <span class="token class-name">BFSState</span> <span class="token punctuation">{</span>
+    Pos p<span class="token punctuation">;</span>
+    <span class="token keyword">int</span> dirMask<span class="token punctuation">;</span>
+    <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+<ul>
+<li>和金币问题类似，采用二进制进行位压缩；</li>
+</ul>
+<h2><a id="2_496"></a>2、同余搜索</h2>
+<blockquote>
+<p>【例题7】给定一个不能被 2 或 5 整除的数 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>n</mi><mo stretchy="false">(</mo><mn>0</mn><mo>≤</mo><mi>n</mi><mo>≤</mo><mn>10000</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">n (0 \le n \le 10000)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathdefault">n</span><span class="mopen">(</span><span class="mord">0</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">≤</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.77194em; vertical-align: -0.13597em;"></span><span class="mord mathdefault">n</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">≤</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord">1</span><span class="mord">0</span><span class="mord">0</span><span class="mord">0</span><span class="mord">0</span><span class="mclose">)</span></span></span></span></span>，求一个十进制表示都是 1 的数 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>K</mi></mrow><annotation encoding="application/x-tex">K</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathdefault" style="margin-right: 0.07153em;">K</span></span></span></span></span> ，使得 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>K</mi></mrow><annotation encoding="application/x-tex">K</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathdefault" style="margin-right: 0.07153em;">K</span></span></span></span></span> 是 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathdefault">n</span></span></span></span></span> 的倍数，且最小。例如：<span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>n</mi><mo>=</mo><mn>3</mn></mrow><annotation encoding="application/x-tex">n = 3</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathdefault">n</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">3</span></span></span></span></span>，那么答案就是 111，因为 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mn>111</mn><mtext>&nbsp;</mtext><mi>m</mi><mi>o</mi><mi>d</mi><mtext>&nbsp;</mtext><mn>3</mn><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">111 \ mod \ 3 = 0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.69444em; vertical-align: 0em;"></span><span class="mord">1</span><span class="mord">1</span><span class="mord">1</span><span class="mspace">&nbsp;</span><span class="mord mathdefault">m</span><span class="mord mathdefault">o</span><span class="mord mathdefault">d</span><span class="mspace">&nbsp;</span><span class="mord">3</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">0</span></span></span></span></span>。</p>
+</blockquote>
+<ul>
+<li>模拟 1 个 1，2 个 1, 3 个 1 … 不断对 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathdefault">n</span></span></span></span></span> 取余数，根据初等数论的知识，我们令 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>a</mi><mo stretchy="false">[</mo><mi>i</mi><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">a[i]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathdefault">a</span><span class="mopen">[</span><span class="mord mathdefault">i</span><span class="mclose">]</span></span></span></span></span> 表示 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.65952em; vertical-align: 0em;"></span><span class="mord mathdefault">i</span></span></span></span></span> 个 1 对 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>n</mi></mrow><annotation encoding="application/x-tex">n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathdefault">n</span></span></span></span></span> 取余数的值，则有：<span class="katex--display"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>a</mi><mo stretchy="false">[</mo><mi>i</mi><mo stretchy="false">]</mo><mo>=</mo><mo stretchy="false">(</mo><mi>a</mi><mo stretchy="false">[</mo><mi>i</mi><mo>−</mo><mn>1</mn><mo stretchy="false">]</mo><mo>∗</mo><mn>10</mn><mo>+</mo><mn>1</mn><mo stretchy="false">)</mo><mtext>&nbsp;</mtext><mi>m</mi><mi>o</mi><mi>d</mi><mtext>&nbsp;</mtext><mi>n</mi></mrow><annotation encoding="application/x-tex">a[i] = (a[i-1] * 10 + 1) \ mod \ n</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathdefault">a</span><span class="mopen">[</span><span class="mord mathdefault">i</span><span class="mclose">]</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord mathdefault">a</span><span class="mopen">[</span><span class="mord mathdefault">i</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord">1</span><span class="mclose">]</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 0.72777em; vertical-align: -0.08333em;"></span><span class="mord">1</span><span class="mord">0</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord">1</span><span class="mclose">)</span><span class="mspace">&nbsp;</span><span class="mord mathdefault">m</span><span class="mord mathdefault">o</span><span class="mord mathdefault">d</span><span class="mspace">&nbsp;</span><span class="mord mathdefault">n</span></span></span></span></span></span></li>
+<li>那么当某个 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>a</mi><mo stretchy="false">[</mo><mi>i</mi><mo>−</mo><mn>1</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">a[i-1]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathdefault">a</span><span class="mopen">[</span><span class="mord mathdefault">i</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord">1</span><span class="mclose">]</span></span></span></span></span> 出现过了，后面的 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>a</mi><mo stretchy="false">[</mo><mi>i</mi><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">a[i]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathdefault">a</span><span class="mopen">[</span><span class="mord mathdefault">i</span><span class="mclose">]</span></span></span></span></span> 势必也会重复，所以我们可以拿 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>a</mi><mo stretchy="false">[</mo><mi>i</mi><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">a[i]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathdefault">a</span><span class="mopen">[</span><span class="mord mathdefault">i</span><span class="mclose">]</span></span></span></span></span> 作为状态，结束状态就是找到 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>a</mi><mo stretchy="false">[</mo><mi mathvariant="normal">.</mi><mi mathvariant="normal">.</mi><mi mathvariant="normal">.</mi><mo stretchy="false">]</mo><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">a[...] = 0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathdefault">a</span><span class="mopen">[</span><span class="mord">.</span><span class="mord">.</span><span class="mord">.</span><span class="mclose">]</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">0</span></span></span></span></span>， 这样最多进行 10000 次枚举就能找到满足条件的状态。</li>
+</ul>
+<h2><a id="3_501"></a>3、预处理</h2>
+<ul>
+<li>这里介绍的是一种思想，适用于数据量很大的问题。</li>
+<li>对于一些 结束状态 永远是固定的，而 初始状态 不同，并且询问很多 的问题，那么我们可以从 结束状态 开始搜索，并且将到达的所有状态都一次性搜索出来，那么，每次询问的时候只需要查询状态步数即可，总时间复杂度就是预处理的时间，查询时间复杂度 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathdefault" style="margin-right: 0.02778em;">O</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span>。</li>
+</ul>
+<hr>
+<ul>
+<li>关于 <font color="red"><b>单向广搜</b></font> 的内容到这里就结束了。</li>
+<li>如果还有不懂的问题，可以 <font color="red"><b>想方设法</b></font> 找到作者的微信进行在线咨询。</li>
+</ul>
+<hr>
+<ul>
+<li>本文所有示例代码均可在以下 github 上找到：<a href="https://github.com/WhereIsHeroFrom/Code_Templates/tree/master/%E5%9B%BE%E8%AE%BA/%E5%B9%BF%E5%BA%A6%E4%BC%98%E5%85%88%E6%90%9C%E7%B4%A2">github.com/WhereIsHeroFrom/模板/广度优先搜索</a></li>
+</ul>
+<hr>
+<p><img src="https://img-blog.csdnimg.cn/20210105190605774.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1doZXJlSXNIZXJvRnJvbQ==,size_16,color_FFFFFF,t_70" alt=""></p>
+<hr>
+<h1><a id="_517"></a>六、单向广搜题集整理</h1>
+
+<table>
+<thead>
+<tr>
+<th>题目链接</th>
+<th>难度</th>
+<th>解法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="http://poj.org/problem?id=1096">PKU 1096 Space Station Shielding</a></td>
+<td>★☆☆☆☆</td>
+<td>FloodFill</td>
+</tr>
+<tr>
+<td><a href="http://acm.hdu.edu.cn/showproblem.php?pid=2952">HDU 2952 Counting Sheep</a></td>
+<td>★☆☆☆☆</td>
+<td>FloodFill</td>
+</tr>
+<tr>
+<td><a href="http://acm.hdu.edu.cn/showproblem.php?pid=1026">HDU 1026 Ignatius and the Princess I</a></td>
+<td>★☆☆☆☆</td>
+<td>优先队列应用</td>
+</tr>
+<tr>
+<td><a href="http://acm.hdu.edu.cn/showproblem.php?pid=1072">HDU 1072 Nightmare</a></td>
+<td>★☆☆☆☆</td>
+<td>记录时间维度</td>
+</tr>
+<tr>
+<td><a href="http://acm.hdu.edu.cn/showproblem.php?pid=1240">HDU 1240 Asteroids!</a></td>
+<td>★☆☆☆☆</td>
+<td>【例题1】三维迷宫</td>
+</tr>
+<tr>
+<td><a href="http://acm.hdu.edu.cn/showproblem.php?pid=1415">HDU 1415 Jugs</a></td>
+<td>★☆☆☆☆</td>
+<td>经典广搜 - 倒水问题</td>
+</tr>
+<tr>
+<td><a href="http://acm.hdu.edu.cn/showproblem.php?pid=1495">HDU 1495 非常可乐</a></td>
+<td>★☆☆☆☆</td>
+<td>经典广搜 - 倒水问题</td>
+</tr>
+<tr>
+<td><a href="http://acm.hdu.edu.cn/showproblem.php?pid=1195">HDU 1195 Open the Lock</a></td>
+<td>★☆☆☆☆</td>
+<td>一维的数码可达问题</td>
+</tr>
+<tr>
+<td><a href="http://poj.org/problem?id=1915">PKU 1915 Knight Moves</a></td>
+<td>★★☆☆☆</td>
+<td>马的走位</td>
+</tr>
+<tr>
+<td><a href="http://acm.hdu.edu.cn/showproblem.php?pid=1372">HDU 1372 Knight Moves</a></td>
+<td>★★☆☆☆</td>
+<td>马的走位</td>
+</tr>
+<tr>
+<td><a href="http://acm.hdu.edu.cn/showproblem.php?pid=2235">HDU 2235 机器人的容器</a></td>
+<td>★★☆☆☆</td>
+<td>FloodFill</td>
+</tr>
+<tr>
+<td><a href="http://acm.hdu.edu.cn/showproblem.php?pid=3713">HDU 3713 Double Maze</a></td>
+<td>★★☆☆☆</td>
+<td>2个人的迷宫问题</td>
+</tr>
+<tr>
+<td><a href="http://acm.hdu.edu.cn/showproblem.php?pid=2216">HDU 2216 Game III</a></td>
+<td>★★☆☆☆</td>
+<td>【例题2】2个人的迷宫问题</td>
+</tr>
+<tr>
+<td><a href="http://acm.hdu.edu.cn/showproblem.php?pid=3309">HDU 3309 Roll The Cube</a></td>
+<td>★★☆☆☆</td>
+<td>2个人的迷宫问题</td>
+</tr>
+<tr>
+<td><a href="http://acm.hdu.edu.cn/showproblem.php?pid=1254">HDU 1254 推箱子</a></td>
+<td>★★☆☆☆</td>
+<td>【例题3】推箱子问题</td>
+</tr>
+<tr>
+<td><a href="http://poj.org/problem?id=1475">PKU 1475 Pushing Boxes</a></td>
+<td>★★☆☆☆</td>
+<td>【例题3】推箱子问题</td>
+</tr>
+<tr>
+<td><a href="http://acm.hdu.edu.cn/showproblem.php?pid=1253">HDU 1253 胜利大逃亡</a></td>
+<td>★★☆☆☆</td>
+<td>三维迷宫</td>
+</tr>
+<tr>
+<td><a href="http://acm.hdu.edu.cn/showproblem.php?pid=1252">HDU 1252 Hike on a Graph</a></td>
+<td>★★☆☆☆</td>
+<td>3个人的迷宫问题</td>
+</tr>
+<tr>
+<td><a href="http://acm.hdu.edu.cn/showproblem.php?pid=1044">HDU 1044 Collect More Jewels</a></td>
+<td>★★☆☆☆</td>
+<td>【例题5】二进制状态压缩的应用</td>
+</tr>
+<tr>
+<td><a href="http://poj.org/problem?id=2157">PKU 2157 Maze</a></td>
+<td>★★☆☆☆</td>
+<td>二进制状态压缩的应用</td>
+</tr>
+<tr>
+<td><a href="http://acm.hdu.edu.cn/showproblem.php?pid=3220">HDU 3220 Alice’s Cube</a></td>
+<td>★★☆☆☆</td>
+<td>预处理 + 位运算</td>
+</tr>
+<tr>
+<td><a href="http://acm.hdu.edu.cn/showproblem.php?pid=1429">HDU 1429 胜利大逃亡(续)</a></td>
+<td>★★☆☆☆</td>
+<td>二进制状态压缩的应用</td>
+</tr>
+<tr>
+<td><a href="http://poj.org/problem?id=1077">PKU 1077 Eight</a></td>
+<td>★★☆☆☆</td>
+<td>经典八数码</td>
+</tr>
+<tr>
+<td><a href="http://acm.hdu.edu.cn/showproblem.php?pid=2822">HDU 2170 Frogger</a></td>
+<td>★★☆☆☆</td>
+<td>带停留的搜索</td>
+</tr>
+<tr>
+<td><a href="http://acm.hdu.edu.cn/showproblem.php?pid=1226">HDU 1226 超级密码</a></td>
+<td>★★☆☆☆</td>
+<td>枚举位数</td>
+</tr>
+<tr>
+<td><a href="http://poj.org/problem?id=2551">PKU 2551 Ones</a></td>
+<td>★★☆☆☆</td>
+<td>同余搜索</td>
+</tr>
+<tr>
+<td><a href="http://poj.org/problem?id=1426">PKU 1426 Find The Multiple</a></td>
+<td>★★☆☆☆</td>
+<td>同余搜索</td>
+</tr>
+<tr>
+<td><a href="http://poj.org/problem?id=1860">PKU 1860 Currency Exchange</a></td>
+<td>★★☆☆☆</td>
+<td>SPFA</td>
+</tr>
+<tr>
+<td><a href="http://poj.org/problem?id=1237">PKU 1237 The Postal Worker Rings</a></td>
+<td>★★☆☆☆</td>
+<td>SPFA</td>
+</tr>
+<tr>
+<td><a href="http://poj.org/problem?id=1724">PKU 1724 ROADS</a></td>
+<td>★★☆☆☆</td>
+<td>优先队列应用</td>
+</tr>
+<tr>
+<td><a href="http://acm.hdu.edu.cn/showproblem.php?pid=2822">HDU 2822 Dogs</a></td>
+<td>★★☆☆☆</td>
+<td>优先队列应用</td>
+</tr>
+<tr>
+<td><a href="http://acm.hdu.edu.cn/showproblem.php?pid=2851">HDU 2851 Lode Runner</a></td>
+<td>★★☆☆☆</td>
+<td>优先队列应用</td>
+</tr>
+<tr>
+<td><a href="http://acm.hdu.edu.cn/showproblem.php?pid=2237">HDU 2237 无题III</a></td>
+<td>★★☆☆☆</td>
+<td>多维状态搜索</td>
+</tr>
+<tr>
+<td><a href="http://acm.hdu.edu.cn/showproblem.php?pid=3912">HDU 3912 Turn Right</a></td>
+<td>★★☆☆☆</td>
+<td>【例题4】右转迷宫 + 增加方向维度</td>
+</tr>
+<tr>
+<td><a href="http://poj.org/problem?id=2283">PKU 2283 Different Digits</a></td>
+<td>★★★☆☆</td>
+<td>同余搜索</td>
+</tr>
+<tr>
+<td><a href="http://poj.org/problem?id=2206">PKU 2206 Magic Multiplying Machine</a></td>
+<td>★★★☆☆</td>
+<td>同余搜索</td>
+</tr>
+<tr>
+<td><a href="http://acm.hdu.edu.cn/showproblem.php?pid=1104">HDU 1104 Remainder</a></td>
+<td>★★★☆☆</td>
+<td>同余搜索</td>
+</tr>
+<tr>
+<td><a href="http://poj.org/problem?id=3000">PKU 3000 Frogger</a></td>
+<td>★★★☆☆</td>
+<td>同余搜索</td>
+</tr>
+<tr>
+<td><a href="http://acm.hdu.edu.cn/showproblem.php?pid=1317">HDU 1317 XYZZY</a></td>
+<td>★★★☆☆</td>
+<td>最长路判环</td>
+</tr>
+<tr>
+<td><a href="http://acm.hdu.edu.cn/showproblem.php?pid=1384">HDU 1384 Intervals</a></td>
+<td>★★★☆☆</td>
+<td>差分约束</td>
+</tr>
+<tr>
+<td><a href="http://acm.hdu.edu.cn/showproblem.php?pid=1531">HDU 1531 King</a></td>
+<td>★★★☆☆</td>
+<td>差分约束</td>
+</tr>
+<tr>
+<td><a href="http://poj.org/problem?id=1716">PKU 1716 Integer Intervals</a></td>
+<td>★★★☆☆</td>
+<td>差分约束</td>
+</tr>
+<tr>
+<td><a href="http://poj.org/problem?id=3501">PKU 3501 Escape from Enemy Territory</a></td>
+<td>★★★☆☆</td>
+<td>二分答案 + BFS</td>
+</tr>
+<tr>
+<td><a href="http://poj.org/problem?id=1292">PKU 1292 Will Indiana Jones Get</a></td>
+<td>★★★☆☆</td>
+<td>二分答案 + BFS</td>
+</tr>
+<tr>
+<td><a href="http://poj.org/problem?id=1485">PKU 1485 Fast Food</a></td>
+<td>★★★☆☆</td>
+<td>SPFA</td>
+</tr>
+<tr>
+<td><a href="http://poj.org/problem?id=1511">PKU 1511 Invitation Cards</a></td>
+<td>★★★☆☆</td>
+<td>SPFA</td>
+</tr>
+<tr>
+<td><a href="http://poj.org/problem?id=1545">PKU 1545 Galactic Import</a></td>
+<td>★★★☆☆</td>
+<td>SPFA</td>
+</tr>
+<tr>
+<td><a href="http://poj.org/problem?id=1734">PKU 1734 Sightseeing trip</a></td>
+<td>★★★☆☆</td>
+<td>无向图最小环</td>
+</tr>
+<tr>
+<td><a href="http://poj.org/problem?id=1420">PKU 1420 Spreadsheet</a></td>
+<td>★★★☆☆</td>
+<td>建立拓扑图后广搜</td>
+</tr>
+<tr>
+<td><a href="http://poj.org/problem?id=2353">PKU 2353 Ministry</a></td>
+<td>★★★☆☆</td>
+<td>需要存路径</td>
+</tr>
+<tr>
+<td><a href="http://poj.org/problem?id=2046">PKU 2046 Gap</a></td>
+<td>★★★☆☆</td>
+<td>A*</td>
+</tr>
+<tr>
+<td><a href="http://poj.org/problem?id=1778">PKU 1778 All Discs Considered</a></td>
+<td>★★★☆☆</td>
+<td></td>
+</tr>
+<tr>
+<td><a href="http://poj.org/problem?id=1097">PKU 1097 Roads Scholar</a></td>
+<td>★★★☆☆</td>
+<td>SPFA</td>
+</tr>
+<tr>
+<td><a href="http://poj.org/problem?id=1324">PKU 1324 Holedox Moving</a></td>
+<td>★★★☆☆</td>
+<td>【例题6】状态压缩的广搜</td>
+</tr>
+<tr>
+<td><a href="http://poj.org/problem?id=1062">PKU 1062 昂贵的聘礼</a></td>
+<td>★★★☆☆</td>
+<td>优先队列应用</td>
+</tr>
+<tr>
+<td><a href="http://poj.org/problem?id=3897">PKU 3897 Maze Stretching</a></td>
+<td>★★★☆☆</td>
+<td></td>
+</tr>
+<tr>
+<td><a href="http://poj.org/problem?id=3346">PKU 3346 Treasure of the Chimp</a></td>
+<td>★★★☆☆</td>
+<td></td>
+</tr>
+<tr>
+<td><a href="http://poj.org/problem?id=2983">PKU 2983 Is the Information Reliable</a></td>
+<td>★★★☆☆</td>
+<td>最长路判环</td>
+</tr>
+<tr>
+<td><a href="http://poj.org/problem?id=1482">PKU 1482 It’s not a Bug, It’s a</a></td>
+<td>★★★☆☆</td>
+<td></td>
+</tr>
+<tr>
+<td><a href="http://acm.hdu.edu.cn/showproblem.php?pid=3008">HDU 3008 Warcraft</a></td>
+<td>★★★☆☆</td>
+<td></td>
+</tr>
+<tr>
+<td><a href="http://acm.hdu.edu.cn/showproblem.php?pid=3036">HDU 3036 Escape</a></td>
+<td>★★★☆☆</td>
+<td></td>
+</tr>
+<tr>
+<td><a href="http://poj.org/problem?id=3322">PKU 3322 Bloxorz I</a></td>
+<td>★★★☆☆</td>
+<td>当年比较流行这个游戏</td>
+</tr>
+<tr>
+<td><a href="http://acm.hdu.edu.cn/showproblem.php?pid=1043">HDU 1043 Eight</a></td>
+<td>★★★☆☆</td>
+<td>数据较强，需要预处理</td>
+</tr>
+<tr>
+<td><a href="http://acm.hdu.edu.cn/showproblem.php?pid=1307">HDU 1307 N-Credible Mazes</a></td>
+<td>★★★☆☆</td>
+<td>多维空间搜索，散列HASH</td>
+</tr>
+<tr>
+<td><a href="http://acm.hdu.edu.cn/showproblem.php?pid=3681">HDU 3681 Prison Break</a></td>
+<td>★★★☆☆</td>
+<td>状态压缩</td>
+</tr>
+<tr>
+<td><a href="http://acm.hdu.edu.cn/showproblem.php?pid=3500">HDU 3500 Fling</a></td>
+<td>★★★☆☆</td>
+<td>某个消除游戏</td>
+</tr>
+<tr>
+<td><a href="http://acm.hdu.edu.cn/showproblem.php?pid=2605">HDU 2605 Snake</a></td>
+<td>★★★★☆</td>
+<td>状态压缩</td>
+</tr>
+<tr>
+<td><a href="http://acm.hdu.edu.cn/showproblem.php?pid=1122">HDU 1122 Direct Visibility</a></td>
+<td>★★★★☆</td>
+<td>计算几何判断连通性</td>
+</tr>
+<tr>
+<td><a href="http://poj.org/problem?id=3912">PKU 3912Up and Down</a></td>
+<td>★★★★☆</td>
+<td>离散化 + BFS</td>
+</tr>
+<tr>
+<td><a href="http://poj.org/problem?id=3463">PKU 3463 Sightseeing</a></td>
+<td>★★★★☆</td>
+<td>SPFA</td>
+</tr>
+<tr>
+<td><a href="http://poj.org/problem?id=3328">PKU 3328 Cliff Climbing</a></td>
+<td>★★★★☆</td>
+<td>日本人的题就是这么长</td>
+</tr>
+<tr>
+<td><a href="http://poj.org/problem?id=3455">PKU 3455 Cheesy Chess</a></td>
+<td>★★★★☆</td>
+<td>仔细看题</td>
+</tr>
+<tr>
+<td><a href="http://poj.org/problem?id=1924">PKU 1924 The Treasure</a></td>
+<td>★★★★☆</td>
+<td></td>
+</tr>
+<tr>
+<td><a href="http://poj.org/problem?id=3702">PKU 3702 Chessman</a></td>
+<td>★★★★★</td>
+<td>弄清状态同余的概念</td>
+</tr>
+<tr>
+<td><a href="http://acm.hdu.edu.cn/showproblem.php?pid=3278">HDU 3278 Puzzle</a></td>
+<td>★★★★★</td>
+<td>几乎尝试了所有的搜索 -_-</td>
+</tr>
+<tr>
+<td><a href="http://acm.hdu.edu.cn/showproblem.php?pid=3900">HDU 3900 Unblock Me</a></td>
+<td>★★★★★</td>
+<td>8进制压缩状态，散列HASH，位运算加速</td>
+</tr>
+</tbody>
+</table></div>
+</body>
+
+</html>

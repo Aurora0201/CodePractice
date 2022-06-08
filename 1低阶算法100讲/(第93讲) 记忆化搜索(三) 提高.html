@@ -1,0 +1,134 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>《算法零基础100讲》(第93讲) 记忆化搜索(三) 提高</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__html"><p></p><div class="toc"><h3>文章目录</h3><ul><li><a href="#_3">零、写在前面</a></li><li><a href="#_8">一、概念定义</a></li><li><a href="#_12">二、题目描述</a></li><li><a href="#_19">三、算法详解</a></li><li><a href="#_34">四、源码剖析</a></li><li><a href="#_106">五、推荐专栏</a></li><li><a href="#_112">六、习题练习</a></li></ul></div><p></p>
+<h1><a id="_3"></a>零、写在前面</h1>
+<p>  这是<a href="https://blog.csdn.net/whereisherofrom/category_11426012.html">《算法零基础100讲》</a> 专栏打卡学习的第 <font color="red">93</font> 天了。如果觉得本专栏太贵无法承受，在博主主页添加博主好友，获取 <font color="red"><strong>付费专栏优惠券</strong></font>。<br>
+  每天专栏的题，做不出来没关系，因为困难的题涉及知识点较多，可能会涉及到后面的章节，所以不要着急，内容能看懂，能自己分析，能做出简单题就行。<br>
+  在刷题的过程中，总结自己遇到的坑点，写出 <strong>「 解题报告 」</strong>  供他人学习，也是一种自我学习的方式。这就是经典的帮助他人的同时，成就自己。目前， <a href="https://bbs.csdn.net/forums/hero"><strong>「 万人千题 」</strong></a> 社区 每天都会有五六篇高质量的 <strong>「 解题报告 」</strong> 被我 <strong>「 加精 」</strong>。如果觉得自己有能力的，也可以来发布你的 <strong>「 解题报告 」</strong>。千万级流量，你我共同拥有。</p>
+<h1><a id="_8"></a>一、概念定义</h1>
+<p>  对于某些不能记忆化到数组中的问题，我们还可以采用哈希表进行记忆化，类似 C++11 中的 <code>unordered_map</code>；<br>
+  最重要的是能不能把状态给一点一点的梳理出来，在你写深度优先搜索的时候，其实是一个暴力的过程，但是写完以后，把一些变量提取出来，存储到缓存中，就变成了 <strong>记忆化搜索</strong>。</p>
+<h1><a id="_12"></a>二、题目描述</h1>
+<blockquote>
+<p>  有一个甜甜圈商店，每批次都烤 <code>batchSize</code>个甜甜圈。这个店铺有个规则，就是在烤一批新的甜甜圈时，之前 所有 甜甜圈都必须已经全部销售完毕。给你一个整数 <code>batchSize</code>和一个整数数组 <code>groups</code>，数组中的每个整数都代表一批前来购买甜甜圈的顾客，其中 <code>groups[i]</code>表示这一批顾客的人数。每一位顾客都恰好只要一个甜甜圈。<br>
+  当有一批顾客来到商店时，他们所有人都必须在下一批顾客来之前购买完甜甜圈。如果一批顾客中第一位顾客得到的甜甜圈不是上一组剩下的，那么这一组人都会很开心。<br>
+  你可以随意安排每批顾客到来的顺序。请你返回在此前提下，<strong>最多有多少组人</strong> 会感到开心。其中 <code>batchSize &lt;= 9, groups &lt;= 30</code>。</p>
+</blockquote>
+<h1><a id="_19"></a>三、算法详解</h1>
+<p>  <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span> 对于这个问题，我们可以把每组人的数字模上<code>batchSize</code>，如果结果为 0，则直接放在最前面，并不影响结果；如果不为零，则就是要求一个全排列，找出排列中前缀和模<code>batchSize</code>为零的最大情况。<br>
+  <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span></span> 最容易想到的办法，就是写一个全排列，总共 30 个组，时间复杂度最坏情况下为 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mn>30</mn><mo stretchy="false">!</mo><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(30!)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathdefault" style="margin-right: 0.02778em;">O</span><span class="mopen">(</span><span class="mord">3</span><span class="mord">0</span><span class="mclose">!</span><span class="mclose">)</span></span></span></span></span>。<br>
+  <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(3)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">3</span><span class="mclose">)</span></span></span></span></span> 在枚举的过程中，我们可以对已经计算的结果进行记忆化，那记忆化的内容是什么呢？主要有以下三种数据：<br>
+    <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>3.1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(3.1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">3</span><span class="mord">.</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span> 已经枚举了多少个组，最多 30；<br>
+    <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>3.2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(3.2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">3</span><span class="mord">.</span><span class="mord">2</span><span class="mclose">)</span></span></span></span></span> 前缀和模<code>batchSize</code>的结果，最多8；<br>
+    <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>3.3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(3.3)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">3</span><span class="mord">.</span><span class="mord">3</span><span class="mclose">)</span></span></span></span></span> 还剩下的人的组合，是一个数组；<br>
+  <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>4</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(4)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">4</span><span class="mclose">)</span></span></span></span></span> 于是，我们可以用一个 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>d</mi><mi>p</mi><mo stretchy="false">[</mo><mn>31</mn><mo stretchy="false">]</mo><mo stretchy="false">[</mo><mn>9</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">dp[31][9]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathdefault">d</span><span class="mord mathdefault">p</span><span class="mopen">[</span><span class="mord">3</span><span class="mord">1</span><span class="mclose">]</span><span class="mopen">[</span><span class="mord">9</span><span class="mclose">]</span></span></span></span></span> 的哈希表来进行记忆化，也就是 C++ 中的如下定义：</p>
+<pre><code class="prism language-cpp">    <span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name">ull</span> <span class="token expression"><span class="token keyword">unsigned</span> <span class="token keyword">long</span> <span class="token keyword">long</span></span></span>
+    unordered_map<span class="token operator">&lt;</span>ull<span class="token punctuation">,</span> <span class="token keyword">int</span> <span class="token operator">&gt;</span> dp<span class="token punctuation">[</span><span class="token number">31</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token number">9</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+</code></pre>
+<p>  其中需要将<span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>3.3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(3.3)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">3</span><span class="mord">.</span><span class="mord">3</span><span class="mclose">)</span></span></span></span></span> 的数组转换成一维的数字，即用一个 <code>ull </code>来存储。<br>
+  <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>5</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(5)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">5</span><span class="mclose">)</span></span></span></span></span> 然后就是枚举全排列，并且记忆化的过程了。</p>
+<h1><a id="_34"></a>四、源码剖析</h1>
+<pre><code class="prism language-cpp"><span class="token keyword">class</span> <span class="token class-name">Solution</span> <span class="token punctuation">{</span>
+    <span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name">ull</span> <span class="token expression"><span class="token keyword">unsigned</span> <span class="token keyword">long</span> <span class="token keyword">long</span></span></span>
+    <span class="token keyword">int</span> hash<span class="token punctuation">[</span><span class="token number">10</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+    unordered_map<span class="token operator">&lt;</span>ull<span class="token punctuation">,</span> <span class="token keyword">int</span> <span class="token operator">&gt;</span> dp<span class="token punctuation">[</span><span class="token number">31</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token number">9</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+
+
+    <span class="token keyword">int</span> <span class="token function">dfs</span><span class="token punctuation">(</span><span class="token keyword">int</span> depth<span class="token punctuation">,</span> <span class="token keyword">int</span> maxDepth<span class="token punctuation">,</span> <span class="token keyword">int</span> mod<span class="token punctuation">,</span> <span class="token keyword">int</span> batchSize<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+
+        <span class="token keyword">int</span> ans <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+        <span class="token keyword">int</span> happy<span class="token punctuation">;</span>
+
+        <span class="token keyword">if</span><span class="token punctuation">(</span>depth <span class="token operator">==</span> maxDepth<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>                              <span class="token comment">// (1)</span>
+        <span class="token punctuation">}</span>
+
+        ull sum <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>                               <span class="token comment">// (2)</span>
+        <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> batchSize<span class="token punctuation">;</span> <span class="token operator">++</span>i<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            sum <span class="token operator">=</span> sum <span class="token operator">*</span> <span class="token number">31</span> <span class="token operator">+</span> hash<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span> dp<span class="token punctuation">[</span>depth<span class="token punctuation">]</span><span class="token punctuation">[</span>mod<span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">find</span><span class="token punctuation">(</span>sum<span class="token punctuation">)</span> <span class="token operator">!=</span> dp<span class="token punctuation">[</span>depth<span class="token punctuation">]</span><span class="token punctuation">[</span>mod<span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">end</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">return</span> dp<span class="token punctuation">[</span>depth<span class="token punctuation">]</span><span class="token punctuation">[</span>mod<span class="token punctuation">]</span><span class="token punctuation">[</span>sum<span class="token punctuation">]</span><span class="token punctuation">;</span>            <span class="token comment">// (3)</span>
+        <span class="token punctuation">}</span>
+        
+        <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> batchSize<span class="token punctuation">;</span> <span class="token operator">++</span>i<span class="token punctuation">)</span> <span class="token punctuation">{</span>       <span class="token comment">// (4)</span>
+            <span class="token keyword">if</span><span class="token punctuation">(</span>hash<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                <span class="token operator">--</span>hash<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span>
+                happy <span class="token operator">=</span> <span class="token function">dfs</span><span class="token punctuation">(</span>depth<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">,</span> maxDepth<span class="token punctuation">,</span> <span class="token punctuation">(</span>mod <span class="token operator">+</span> i<span class="token punctuation">)</span> <span class="token operator">%</span> batchSize<span class="token punctuation">,</span> batchSize<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token keyword">if</span><span class="token punctuation">(</span>happy <span class="token operator">&gt;</span> ans<span class="token punctuation">)</span> ans <span class="token operator">=</span> happy<span class="token punctuation">;</span>
+                <span class="token operator">++</span>hash<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+ 
+        <span class="token keyword">return</span> dp<span class="token punctuation">[</span>depth<span class="token punctuation">]</span><span class="token punctuation">[</span>mod<span class="token punctuation">]</span><span class="token punctuation">[</span>sum<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">(</span> ans <span class="token operator">+</span> <span class="token punctuation">(</span>mod <span class="token operator">==</span> <span class="token number">0</span> <span class="token operator">?</span> <span class="token number">1</span> <span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// (5)</span>
+    <span class="token punctuation">}</span>
+<span class="token keyword">public</span><span class="token operator">:</span>
+    <span class="token keyword">int</span> <span class="token function">maxHappyGroups</span><span class="token punctuation">(</span><span class="token keyword">int</span> batchSize<span class="token punctuation">,</span> vector<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">&gt;</span><span class="token operator">&amp;</span> groups<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">int</span> ans <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+        <span class="token keyword">int</span> maxCnt <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+        <span class="token keyword">int</span> i<span class="token punctuation">,</span> j<span class="token punctuation">;</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span>batchSize <span class="token operator">==</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> 
+            <span class="token keyword">return</span> groups<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">for</span><span class="token punctuation">(</span>i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> <span class="token number">31</span><span class="token punctuation">;</span> <span class="token operator">++</span>i<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">for</span><span class="token punctuation">(</span>j <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> j <span class="token operator">&lt;</span> <span class="token number">9</span><span class="token punctuation">;</span> <span class="token operator">++</span>j<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                dp<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">[</span>j<span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">clear</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+        <span class="token function">memset</span><span class="token punctuation">(</span>hash<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>hash<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> groups<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token operator">++</span>i<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            groups<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">%=</span> batchSize<span class="token punctuation">;</span>
+            <span class="token keyword">if</span><span class="token punctuation">(</span>groups<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                <span class="token operator">++</span>ans<span class="token punctuation">;</span>
+            <span class="token punctuation">}</span><span class="token keyword">else</span> <span class="token punctuation">{</span>
+                <span class="token operator">++</span> hash<span class="token punctuation">[</span> groups<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token punctuation">]</span><span class="token punctuation">;</span>
+                <span class="token operator">++</span>maxCnt<span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">return</span> <span class="token function">dfs</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> maxCnt<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> batchSize<span class="token punctuation">)</span> <span class="token operator">+</span> ans<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+</code></pre>
+<ul>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span></span> 递归出口；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">2</span><span class="mclose">)</span></span></span></span></span> 将数组哈希成一个数字；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(3)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">3</span><span class="mclose">)</span></span></span></span></span> 记忆化搜索的读取；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>4</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(4)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">4</span><span class="mclose">)</span></span></span></span></span> 暴力枚举全排列；</li>
+<li><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo stretchy="false">(</mo><mn>5</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(5)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">5</span><span class="mclose">)</span></span></span></span></span> 记忆化写入并且递归返回；</li>
+</ul>
+<h1><a id="_106"></a>五、推荐专栏</h1>
+ <center> <a href="https://blog.csdn.net/whereisherofrom/category_9273531.html"><font color="886ce4"><b>💜《<u>夜深人静写算法</u>》💜</b></font></a></center>
+  
+ <center> <a href="https://blog.csdn.net/WhereIsHeroFrom/article/details/114456990"><font color="886ce4"><b>（<u>二十六）记忆化搜索</u></b></font></a></center>
+<h1><a id="_112"></a>六、习题练习</h1>
+
+<table>
+<thead>
+<tr>
+<th>序号</th>
+<th>题目链接</th>
+<th>难度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><a href="https://leetcode-cn.com/problems/maximum-number-of-groups-getting-fresh-donuts/">LeetCode 1815. 得到新鲜甜甜圈的最多组数</a></td>
+<td>★★★★☆</td>
+</tr>
+</tbody>
+</table><center>👇🏻添加 博主 获取付费专栏优惠券👇🏻</center>
+</div>
+</body>
+
+</html>
