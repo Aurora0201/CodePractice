@@ -379,6 +379,16 @@ int main(){
 
 下面这道例题（防线 UVa1471）更加复杂，但思路是一样的：先排除一些干扰元素（无用元素），然后 把有用的元素组织成易于操作的数据结构
 
+#### 1.固定滑动区间
+
+
+
+---
+
+#### 2.可变滑动区间
+
+
+
 ---
 
 ### 9.差分思想
@@ -4250,6 +4260,80 @@ public:
     }
 };
 ```
+
+---
+
+#### LC.1838 最高频元素频数
+
+1.前缀和+二分查找
+
+首先将原数组排序，然后将前缀和储存在一个新数组中，然后对于每一个数num[i]，我们查找一个num[t],对于t有`(i-t+1)*num[i]<=sub[i]-sub[t-1]+k`,这样到最后一定可以获得最大的长度，还有就是数据量已经达到`1e5*1e5`了，应该用long long来避免溢出问题，但是这个不是最优解，时间复杂度$$O(nlogn)$$，空间复杂度$$O(n+logn)$$
+
+AC代码：
+
+```c++
+class Solution {
+    typedef long long ll;
+    vector<ll> sub;//前缀
+    int bsearch(ll val,int R,int k){
+        int l=1,r=R+2,ans=0;
+        while(l<r){
+            int m=l+(r-l)/2;
+            ll cnt=val*(R-(m-1)+1),tmp=sub[R+1]-sub[m-1]+k;//m相当于下标t
+            if(cnt==tmp)return R-(m-1)+1;
+            else if(cnt<tmp)ans=max(ans,R-(m-1)+1),r=m;
+            else l=m+1;
+        }
+        return ans;
+    }
+public:
+    int maxFrequency(vector<int>& nums, int k) {
+        int n=nums.size();
+        ll cnt=0;
+        sort(nums.begin(),nums.end());
+        sub.push_back(0);
+        for(int i:nums){
+            cnt+=i;
+            sub.push_back(cnt);
+        }
+        int ans=0;
+        for(int i=n-1;i>=0;i--){
+            ans=max(ans,bsearch(nums[i],i,k));
+        }
+        return ans;
+    }
+};
+```
+
+2.滑动区间
+
+这道题的最佳解法肯定是滑动区间，只不过这里区间滑动的不是在`num`上的，而是在这些差值`num[r]-num[l]`上的，也就是这些阴影面积上，每次下标`R`向前滑动，我们就将`sum`加上新的阴影区间，如此这样滑动下去，`sum`就会计算出当前的阴影区间如下图所示，这里`sum`表示的就是我们需要更改的值即次数,当`sum>k`时，我们就需要将`L`右移，同时`sum`需要减去减少的部分也就是`num[R]-num[L]`，还有注意的点就是，这里的`L`是不用左移的，因为当`R`向右移动时，改变下面的元素需要的代价一定是更多的，所以一旦满足就是最优解，这个解法的时间复杂度接近于$$O(n)$$,空间复杂度则是$$O(logn)$$
+
+
+
+![image-20220610180132024](https://images.weserv.nl/?url=https://cdn.jsdelivr.net/gh/Aurora0201/ImageStore@main/img/image-20220610180132024.png)
+
+AC代码：
+
+```c++
+class Solution {
+    typedef long long ll;
+public:
+    int maxFrequency(vector<int>& nums, int k) {
+        sort(nums.begin(),nums.end());
+        int l=0,n=nums.size(),ans=1;
+        ll sum=0;
+        for(int r=1;r<n;r++){
+            sum+=(ll)(r-l)*(nums[r]-nums[r-1]);
+            while(sum>k)sum-=nums[r]-nums[l++];
+            ans=max(ans,r-l+1);
+        }
+        return ans;
+    }
+};
+```
+
+
 
 ---
 
