@@ -4333,6 +4333,102 @@ public:
 };
 ```
 
+---
+
+### 12.哈希表
+
+#### LC.1590 使数组能被P整除
+
+首先分析一下，我们需要通过移除一个子数组Presum来使sum-Presum对P取余等于0，一开始想通过枚举i，通过二分查找j，但是因为这里不能明确在哪个区间，所以二分法是不成立的，这里我们使用的方法是前缀和+哈希表
+
+假设 nums 的和除以 P，余数是 mod，
+
+如果 mod == 0，答案就是 0。
+
+如果 mod != 0，答案变成了找原数组中的最短连续子数组，使得其数字和除以 P，余数也是 mod。
+
+由于是求解连续子数组和的问题，很容易想到使用前缀和。
+
+我们可以扫描一遍整个数组，计算到每个元素的前缀和。
+
+假设当前前缀和除以 P 的余数是 curmod，为了找到一段连续子数组对 P 的余数是 mod，我们需要找到一段前缀和，对 P 的余数是 targetmod。其中 targetmod 的求法是：
+
+如果 curmod >= mod，很简单：targetmod = curmod - mod；
+
+如果 curmod < mod，我们需要加上一个 P：targetmod = curmod - mod + P；
+
+这样，我们可以保证，当前前缀和减去目标前缀和，剩余的数组对 P 的余数是 mod。我们只需要找最短的这样的数组就好。
+
+最后，为了快速找到一段对 P 的余数为 targetmod 的前缀和，我们使用一个哈希表 table，来存储之前前缀和对 P 的余数和所在的索引。（key 为余数；value 为索引）。
+
+table 在遍历过程中更新，以保证每次在 table 中查找到的，是离当前元素最近的索引，从而保证找到的是“最短”的连续子数组。
+
+**为什么哈希表需要放入键值对{0, -1}**？
+rangeSum == preSum[j] - preSum[i] (其中 i < j)。
+
+因为有一个特殊情形, 当区间和(rangeSum)对应的前缀和之差中被减数(即这里的preSum[i])%p得到的余数是0时, 区间的起点index会成为0。此时的被减数变得可有可无了, 长度按更长的算, 即j+1或j-(-1)。
+
+为方便起见，一般可以把哈希表中加入一个键值对 {0, -1}，有利于后面求区间长度
+
+AC代码：
+
+```c++
+class Solution {
+    typedef long long ll;
+    unordered_map<ll,int> mp;
+public:
+    int minSubarray(vector<int>& nums, int p) {
+        int n=nums.size();
+        ll sum=0;
+        for(ll i:nums)sum+=i;
+        ll mod=sum%p;
+        if(mod==0)return 0;//等于0时不需要移除子数组
+        sum=0;
+        int ans=n;
+        ll target,tmp;
+        mp[0]=-1;
+        for(int i=0;i<n;i++){
+            sum+=nums[i];
+            ll tmp=sum%p;//currmod
+            mp[tmp]=i;
+            ll target=tmp>=mod?tmp-mod:tmp-mod+p;
+            if(mp.count(target))ans=min(ans,i-mp[target]);
+        }
+        return ans==n?-1:ans;    
+    }
+};
+```
+
+---
+
+#### LC.974 和可被k整除
+
+这道题不难很容易推出 pre[i]%p=pre[j]%p，也就是说只要找一个余数相同就行了，用前缀和+哈希表就可以解决，但是由于C++的特性，余数可以为负数，但是余数的概念是不能为负数，所以我们要对余数特殊处理
+
+AC代码：
+
+```c++
+class Solution {
+    // unordered_map<int,int> mp;
+    int hash[10005];
+public:
+    int subarraysDivByK(vector<int>& nums, int k) {
+        memset(hash,0,sizeof(hash));
+        int sum=0,ans=0;
+        hash[0]=1;
+        //mp[0]=1;
+        for(int i=0;i<nums.size();i++){
+            sum+=nums[i];
+            int tmp=(sum%k+k)%k; //特殊处理
+            // if(mp.count(tmp))ans+=mp[tmp];
+            ans+=hash[tmp];
+            hash[tmp]++;
+        }
+        return ans;   
+    }
+};
+```
+
 
 
 ---
