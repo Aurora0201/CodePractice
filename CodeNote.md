@@ -2724,7 +2724,7 @@ int main(){
 
 ---
 
-### 9.Kefa and Park
+### 9.Kefa and Park（DFS）
 
 https://www.luogu.com.cn/problem/CF580C
 
@@ -2778,6 +2778,72 @@ int main(){
     return 0;
 }
 ```
+
+---
+
+### 10.Paint it really, really dark gray（构造法）
+
+https://www.luogu.com.cn/problem/CF717E
+
+本题主要是需要构造出一个函数来解决问题，主要是`递归解决问题的思想`
+
+![image-20220927194012150](https://img.noobzone.ru/getimg.php?url=https://cdn.jsdelivr.net/gh/Aurora0201/ImageStore@main/img/image-20220927194012150.png)
+
+```c++
+#include<bits/stdc++.h>
+#define IOS ios::sync_with_stdio(false);cin.tie(0);cout.tie(0);
+using namespace std;
+typedef long long ll;
+const int N = 2e5 + 5;
+int val[N], vis[N], n, m;
+int ans = 0, cnt = 0;
+vector<int> tr[N];
+void dfs(int u, int v){//
+    for(int i = 0; i < tr[u].size(); i++){
+        int son = tr[u][i];
+        if(son == v)continue;
+        val[son] ^= -2; //走到u的子节点
+        cout << son << " ";
+        dfs(son, u);//子节点的所有子节点都变为1
+        cout << u << " ";
+        val[u] ^= -2;//走回当前节点u
+        if(val[son] == -1){//子节点是-1,先走到子节点再走回来
+            val[son] ^= -2, val[u] ^= -2;
+            cout << son << " " << u << " ";
+        }
+    }
+    if(u != 1 && val[u] == -1){//退到父亲再回来
+        val[v] ^= -2, val[u] ^= -2;
+        cout << v << " " << u << " ";
+    }
+}
+int main(){
+    IOS
+    // FIN
+    cin >> n;
+    for(int i = 1; i <= n; i++){
+        cin >> val[i];
+    }
+    for(int i = 0; i < n - 1; i++){
+        int x, y;
+        cin >> x >> y;
+        tr[x].push_back(y);
+        tr[y].push_back(x);
+    }
+    cout << 1 << " ";
+    dfs(1, 0);
+    if(val[1] == -1){
+        cout << tr[1][0] << " " << 1 << " " << tr[1][0] << " ";
+    }
+    cout << endl;
+    system("pause");
+    return 0;
+}
+```
+
+---
+
+
 
 ---
 
