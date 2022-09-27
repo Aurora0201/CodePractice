@@ -361,21 +361,21 @@ int main(){
 
 输入正整数 k 和一个长度为 n 的整数序列 A1, A2, A3,…, An。定义 f(i)表示从元素 i 开始 的连续 k 个元素的最小值，即 f(i)=min{Ai, Ai+1,…, Ai+k-1}。要求计算 f(1), f(2), f(3),…, f(n-k+1)。 例如，对于序列 5, 2, 6, 8, 10, 7, 4，k=4，则 f(1)=2, f(2)=2, f(3)=6, f(4)=4
 
-【分析】 如果使用定义，每个 f(i)都需要 O(k)时间计算，总时间复杂度为((n-k)k)，太大了。那么 换一个思路：计算 f(1)时，需要求 k 个元素的最小值——这是一个“窗口”。计算 f(2)时， 这个窗口向右滑动了一个位置，计算 f(3)和 f(4)时，窗口各滑动了一个位置，如图所示
+【分析】 如果使用定义，每个f(i)都需要O(k)时间计算，总时间复杂度为((n-k)k)，太大了。那么换一个思路：计算 f(1)时，需要求k个元素的最小值——这是一个“窗口”。计算 f(2)时，这个窗口向右滑动了一个位置，计算f(3)和f(4)时，窗口各滑动了一个位置，如图所示
 
 ![image-20220426163111102](https://s1.ax1x.com/2022/05/27/XegebV.png)
 
-因此，这个问题称为滑动窗口的最小值问题。窗口在滑动的过程中，窗口中的元素“出 去”了一个，又“进来”了一个。借用数据结构中的术语，窗口往右滑动时需要删除一个 元素，然后插入一个元素，还需要取最小值。这不就是优先队列吗？第 5 章中曾经介绍过 用 STL 集合实现一个支持删除任意元素的优先队列。因为窗口中总是有 k 个元素，插入、 删除、取最小值的时间复杂度均为 O(logk)。这样，每次把窗口滑动时都需要 O(logk)的时间， 一共滑动 n-k 次，因此总时间复杂度为 O((n-k)logk)。
+因此，这个问题称为滑动窗口的最小值问题。窗口在滑动的过程中，窗口中的元素“出去”了一个，又“进来”了一个。借用数据结构中的术语，窗口往右滑动时需要删除一个元素，然后插入一个元素，还需要取最小值。这不就是优先队列吗？第5章中曾经介绍过用STL集合实现一个支持删除任意元素的优先队列。因为窗口中总是有k个元素，插入、删除、取最小值的时间复杂度均为O(logk)。这样，每次把窗口滑动时都需要O(logk)的时间,一共滑动n-k次，因此总时间复杂度为 O((n-k)logk)。
 
-其实还可以做得更好。假设窗口中有两个元素 1 和 2，且 1 在 2 的右边，会怎样？这意 味着 2 在离开窗口之前永远不可能成为最小值。换句话说，这个 2 是无用的，应当及时删 除。当删除无用元素之后，滑动窗口中的有用元素从左到右是递增的。为了叙述方便，习 惯上称其为单调队列。在单调队列中求最小值很容易：队首元素就是最小值
+其实还可以做得更好。假设窗口中有两个元素1和2，且1在2的右边，会怎样？这意味着2在离开窗口之前永远不可能成为最小值。换句话说，这个2是无用的，应当及时删除。当删除无用元素之后，滑动窗口中的有用元素从左到右是递增的。为了叙述方便，习惯上称其为单调队列。在单调队列中求最小值很容易：队首元素就是最小值
 
-当窗口滑动时，首先要删除滑动前窗口的最左边元素（如果是有用元素），然后把新 元素加入单调队列。注意，比新元素大的元素都变得无用了，应当从右往左删除。如图 8-14 所示是滑动窗口的 4 个位置所对应的单调队列
+当窗口滑动时，首先要删除滑动前窗口的最左边元素（如果是有用元素），然后把新元素加入单调队列。注意，比新元素大的元素都变得无用了，应当从右往左删除。如图 8-14 所示是滑动窗口的 4 个位置所对应的单调队列
 
 ![image-20220426163303144](https://s1.ax1x.com/2022/05/27/XegnET.png)
 
-单调队列和普通队列有些不同，因为右端既可以插入又可以删除，因此在代码中通常用一个数组和 front、rear 两个指针来实现，而不是用 STL 中的 queue。如果一定要用 STL， 则需要用双端队列（即两端都可以插入和删除），即deque
+单调队列和普通队列有些不同，因为右端既可以插入又可以删除，因此在代码中通常用一个数组和front、rear两个指针来实现，而不是用STL中的queue。如果一定要用STL， 则需要用双端队列（即两端都可以插入和删除），即deque
 
-尽管插入元素时可能会删除多个元素，但因为每个元素最多被删除一次，所以总的时间复杂度仍为 O(n)，达到了理论下界（因为至少需要 O(n)的时间来检查每个元素）
+尽管插入元素时可能会删除多个元素，但因为每个元素最多被删除一次，所以总的时间复杂度仍为O(n)，达到了理论下界（因为至少需要O(n)的时间来检查每个元素）
 
 下面这道例题（防线 UVa1471）更加复杂，但思路是一样的：先排除一些干扰元素（无用元素），然后 把有用的元素组织成易于操作的数据结构
 
@@ -403,7 +403,7 @@ int main(){
 
 同样容易证明b[l]=b[l]+k,b[r+1]=b[r+1]-k
 
-【例题】LC.995 连续位的最小翻转次数 
+【例题】LC.995 连续位的最小翻转次数 LC.1589所有排列和zhong
 
 其中一种方法利用了同样的思想
 
@@ -2436,7 +2436,348 @@ int main(){
 }
 ```
 
+---
 
+### 4.数的划分（dfs / dp）
+
+https://www.luogu.com.cn/problem/P1025
+
+第一种方法：dfs
+
+这道题有两种做法，首先是比较简单能想到的dfs，但是需要注意一点的是为了排除相同的情况，我们可以用一个特殊的处理，就是每次取数时，一定要比上一个数大，这样就可以避免重复的情况，还有我们要剪枝，因为每次取数我们只能取到n/k，所以我们在循环时做一个处理就可以
+
+```c++
+#include<bits/stdc++.h>
+#define IOS ios::sync_with_stdio(false);cin.tie(0);cout.tie(0);
+using namespace std;
+int n, k;
+int ans = 0;
+void dfs(int n, int k, int x){
+    if(k == 1){
+        ans ++;
+        return;
+    }
+    for(int i = x; i <= n / k; i++)dfs(n - i, k - 1, i);
+}
+
+int main(){
+    IOS
+    cin >> n >> k;
+    dfs(n, k, 1);
+    cout << ans << endl;
+    system("pause");
+    return 0;
+}
+```
+
+第二种方法：dp
+
+---
+
+### 5.砝码称重（dp）
+
+https://www.luogu.com.cn/problem/P2347
+
+这道题主要是对于状态的设计，我们设`f[i]`是当重量为i时是否能称出来，能就是1，不能就是0，所以状态是从`f[i]`向`f[i + w[i]]`转移，这里我们使用逆序就算状态就能避免一个物品拿取多次的问题，因为一定是从值小的状态向大的状态转移
+
+```c++
+#include<bits/stdc++.h>
+#define IOS ios::sync_with_stdio(false);cin.tie(0);cout.tie(0);
+using namespace std;
+typedef long long ll;
+const int N=1000+5;
+
+int vec[10], ans = 0, f[N], w[10] = {1, 2, 3, 5, 10 ,20};//vec存储数量
+
+int main(){
+    IOS
+    for(int i = 0; i < 6; i++){
+        cin>>vec[i];
+    }
+    f[0] = 1;
+    for(int i = 0; i < 6; i++){
+        for(int j = 1; j <= vec[i]; j++){
+            for(int k = 1000; k >= 0; k--){
+                if(f[k] == 1)f[k + w[i]] = 1;
+            }
+        }
+    }
+    for(int i = 1;i < 1001; i++){
+        if(f[i])ans++;
+    }
+    cout << "Total=" << ans << endl; 
+    system("pause");
+    return 0;
+}
+```
+
+---
+
+### 6.砝码称重加强版（dfs + dp）
+
+https://www.luogu.com.cn/problem/P1441
+
+这道题主要是注意dfs的剪枝，其他部分和上面那题没什么差异
+
+```c++
+#include<bits/stdc++.h>
+#define IOS ios::sync_with_stdio(false);cin.tie(0);cout.tie(0);
+#define MEMSET(A,x) memset(A,x,sizeof(A));
+using namespace std;
+typedef long long ll;
+const int N=2000+5;
+int n, m;
+int vec[20], ans = 0, f[N];//vec存储数量
+
+/* 
+    递归选出不要的砝码，对每次选好后的结果进行计算
+*/
+int vis[20];
+void get(){
+    MEMSET(f, 0);
+    int wei = 0, cnt = 0;
+    f[0] = 1;
+    for(int i = 0; i < n; i++){
+        if(vis[i])continue;
+        for(int j = wei; j >= 0; j--){
+            if(f[j] == 1){
+                f[j + vec[i]] = 1;
+            }
+        }
+        wei += vec[i];
+    }
+    for(int i = 1; i <= wei; i++)if(f[i])cnt++;
+    ans = max(ans, cnt);
+    return;
+}
+void dfs(int m, int x){
+    if(m == 0){
+        get();
+        return;
+    }
+    for(int i = x; i < n; i++){
+        if(vis[i] == 0){
+            vis[i] = 1;
+            dfs(m - 1 ,i + 1);
+            vis[i] = 0;
+        }
+    }
+}
+
+int main(){
+    IOS
+    FIN
+    in >> n >> m;
+    for(int i = 0; i < n; i++){//输入砝码质量
+        in>>vec[i];
+    }
+    dfs(m, 0);//从第零个开始选
+    cout << ans << endl; 
+    system("pause");
+    return 0;
+}
+```
+
+---
+
+### 7.正方形计数（枚举）
+
+https://www.luogu.com.cn/problem/CF510B
+
+这道题虽然是暴力搜索，但是也是有一定的方法，如果我们枚举每一个点然后算边长那根本是不可能的，所以这里我们巧妙的利用了计算几何来降低我们的时间复杂度
+
+![img](https://img.noobzone.ru/getimg.php?url=https://cdn.jsdelivr.net/gh/Aurora0201/ImageStore@main/img/IMG_0134.jpeg)
+
+```c++
+#include<bits/stdc++.h>
+#define IOS ios::sync_with_stdio(false);cin.tie(0);cout.tie(0);
+using namespace std;
+typedef long long ll;
+const int N=500+5;
+
+int n;
+int vis[205][205], x[N], y[N];
+
+int check(int i, int j){
+    int mx = (x[i] + x[j]) / 2, my = (y[i] + y[j]) / 2;
+    int x1 = mx - (y[i] - my), y1 = my - (mx - x[i]);
+    int x2 = mx + (y[i] - my), y2 = my + (mx - x[i]);
+    if(x1 <= 0 || y1 <= 0 || x2 <= 0 || y2 <= 0)return 0;
+    if(vis[x1][y1] && vis[x2][y2])return 1;
+    return 0;
+}
+
+int main(){
+    IOS
+    cin >> n;
+    for(int i = 0; i < n; i++){
+        cin >> x[i] >> y[i];
+        x[i] = (x[i] + 51) << 1, y[i] = (y[i] + 51) << 1;
+        vis[x[i]][y[i]] = 1;
+    }
+    int ans = 0;
+    for(int i = 0; i < n; i++){
+        for(int j = 0; j < n; j++){
+            if(j > i){
+                if(check(i, j))ans ++;
+            }
+        }
+    }
+    cout << (ans >> 1) << endl;
+    system("pause");
+    return 0;
+}
+```
+
+---
+
+### 8.方格填数（枚举）
+
+https://www.luogu.com.cn/problem/P1665
+
+这道题主要是要推出来，当每行每列和相等时，那么总和除以行数就能得出每行的和，然后就是剪枝的问题，只要填满一行就判断一行，填满一列就判断一列就ok，对角线填完特判就行
+
+```c++
+#include<bits/stdc++.h>
+#define IOS ios::sync_with_stdio(false);cin.tie(0);cout.tie(0);
+using namespace std;
+typedef long long ll;
+const int N=20+5;
+int a[N], n, mat[N][N];
+int sum = 0;
+int vis[N], ok = 0;
+
+int check(int x){
+    int cnt = 0;
+    for(int i = 0; i < x / n; i++){//行
+        cnt = 0;
+        for(int j = 0; j < n; j++){
+            cnt += mat[i][j];
+        }
+        if(cnt != sum)return 1;
+    }
+    if(x > n * (n - 1)){
+        for(int i = 0; i < x - (n * (n - 1)); i++){//列
+            cnt = 0;
+            for(int j = 0; j < n; j++){
+                cnt += mat[j][i];
+            }
+            if(cnt != sum)return 1;
+        }
+    }
+    if(x == n * n){
+        cnt = 0;
+        for(int i = 0; i < n; i++){//对角
+            cnt += mat[i][i];
+        }
+        if(cnt != sum)return 1;
+        cnt = 0;
+        for(int i = 0; i < n; i++){//对角
+            cnt += mat[i][n - i - 1];
+        }
+        if(cnt != sum)return 1;
+    }
+    return 0;
+}
+
+void dfs(int x){
+    if(ok)return;
+    if(check(x)){
+        return;
+    }
+    if(x == n * n){
+        cout << sum << endl;
+        for(int i = 0; i < n; i++){//输出答案
+            for(int j = 0; j < n; j++){
+                cout << mat[i][j] << " ";
+            }
+            cout << endl;
+        }
+        ok = 1;
+        return;
+    }
+    for(int i = 0; i < n * n; i++){
+        if(vis[i] == 0){
+            vis[i] = 1;
+            mat[x / n][x % n] = a[i];
+            dfs(x + 1);
+            vis[i] = 0;
+        }
+    }
+}
+
+int main(){
+    IOS
+    // FIN
+    cin >> n;
+    for(int i = 0; i < n * n; i++){
+        cin >> a[i];
+        sum += a[i];
+    }
+    sum /= n;
+    sort(a, a + n * n);
+    dfs(0);
+    system("pause");
+    return 0;
+}
+```
+
+---
+
+### 9.Kefa and Park
+
+https://www.luogu.com.cn/problem/CF580C
+
+这道题主要是注意几个点，首先是图的构建，这里我们以后直接用`vector`建树，不仅剩下大量的空间，时间复杂度也会降低，然后是注意叶子节点的判断，当一个节点除了父节点以外没有与其他节点相连则就是叶子节点，然后是注意路径的判断，当路径不合法时，我们直接添加一个变量来记录就ok
+
+```c
+#include<bits/stdc++.h>
+#define IOS ios::sync_with_stdio(false);cin.tie(0);cout.tie(0);
+using namespace std;
+typedef long long ll;
+const int N = 1e5 + 5;
+int val[N], vis[N], n, m;
+int ans = 0, cnt = 0;
+vector<int> tr[N];
+void dfs(int u, int v){//u当前节点,v父节点
+    int tmp = 0, lev = 1, ok = 1;
+    for(int i = 0; i < tr[u].size(); i++){
+        if(tr[u][i] == v)continue;
+        tmp = cnt;
+        cnt += val[tr[u][i]];
+        if(val[tr[u][i]] == 0)cnt = 0;
+        if(cnt > m){
+            ok = 0;
+            cnt = tmp;
+            continue;
+        }
+        dfs(tr[u][i], u);
+        cnt = tmp;
+        lev = 0;
+    }
+    if(lev && ok)ans++;
+}
+
+int main(){
+    IOS
+    cin >> n >> m;
+    for(int i = 1; i <= n; i++){
+        cin >> val[i];
+    }
+    tr[0].push_back(1);
+    tr[1].push_back(0);
+    for(int i = 0; i < n - 1; i++){
+        int x, y;
+        cin >> x >> y;
+        tr[x].push_back(y);
+        tr[y].push_back(x);
+    }
+    dfs(0, -1);
+    cout << ans << endl;
+    system("pause");
+    return 0;
+}
+```
 
 ---
 
@@ -2995,7 +3336,60 @@ void dfs(string s);//值传递
 void dfs(string& s);//引用
 ```
 
+---
 
+### 17.重载操作符
+
+我们不仅可以重载<，（），还可以重载+，<<等操作符，下面是一个例子
+
+```c++
+struct Node{
+    int x, y;
+};
+
+ostream& operator << ( ostream &_out, Node& a){
+    _out<<a.x<<" "<<a.y<<endl;
+    return _out;
+}
+
+Node operator + (const Node& a, const Node& b){
+    return Node(a.x + b.x, a.y + b.y);
+}
+
+int main(){
+    Node a{1, 2}, b{1, 2};
+    cout<< a + b << endl;
+}
+```
+
+### 18.模板
+
+当我们写出一段如下的程序时，虽然他能满足我们的要求，但是他的泛用性是不强的，只要类型有变化就不能继续使用
+
+```c++
+int sum(int* begin, int* end){
+    int ans = 0;
+    for(int* i = begin; i != end; i++){
+        ans += *i;
+    }
+    return ans;
+}
+```
+
+为此我们可以把它变成一个模板，以解决我们的泛用性问题
+
+```c++
+template<typename T>
+T sum(T* begin, T* end){
+    T ans = 0;
+    for(T* i = begin; i != end; i++){
+        ans = ans + *i;
+    }
+    return ans;
+}
+```
+
+这样不管数组是double还是 其他类型我们都能使用这个函数
 
 ---
 
@@ -3080,6 +3474,29 @@ int countTriplets(vector<int>& arr) {
         return ans;
     }
 ```
+
+#### LC.89 格雷编码
+
+本题主要是通过递归的方式求解
+
+```c++
+class Solution {
+public:
+    vector<int> grayCode(int n) {
+        if(n==1)return {0,1};
+        vector ans=grayCode(n-1);
+        int len = ans.size();
+        for(int i=0;i<len;i++){
+            int x=ans[len-1-i]|(1<<(n-1));//先在前头+0，然后进行或运算，相当于在前头+1
+            ans.push_back(x);
+        }
+
+        return ans;
+    }
+};
+```
+
+
 
 ---
 
@@ -4425,6 +4842,125 @@ public:
             hash[tmp]++;
         }
         return ans;   
+    }
+};
+```
+
+---
+
+### 13.差分数组
+
+#### LC.1589 所有排列和中的最大和
+
+首先是贪心思想，很容易想到我们需要让出现次数最多的值最大，但是下面如何进行操作是一个很大的问题，假如直接进行模拟复杂度太高了，我们可以发现。在我们统计每个数出现的次数时，这不就是对区间相同操作，所以这里我们可以引入差分数组来统计每个数出现的频次，最后对差分数组进行累加就能得到每个数出现的次数，然后分别对两个数组进行排序就能得到正确的顺序
+
+AC代码：
+
+```c++
+class Solution {
+public:
+    int maxSumRangeQuery(vector<int>& nums, vector<vector<int>>& requests) {
+        int n=nums.size();
+        vector<int> diff(n);
+        for(auto i:requests){
+            diff[i[0]]++;
+            if(i[1]<n-1)diff[i[1]+1]--;//注意我们要舍弃掉差分数组的最后一个
+        }
+        for(int i=1;i<n;i++)diff[i]+=diff[i-1];
+        sort(diff.begin(),diff.end());
+        sort(nums.begin(),nums.end());
+        int mod=1e9+7;
+        long long ans=0;
+        for(int i=n-1;i>=0;i--){
+            if(!diff[i])break;
+            ans+=((long long)diff[i]*nums[i]);
+            ans%=mod;
+        }
+        return ans;
+    }
+};
+```
+
+----
+
+### 14.单调栈
+
+#### LC.84 柱状图中的最大矩形
+
+单调栈模板，但是注意边界处理，这里我们在头部和尾部插入0来实现边界的处理
+
+```c++
+class Solution {
+    int st[100005];
+    int top=0;
+public:
+    int largestRectangleArea(vector<int>& heights) {
+        heights.insert(heights.begin(),0);//头部处理
+        heights.push_back(0);
+        int ans=0;
+        int n=heights.size();
+        for(int i=0;i<n;i++){
+            while(top && heights[i]<heights[st[top-1]]){
+                int cnt=st[top-1];
+                //top-1==0 证明栈中只有一个元素,则
+                ans=max((i-st[top-2]-1)*heights[cnt],ans);
+                top--;//出栈
+            }
+            st[top++]=i;
+        }
+        return ans;
+    }
+};
+```
+
+---
+
+#### LC.85 最大矩形
+
+本题主要是多了一步处理，就是要对每一行计算柱状图，这样就可以转化成柱状图中的最大矩形问题，本体还有一个步骤没看清楚，就是矩形不是int型而是char型
+
+```c++
+class Solution {
+    
+    int largestRectangleArea(vector<int>& heights) {
+        int st[205];
+        int top=0;
+        heights.insert(heights.begin(),0);//头部处理
+        heights.push_back(0);
+        int ans=0;
+        int n=heights.size();
+        for(int i=0;i<n;i++){
+            while(top && heights[i]<heights[st[top-1]]){
+                int cnt=st[top-1];
+                //top-1==0 证明栈中只有一个元素,则
+                ans=max((i-st[top-2]-1)*heights[cnt],ans);
+                top--;//出栈
+            }
+            st[top++]=i;
+        }
+        return ans;
+    }
+public:
+    int maximalRectangle(vector<vector<char>>& matrix) {
+        //逐层扫描
+        int r=matrix.size(),c=matrix[0].size();
+        int ans=0;
+        //从最上层扫描
+        vector<int> height;
+        for(int i=0;i<r;i++){//逐行扫描
+            height.clear();
+            for(int j=0;j<c;j++){//枚举列
+                int cnt=0;
+                for(int k=i;k>=0;k--){
+                    if(matrix[k][j]=='1')cnt++;
+                    else break;
+                }
+                height.push_back(cnt);
+            }
+            // for(auto i:height)cout<<i<<" ";
+            ans=max(ans,largestRectangleArea(height));
+        }
+        return ans;
     }
 };
 ```
