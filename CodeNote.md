@@ -54,15 +54,15 @@ int maxsum(int* A,int x,int y){
 ```c++
 void merge_sort(int* A,int x,int y,int* T){
     if(y-x>1){
-        int m=x+(y-x)/2;
-        int p=x,q=m,i=x;//这里的p，q分别为两个序列的头指针
+        int m = x + (y - x)/2;
+        int p = x, q = m, i = x;//这里的p，q分别为两个序列的头指针
         merge_sort(A,x,m,T);
         merge_sort(A,m,y,T);
         while(p<m || q<y){//合并并排序两个序列
-            if(q>=y||(p<m && A[p]<=A[q]))T[i++]=A[p++];//从左半数组复制到临时空间
-            else T[i++]=A[q++];//从右半数组复制到临时空间
+            if(q >= y || (p < m && A[p] <= A[q]))T[i++] = A[p++];//从左半数组复制到临时空间
+            else T[i++] = A[q++];//从右半数组复制到临时空间
         }
-        for(int i=x;i<y;i++)A[i]=T[i];
+        for(int i = x; i<y; i++)A[i] = T[i];
     }
 }
 ```
@@ -107,10 +107,10 @@ void Merge(int l, int r){
 int bsearch(int* A,int x,int y,int v){
     int m;
     while(x<y){
-        m=x+(y-x)/2;
-        if(A[m]==v)return m;
-        else if(A[m]>v)y=m;
-        else x=m+1;
+        m = x + (y-x)/2;
+        if(A[m] == v)return m;
+        else if(A[m] > v)y = m;
+        else x = m + 1;
     }
     return -1;
 }
@@ -982,7 +982,7 @@ void dfs(int x, int y, int height){//间接的返回
 
 下面就以最长不下降子序列为例子来讲解
 
-![image-20221110105739227](../image/image-20221110105739227.png)
+![image-20221110105739227](https://img.noobzone.ru/getimg.php?url=https://cdn.jsdelivr.net/gh/Aurora0201/ImageStore@main/img/image-20221110105739227.png)
 
 我们设`g[i]`是长度为`i`时的子序列的最后一个元素，那么从下标1-6开始遍历，给出`g[i]`的变化
 
@@ -1168,11 +1168,12 @@ int main(){
 
 输入描述:
 
-```
-输入的第一行包含两个整数n和t（1≤b≤2000001 \leq b \leq 2000001≤b≤200000，1≤t≤1091\leq t \leq 10^91≤t≤109）表示小数（含小数点）的长度以及四舍五入的次数。
+输入的第一行包含两个整数n和t
+$1≤b≤2000001 \leq b \leq 2000001≤b≤200000，1≤t≤10^9\leq t \leq 10^9  \ 1≤t≤10^9$表示小数（含小数点）的长度以及四舍五入的次数。
 
 第二行为一个字符串表示qdgg的初始分数。
-```
+
+
 
 输出描述:
 
